@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H7 - Tasks & Games</title>
-    <link rel="icon" type="image/webp" href="attached_assets/IMG_1709.webp">
-    <link rel="apple-touch-icon" href="attached_assets/IMG_1709.webp">
+    <link rel="icon" type="image/webp" href="attached_assets/IMG_1709_1759693384904.webp">
+    <link rel="apple-touch-icon" href="attached_assets/IMG_1709_1759693384904.webp">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -24,6 +24,7 @@
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
+            --info: #3b82f6;
             --text-primary: #fafafa;
             --text-secondary: #a1a1aa;
             --text-tertiary: #71717a;
@@ -257,67 +258,52 @@
 
         /* Task Manager */
         .task-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .task-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
             margin-bottom: 2rem;
-            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
             gap: 1rem;
         }
 
-        .notification-badge {
-            position: relative;
-            display: inline-block;
+        .stat-icon {
+            font-size: 2rem;
         }
 
-        .badge-count {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 700;
-            animation: bounce 0.5s ease;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-
-        .notification-icon {
+        .stat-info h4 {
             font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-primary);
-            transition: color 0.3s ease;
+            margin-bottom: 0.25rem;
         }
 
-        .notification-icon:hover {
-            color: var(--primary);
+        .stat-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        .task-input-container {
+        .task-controls {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
-        .task-input {
+        .search-box {
             flex: 1;
-            min-width: 200px;
+            min-width: 250px;
             padding: 1rem;
             background: var(--bg-card);
             border: 2px solid var(--border);
@@ -328,9 +314,72 @@
             transition: all 0.3s ease;
         }
 
-        .task-input:focus {
+        .search-box:focus {
             border-color: var(--primary);
             box-shadow: var(--glow-primary);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .task-input-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .task-input {
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .task-input:focus, .task-select:focus, .datetime-input:focus {
+            border-color: var(--primary);
+            box-shadow: var(--glow-primary);
+        }
+
+        .task-select {
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .datetime-input {
@@ -342,11 +391,6 @@
             font-size: 1rem;
             outline: none;
             transition: all 0.3s ease;
-        }
-
-        .datetime-input:focus {
-            border-color: var(--primary);
-            box-shadow: var(--glow-primary);
         }
 
         .add-task-btn {
@@ -381,7 +425,7 @@
             padding: 1.5rem;
             transition: all 0.3s ease;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 1rem;
         }
 
@@ -403,6 +447,19 @@
             border-left-color: var(--warning);
         }
 
+        .task-card.priority-high {
+            border-left-color: var(--danger);
+            border-left-width: 6px;
+        }
+
+        .task-card.priority-medium {
+            border-left-color: var(--warning);
+        }
+
+        .task-card.priority-low {
+            border-left-color: var(--info);
+        }
+
         .task-checkbox {
             width: 24px;
             height: 24px;
@@ -411,6 +468,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            margin-top: 2px;
         }
 
         .task-checkbox.checked {
@@ -422,20 +480,68 @@
             flex: 1;
         }
 
+        .task-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
         .task-title {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            flex: 1;
+        }
+
+        .task-priority {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .task-priority.high {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .task-priority.medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .task-priority.low {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--info);
+        }
+
+        .task-category {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(168, 85, 247, 0.2);
+            color: var(--primary);
         }
 
         .task-time {
             font-size: 0.9rem;
             color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .task-description {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-top: 0.5rem;
+            font-style: italic;
         }
 
         .task-actions {
             display: flex;
             gap: 0.5rem;
+            flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .task-action-btn {
@@ -451,6 +557,116 @@
 
         .task-action-btn:hover {
             background: var(--border);
+        }
+
+        /* iOS Style Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInRight 0.3s ease-out;
+            backdrop-filter: blur(10px);
+            min-width: 300px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease-in;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .toast-message {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
         }
 
         /* Games Section */
@@ -717,6 +933,212 @@
             transform: scale(1.05);
         }
 
+        /* Review Section */
+        .review-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: var(--bg-elevated);
+        }
+
+        .upload-area.dragging {
+            border-color: var(--primary);
+            background: var(--bg-elevated);
+            box-shadow: var(--glow-primary);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            margin-top: 1rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--glow-primary);
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .file-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .file-preview {
+            width: 100%;
+            height: 150px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-preview-icon {
+            font-size: 4rem;
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+        }
+
+        .file-delete {
+            background: var(--danger);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-delete:hover {
+            background: #dc2626;
+        }
+
+        .viewer-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10001;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .viewer-header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .viewer-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .viewer-close {
+            background: var(--danger);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .viewer-close:hover {
+            background: #dc2626;
+        }
+
+        .viewer-content {
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100% - 100px);
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .viewer-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .viewer-content img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .games-grid {
@@ -732,67 +1154,37 @@
             }
 
             .task-input-container {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
 
             .task-actions {
                 flex-direction: column;
             }
-        }
 
-        /* Notification Panel */
-        .notification-panel {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 100%;
-            max-width: 400px;
-            height: 100vh;
-            background: var(--bg-card);
-            border-left: 2px solid var(--border);
-            padding: 2rem;
-            transition: right 0.3s ease;
-            overflow-y: auto;
-            z-index: 1000;
-        }
+            .toast-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
 
-        .notification-panel.open {
-            right: 0;
-        }
+            .toast {
+                min-width: auto;
+            }
 
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .notification-item {
-            background: var(--bg-elevated);
-            border-left: 4px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .notification-item.overdue {
-            border-left-color: var(--danger);
-        }
-
-        .notification-item.later {
-            border-left-color: var(--warning);
+            .viewer-modal {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Auth Screen -->
     <div id="auth-screen">
         <div class="face-scanner">
@@ -820,6 +1212,7 @@
             </div>
             <div class="nav-buttons">
                 <button class="nav-btn active" id="tasks-nav" onclick="showSection('tasks')">📋 Tâches</button>
+                <button class="nav-btn" id="review-nav" onclick="showSection('review')">📚 Réviser</button>
                 <button class="nav-btn" id="games-nav" onclick="showSection('games')">🎮 Jeux</button>
             </div>
         </header>
@@ -827,18 +1220,68 @@
         <!-- Tasks Section -->
         <div id="tasks-section">
             <div class="task-container">
-                <div class="task-header">
-                    <h2>Mes Tâches</h2>
-                    <div class="notification-badge" onclick="toggleNotifications()">
-                        <span class="notification-icon">🔔</span>
-                        <span class="badge-count" id="notification-count">0</span>
+                <!-- Stats -->
+                <div class="task-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h4 id="total-tasks">0</h4>
+                            <p>Total Tâches</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h4 id="completed-tasks">0</h4>
+                            <p>Complétées</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-info">
+                            <h4 id="active-tasks">0</h4>
+                            <p>En cours</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-info">
+                            <h4 id="overdue-tasks">0</h4>
+                            <p>En retard</p>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Controls -->
+                <div class="task-controls">
+                    <input type="text" id="search-box" class="search-box" placeholder="🔍 Rechercher une tâche..." oninput="filterTasks()">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">Toutes</button>
+                        <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Actives</button>
+                        <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Complétées</button>
+                        <button class="filter-btn" data-filter="high" onclick="setFilter('high')">🔥 Haute</button>
+                        <button class="filter-btn" data-filter="medium" onclick="setFilter('medium')">⚡ Moyenne</button>
+                        <button class="filter-btn" data-filter="low" onclick="setFilter('low')">💙 Basse</button>
+                    </div>
+                </div>
+
+                <!-- Add Task -->
                 <div class="task-input-container">
-                    <input type="text" id="task-input" class="task-input" placeholder="Nouvelle tâche...">
+                    <input type="text" id="task-input" class="task-input" placeholder="📝 Nouvelle tâche...">
+                    <select id="task-category" class="task-select">
+                        <option value="personnel">🏠 Personnel</option>
+                        <option value="travail">💼 Travail</option>
+                        <option value="sante">❤️ Santé</option>
+                        <option value="etudes">📚 Études</option>
+                        <option value="courses">🛒 Courses</option>
+                    </select>
+                    <select id="task-priority" class="task-select">
+                        <option value="low">Basse</option>
+                        <option value="medium" selected>Moyenne</option>
+                        <option value="high">Haute</option>
+                    </select>
                     <input type="datetime-local" id="task-datetime" class="datetime-input">
-                    <button class="add-task-btn" onclick="addTask()">➕ Ajouter</button>
+                    <button class="add-task-btn" onclick="addTask()">➕</button>
                 </div>
 
                 <div class="task-list" id="task-list"></div>
@@ -920,18 +1363,75 @@
                 </div>
             </div>
         </div>
+
+        <!-- Review Section -->
+        <div id="review-section" class="hidden">
+            <div class="review-container">
+                <h2 style="margin-bottom: 2rem;">📚 Partage de Révisions</h2>
+                
+                <!-- Upload Area -->
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">Glisser-déposer ou cliquer pour uploader</div>
+                    <div class="upload-hint">PDF et Images (Max 50MB)</div>
+                    <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp">
+                    <button class="upload-btn" onclick="document.getElementById('file-input').click()">Choisir un fichier</button>
+                </div>
+
+                <!-- Files Grid -->
+                <h3 style="margin-bottom: 1rem;">Fichiers partagés</h3>
+                <div class="files-grid" id="files-grid"></div>
+            </div>
+        </div>
     </div>
 
-    <!-- Notification Panel -->
-    <div id="notification-panel" class="notification-panel">
-        <div class="notification-header">
-            <h3>Notifications</h3>
-            <button class="close-btn" onclick="toggleNotifications()">✖️</button>
+    <!-- Viewer Modal -->
+    <div id="viewer-modal" class="viewer-modal hidden">
+        <div class="viewer-header">
+            <div class="viewer-title" id="viewer-title">Document</div>
+            <button class="viewer-close" onclick="closeViewer()">✕ Fermer</button>
         </div>
-        <div id="notification-list"></div>
+        <div class="viewer-content" id="viewer-content"></div>
     </div>
 
     <script>
+        // Toast Notifications (iOS Style)
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || 'ℹ️'}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast(this.parentElement)">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                removeToast(toast);
+            }, 4000);
+        }
+
+        function removeToast(toast) {
+            toast.classList.add('removing');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }
+
         // Auth & Loading
         function startAuth() {
             document.getElementById('auth-screen').classList.add('hidden');
@@ -941,21 +1441,30 @@
                 document.getElementById('loading-screen').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 loadTasks();
-                checkNotifications();
+                updateStats();
+                showToast('success', 'Bienvenue!', 'Connexion réussie');
+                checkReminders();
             }, 1500);
         }
 
         // Navigation
         function showSection(section) {
             document.getElementById('tasks-nav').classList.remove('active');
+            document.getElementById('review-nav').classList.remove('active');
             document.getElementById('games-nav').classList.remove('active');
+            
+            document.getElementById('tasks-section').classList.add('hidden');
+            document.getElementById('review-section').classList.add('hidden');
+            document.getElementById('games-section').classList.add('hidden');
             
             if (section === 'tasks') {
                 document.getElementById('tasks-section').classList.remove('hidden');
-                document.getElementById('games-section').classList.add('hidden');
                 document.getElementById('tasks-nav').classList.add('active');
-            } else {
-                document.getElementById('tasks-section').classList.add('hidden');
+            } else if (section === 'review') {
+                document.getElementById('review-section').classList.remove('hidden');
+                document.getElementById('review-nav').classList.add('active');
+                loadFiles();
+            } else if (section === 'games') {
                 document.getElementById('games-section').classList.remove('hidden');
                 document.getElementById('games-nav').classList.add('active');
                 backToGames();
@@ -964,37 +1473,49 @@
 
         // Task Manager
         let tasks = [];
+        let currentFilter = 'all';
 
         function loadTasks() {
             const saved = localStorage.getItem('h7-tasks');
             if (saved) {
                 tasks = JSON.parse(saved);
                 renderTasks();
+                updateStats();
             }
         }
 
         function saveTasks() {
             localStorage.setItem('h7-tasks', JSON.stringify(tasks));
+            updateStats();
         }
 
         function addTask() {
             const input = document.getElementById('task-input');
+            const category = document.getElementById('task-category');
+            const priority = document.getElementById('task-priority');
             const datetime = document.getElementById('task-datetime');
             
-            if (!input.value.trim()) return;
+            if (!input.value.trim()) {
+                showToast('warning', 'Attention', 'Veuillez entrer une tâche');
+                return;
+            }
             
             const task = {
                 id: Date.now(),
                 title: input.value,
+                category: category.value,
+                priority: priority.value,
                 datetime: datetime.value,
                 completed: false,
-                status: 'pending'
+                status: 'pending',
+                createdAt: new Date().toISOString()
             };
             
             tasks.unshift(task);
             saveTasks();
             renderTasks();
-            checkNotifications();
+            
+            showToast('success', 'Tâche ajoutée!', `"${input.value}" a été ajoutée`);
             
             input.value = '';
             datetime.value = '';
@@ -1006,15 +1527,23 @@
                 task.completed = !task.completed;
                 saveTasks();
                 renderTasks();
-                checkNotifications();
+                
+                if (task.completed) {
+                    showToast('success', 'Tâche complétée!', `"${task.title}" est terminée`);
+                } else {
+                    showToast('info', 'Tâche réactivée', `"${task.title}" est de retour`);
+                }
             }
         }
 
         function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveTasks();
-            renderTasks();
-            checkNotifications();
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                tasks = tasks.filter(t => t.id !== id);
+                saveTasks();
+                renderTasks();
+                showToast('error', 'Tâche supprimée', `"${task.title}" a été supprimée`);
+            }
         }
 
         function postponeTask(id) {
@@ -1023,19 +1552,50 @@
                 task.status = 'later';
                 saveTasks();
                 renderTasks();
-                checkNotifications();
+                showToast('warning', 'Tâche reportée', `"${task.title}" à faire plus tard`);
             }
         }
 
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            filterTasks();
+        }
+
+        function filterTasks() {
+            const searchTerm = document.getElementById('search-box').value.toLowerCase();
+            const filteredTasks = tasks.filter(task => {
+                const matchesSearch = task.title.toLowerCase().includes(searchTerm);
+                
+                if (currentFilter === 'all') return matchesSearch;
+                if (currentFilter === 'active') return matchesSearch && !task.completed;
+                if (currentFilter === 'completed') return matchesSearch && task.completed;
+                if (currentFilter === 'high' || currentFilter === 'medium' || currentFilter === 'low') {
+                    return matchesSearch && task.priority === currentFilter;
+                }
+                
+                return matchesSearch;
+            });
+            
+            renderFilteredTasks(filteredTasks);
+        }
+
         function renderTasks() {
+            filterTasks();
+        }
+
+        function renderFilteredTasks(filteredTasks) {
             const list = document.getElementById('task-list');
             
-            if (tasks.length === 0) {
-                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Aucune tâche. Ajoutez-en une!</p>';
+            if (filteredTasks.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Aucune tâche trouvée</p>';
                 return;
             }
             
-            list.innerHTML = tasks.map(task => {
+            list.innerHTML = filteredTasks.map(task => {
                 const now = new Date();
                 const taskDate = new Date(task.datetime);
                 let statusClass = '';
@@ -1048,17 +1608,35 @@
                     statusClass = 'overdue';
                 }
                 
+                const categoryIcons = {
+                    personnel: '🏠',
+                    travail: '💼',
+                    sante: '❤️',
+                    etudes: '📚',
+                    courses: '🛒'
+                };
+                
+                const priorityLabels = {
+                    high: 'Haute',
+                    medium: 'Moyenne',
+                    low: 'Basse'
+                };
+                
                 return `
-                    <div class="task-card ${statusClass}">
+                    <div class="task-card ${statusClass} priority-${task.priority}">
                         <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
                             ${task.completed ? '✓' : ''}
                         </div>
                         <div class="task-content">
-                            <div class="task-title" style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.title}</div>
+                            <div class="task-header">
+                                <div class="task-title" style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.title}</div>
+                                <span class="task-category">${categoryIcons[task.category]} ${task.category.charAt(0).toUpperCase() + task.category.slice(1)}</span>
+                                <span class="task-priority ${task.priority}">${priorityLabels[task.priority]}</span>
+                            </div>
                             ${task.datetime ? `<div class="task-time">📅 ${new Date(task.datetime).toLocaleString('fr-FR')}</div>` : ''}
                         </div>
                         <div class="task-actions">
-                            ${!task.completed ? `<button class="task-action-btn" onclick="postponeTask(${task.id})">⏰ Plus tard</button>` : ''}
+                            ${!task.completed ? `<button class="task-action-btn" onclick="postponeTask(${task.id})">⏰</button>` : ''}
                             <button class="task-action-btn" onclick="deleteTask(${task.id})">🗑️</button>
                         </div>
                     </div>
@@ -1066,40 +1644,34 @@
             }).join('');
         }
 
-        function checkNotifications() {
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const active = tasks.filter(t => !t.completed).length;
             const now = new Date();
-            const notifications = [];
+            const overdue = tasks.filter(t => !t.completed && t.datetime && new Date(t.datetime) < now).length;
             
+            document.getElementById('total-tasks').textContent = total;
+            document.getElementById('completed-tasks').textContent = completed;
+            document.getElementById('active-tasks').textContent = active;
+            document.getElementById('overdue-tasks').textContent = overdue;
+        }
+
+        function checkReminders() {
+            const now = new Date();
             tasks.forEach(task => {
                 if (!task.completed && task.datetime) {
                     const taskDate = new Date(task.datetime);
-                    if (taskDate < now) {
-                        notifications.push({ ...task, type: 'overdue' });
-                    } else if (task.status === 'later') {
-                        notifications.push({ ...task, type: 'later' });
+                    const diff = taskDate - now;
+                    const minutes = Math.floor(diff / 60000);
+                    
+                    if (diff > 0 && diff < 300000) { // 5 minutes
+                        showToast('warning', 'Rappel', `"${task.title}" dans ${minutes} min`);
+                    } else if (diff < 0) {
+                        showToast('error', 'Tâche en retard!', `"${task.title}" est en retard`);
                     }
                 }
             });
-            
-            document.getElementById('notification-count').textContent = notifications.length;
-            
-            const notifList = document.getElementById('notification-list');
-            if (notifications.length === 0) {
-                notifList.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">Aucune notification</p>';
-            } else {
-                notifList.innerHTML = notifications.map(notif => `
-                    <div class="notification-item ${notif.type}">
-                        <div style="font-weight: 600; margin-bottom: 0.5rem;">${notif.title}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                            ${notif.type === 'overdue' ? '⚠️ En retard' : '⏰ Reporté'}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function toggleNotifications() {
-            document.getElementById('notification-panel').classList.toggle('open');
         }
 
         // Games
@@ -1165,13 +1737,13 @@
             
             if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
                 clearInterval(snakeInterval);
-                alert('Game Over! Score: ' + snakeScore);
+                showToast('error', 'Game Over!', `Score: ${snakeScore}`);
                 return;
             }
             
             if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
                 clearInterval(snakeInterval);
-                alert('Game Over! Score: ' + snakeScore);
+                showToast('error', 'Game Over!', `Score: ${snakeScore}`);
                 return;
             }
             
@@ -1213,6 +1785,7 @@
 
         function restartSnake() {
             initSnake();
+            showToast('info', 'Nouveau jeu', 'Snake redémarré');
         }
 
         document.addEventListener('keydown', (e) => {
@@ -1249,12 +1822,12 @@
             renderTicTacToe();
             
             if (checkWinner()) {
-                setTimeout(() => alert(currentPlayer + ' a gagné!'), 100);
+                showToast('success', 'Victoire!', `${currentPlayer} a gagné!`);
                 return;
             }
             
             if (!tttBoard.includes('')) {
-                setTimeout(() => alert('Match nul!'), 100);
+                showToast('info', 'Match nul!', 'Personne n\'a gagné');
                 return;
             }
             
@@ -1280,6 +1853,7 @@
 
         function restartTicTacToe() {
             initTicTacToe();
+            showToast('info', 'Nouveau jeu', 'Tic Tac Toe redémarré');
         }
 
         // 2048 Game
@@ -1323,7 +1897,6 @@
         }
 
         function move2048(direction) {
-            let moved = false;
             const oldBoard = JSON.stringify(board2048);
             
             if (direction === 'left' || direction === 'right') {
@@ -1366,6 +1939,7 @@
 
         function restart2048() {
             init2048();
+            showToast('info', 'Nouveau jeu', '2048 redémarré');
         }
 
         document.addEventListener('keydown', (e) => {
@@ -1376,8 +1950,179 @@
             if (e.key === 'ArrowRight') move2048('right');
         });
 
-        // Check notifications every minute
-        setInterval(checkNotifications, 60000);
+        // Check reminders every minute
+        setInterval(checkReminders, 60000);
+        
+        // Check for overdue tasks every 30 seconds
+        setInterval(() => {
+            const now = new Date();
+            tasks.forEach(task => {
+                if (!task.completed && task.datetime) {
+                    const taskDate = new Date(task.datetime);
+                    if (taskDate < now && !task.notified) {
+                        showToast('warning', 'Rappel urgent!', `"${task.title}" est maintenant en retard`);
+                        task.notified = true;
+                        saveTasks();
+                    }
+                }
+            });
+        }, 30000);
+
+        // Review Section - File Management
+        const fileInput = document.getElementById('file-input');
+        const uploadArea = document.getElementById('upload-area');
+
+        // File input change event
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                await uploadFile(file);
+                fileInput.value = '';
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragging');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragging');
+        });
+
+        uploadArea.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragging');
+            
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                await uploadFile(file);
+            }
+        });
+
+        // Upload file to server
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                showToast('info', 'Upload en cours...', `Envoi de "${file.name}"`);
+                
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'upload');
+                }
+
+                const result = await response.json();
+                showToast('success', 'Fichier uploadé!', `"${result.originalname}" est maintenant disponible`);
+                loadFiles();
+            } catch (error) {
+                showToast('error', 'Erreur', error.message);
+            }
+        }
+
+        // Load all files from server
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/files');
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des fichiers');
+                }
+
+                const files = await response.json();
+                renderFiles(files);
+            } catch (error) {
+                showToast('error', 'Erreur', error.message);
+            }
+        }
+
+        // Render files grid
+        function renderFiles(files) {
+            const grid = document.getElementById('files-grid');
+            
+            if (files.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem; grid-column: 1 / -1;">Aucun fichier partagé</p>';
+                return;
+            }
+
+            grid.innerHTML = files.map(file => {
+                const isImage = file.type === 'image';
+                const fileUrl = `/uploads/${file.filename}`;
+                
+                return `
+                    <div class="file-card" onclick="openViewer('${file.filename}', '${file.type}')">
+                        <div class="file-preview">
+                            ${isImage ? 
+                                `<img src="${fileUrl}" alt="${file.filename}">` : 
+                                `<div class="file-preview-icon">📄</div>`
+                            }
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name" title="${file.filename}">${file.filename}</div>
+                            <button class="file-delete" onclick="event.stopPropagation(); deleteFile('${file.filename}')" title="Supprimer">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Open file viewer
+        function openViewer(filename, type) {
+            const modal = document.getElementById('viewer-modal');
+            const content = document.getElementById('viewer-content');
+            const title = document.getElementById('viewer-title');
+            const fileUrl = `/uploads/${filename}`;
+
+            title.textContent = filename;
+            
+            if (type === 'pdf') {
+                content.innerHTML = `<iframe src="${fileUrl}" type="application/pdf"></iframe>`;
+            } else {
+                content.innerHTML = `<img src="${fileUrl}" alt="${filename}">`;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        // Close viewer
+        function closeViewer() {
+            const modal = document.getElementById('viewer-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Delete file
+        async function deleteFile(filename) {
+            if (!confirm(`Supprimer "${filename}" ?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/files/${filename}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la suppression');
+                }
+
+                showToast('success', 'Fichier supprimé', `"${filename}" a été supprimé`);
+                loadFiles();
+            } catch (error) {
+                showToast('error', 'Erreur', error.message);
+            }
+        }
+
+        // Close viewer with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeViewer();
+            }
+        });
     </script>
 </body>
 </html>
