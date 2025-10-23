@@ -1968,9 +1968,23 @@
             });
         }, 30000);
 
-        // Review Section - File Management
+        // Review Section - File Management (100% LOCAL)
+        let uploadedFiles = [];
         const fileInput = document.getElementById('file-input');
         const uploadArea = document.getElementById('upload-area');
+
+        // Load files from localStorage
+        function loadFilesFromStorage() {
+            const saved = localStorage.getItem('h7-files');
+            if (saved) {
+                uploadedFiles = JSON.parse(saved);
+            }
+        }
+
+        // Save files to localStorage
+        function saveFilesToStorage() {
+            localStorage.setItem('h7-files', JSON.stringify(uploadedFiles));
+        }
 
         // File input change event
         fileInput.addEventListener('change', async (e) => {
@@ -2001,44 +2015,68 @@
             }
         });
 
-        // Upload file to server
+        // Upload file (LOCAL - stocké dans localStorage)
         async function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+            // Vérifier la taille (max 50MB)
+            if (file.size > 50 * 1024 * 1024) {
+                showToast('error', 'Fichier trop grand', 'La taille maximale est de 50MB');
+                return;
+            }
+
+            // Vérifier le type de fichier
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast('error', 'Type non autorisé', 'Seuls les PDF et images sont acceptés');
+                return;
+            }
 
             try {
-                showToast('info', 'Upload en cours...', `Envoi de "${file.name}"`);
+                showToast('info', 'Upload en cours...', `Traitement de "${file.name}"`);
                 
-                const response = await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
+                // Lire le fichier comme base64
+                const base64 = await readFileAsBase64(file);
+                
+                // Déterminer le type
+                const isImage = file.type.startsWith('image/');
+                const isPDF = file.type === 'application/pdf';
+                
+                // Créer l'objet fichier
+                const fileObject = {
+                    filename: file.name,
+                    originalname: file.name,
+                    type: isImage ? 'image' : 'pdf',
+                    mimetype: file.type,
+                    size: file.size,
+                    data: base64,
+                    uploadedAt: new Date().toISOString()
+                };
 
-                if (!response.ok) {
-                    throw new Error('Erreur lors de l\'upload');
-                }
-
-                const result = await response.json();
-                showToast('success', 'Fichier uploadé!', `"${result.originalname}" est maintenant disponible`);
+                // Ajouter au tableau et sauvegarder
+                uploadedFiles.unshift(fileObject);
+                saveFilesToStorage();
+                
+                showToast('success', 'Fichier uploadé!', `"${file.name}" est maintenant disponible`);
                 loadFiles();
             } catch (error) {
-                showToast('error', 'Erreur', error.message);
+                showToast('error', 'Erreur', 'Impossible de traiter le fichier');
+                console.error(error);
             }
         }
 
-        // Load all files from server
-        async function loadFiles() {
-            try {
-                const response = await fetch('/api/files');
-                if (!response.ok) {
-                    throw new Error('Erreur lors du chargement des fichiers');
-                }
+        // Lire un fichier comme base64
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
 
-                const files = await response.json();
-                renderFiles(files);
-            } catch (error) {
-                showToast('error', 'Erreur', error.message);
-            }
+        // Load all files (LOCAL)
+        function loadFiles() {
+            loadFilesFromStorage();
+            renderFiles(uploadedFiles);
         }
 
         // Render files grid
@@ -2050,21 +2088,20 @@
                 return;
             }
 
-            grid.innerHTML = files.map(file => {
+            grid.innerHTML = files.map((file, index) => {
                 const isImage = file.type === 'image';
-                const fileUrl = `/uploads/${file.filename}`;
                 
                 return `
-                    <div class="file-card" onclick="openViewer('${file.filename}', '${file.type}')">
+                    <div class="file-card" onclick="openViewer(${index})">
                         <div class="file-preview">
                             ${isImage ? 
-                                `<img src="${fileUrl}" alt="${file.filename}">` : 
+                                `<img src="${file.data}" alt="${file.filename}">` : 
                                 `<div class="file-preview-icon">📄</div>`
                             }
                         </div>
                         <div class="file-info">
                             <div class="file-name" title="${file.filename}">${file.filename}</div>
-                            <button class="file-delete" onclick="event.stopPropagation(); deleteFile('${file.filename}')" title="Supprimer">🗑️</button>
+                            <button class="file-delete" onclick="event.stopPropagation(); deleteFile(${index})" title="Supprimer">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -2072,18 +2109,20 @@
         }
 
         // Open file viewer
-        function openViewer(filename, type) {
+        function openViewer(index) {
+            const file = uploadedFiles[index];
+            if (!file) return;
+
             const modal = document.getElementById('viewer-modal');
             const content = document.getElementById('viewer-content');
             const title = document.getElementById('viewer-title');
-            const fileUrl = `/uploads/${filename}`;
 
-            title.textContent = filename;
+            title.textContent = file.filename;
             
-            if (type === 'pdf') {
-                content.innerHTML = `<iframe src="${fileUrl}" type="application/pdf"></iframe>`;
+            if (file.type === 'pdf') {
+                content.innerHTML = `<iframe src="${file.data}" type="application/pdf"></iframe>`;
             } else {
-                content.innerHTML = `<img src="${fileUrl}" alt="${filename}">`;
+                content.innerHTML = `<img src="${file.data}" alt="${file.filename}">`;
             }
 
             modal.classList.remove('hidden');
@@ -2095,26 +2134,19 @@
             modal.classList.add('hidden');
         }
 
-        // Delete file
-        async function deleteFile(filename) {
-            if (!confirm(`Supprimer "${filename}" ?`)) {
+        // Delete file (LOCAL)
+        function deleteFile(index) {
+            const file = uploadedFiles[index];
+            if (!file) return;
+
+            if (!confirm(`Supprimer "${file.filename}" ?`)) {
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/files/${filename}`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erreur lors de la suppression');
-                }
-
-                showToast('success', 'Fichier supprimé', `"${filename}" a été supprimé`);
-                loadFiles();
-            } catch (error) {
-                showToast('error', 'Erreur', error.message);
-            }
+            uploadedFiles.splice(index, 1);
+            saveFilesToStorage();
+            showToast('success', 'Fichier supprimé', `"${file.filename}" a été supprimé`);
+            loadFiles();
         }
 
         // Close viewer with Escape key
