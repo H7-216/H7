@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>H7 - Tasks & Games</title>
-    <link rel="icon" type="image/webp" href="IMG_1709.webp">
-    <link rel="apple-touch-icon" href="IMG_1709.webp">
+    <link rel="icon" type="image/webp" href="attached_assets/IMG_1709_1759693384904.webp">
+    <link rel="apple-touch-icon" href="attached_assets/IMG_1709_1759693384904.webp">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -2017,9 +2017,9 @@
 
         // Upload file (LOCAL - stocké dans localStorage)
         async function uploadFile(file) {
-            // Vérifier la taille (max 50MB)
-            if (file.size > 50 * 1024 * 1024) {
-                showToast('error', 'Fichier trop grand', 'La taille maximale est de 50MB');
+            // Vérifier la taille (max 10MB pour localStorage)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', 'Fichier trop grand', 'La taille maximale est de 10MB pour le stockage local');
                 return;
             }
 
@@ -2038,7 +2038,6 @@
                 
                 // Déterminer le type
                 const isImage = file.type.startsWith('image/');
-                const isPDF = file.type === 'application/pdf';
                 
                 // Créer l'objet fichier
                 const fileObject = {
@@ -2053,13 +2052,21 @@
 
                 // Ajouter au tableau et sauvegarder
                 uploadedFiles.unshift(fileObject);
-                saveFilesToStorage();
                 
-                showToast('success', 'Fichier uploadé!', `"${file.name}" est maintenant disponible`);
-                loadFiles();
+                // Sauvegarder avec gestion d'erreur localStorage
+                try {
+                    saveFilesToStorage();
+                    showToast('success', 'Fichier uploadé!', `"${file.name}" est maintenant disponible`);
+                    loadFiles();
+                } catch (storageError) {
+                    // Retirer le fichier si on ne peut pas le sauvegarder
+                    uploadedFiles.shift();
+                    showToast('error', 'Stockage plein', 'Le localStorage est plein. Supprimez des fichiers.');
+                    console.error('localStorage error:', storageError);
+                }
             } catch (error) {
-                showToast('error', 'Erreur', 'Impossible de traiter le fichier');
-                console.error(error);
+                showToast('error', 'Erreur', error.message || 'Impossible de traiter le fichier');
+                console.error('Upload error:', error);
             }
         }
 
