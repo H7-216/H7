@@ -10,13 +10,16 @@
   <meta property="og:description" content="L'application de devoirs intelligente qui organise vos notes automatiquement." />
   <meta property="og:type" content="website" />
   
+  <!-- Requested Icons -->
   <link rel="icon" type="image/webp" href="IMG_1709.webp">
   <link rel="apple-touch-icon" href="IMG_1709.webp">
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,44 +27,44 @@
       theme: {
         extend: {
           colors: {
-            border: "hsl(var(--border))",
-            input: "hsl(var(--input))",
-            ring: "hsl(var(--ring))",
-            background: "hsl(var(--background))",
-            foreground: "hsl(var(--foreground))",
+            border: "hsl(240 5.9% 90%)",
+            input: "hsl(240 5.9% 90%)",
+            ring: "hsl(240 5.9% 10%)",
+            background: "hsl(0 0% 98%)",
+            foreground: "hsl(240 10% 3.9%)",
             primary: {
-              DEFAULT: "hsl(var(--primary))",
-              foreground: "hsl(var(--primary-foreground))",
+              DEFAULT: "hsl(240 5.9% 10%)",
+              foreground: "hsl(0 0% 98%)",
             },
             secondary: {
-              DEFAULT: "hsl(var(--secondary))",
-              foreground: "hsl(var(--secondary-foreground))",
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 5.9% 10%)",
             },
             destructive: {
-              DEFAULT: "hsl(var(--destructive))",
-              foreground: "hsl(var(--destructive-foreground))",
+              DEFAULT: "hsl(0 84.2% 60.2%)",
+              foreground: "hsl(0 0% 98%)",
             },
             muted: {
-              DEFAULT: "hsl(var(--muted))",
-              foreground: "hsl(var(--muted-foreground))",
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 3.8% 46.1%)",
             },
             accent: {
-              DEFAULT: "hsl(var(--accent))",
-              foreground: "hsl(var(--accent-foreground))",
+              DEFAULT: "hsl(240 4.8% 95.9%)",
+              foreground: "hsl(240 5.9% 10%)",
             },
             popover: {
-              DEFAULT: "hsl(var(--popover))",
-              foreground: "hsl(var(--popover-foreground))",
+              DEFAULT: "hsl(0 0% 100%)",
+              foreground: "hsl(240 10% 3.9%)",
             },
             card: {
-              DEFAULT: "hsl(var(--card))",
-              foreground: "hsl(var(--card-foreground))",
+              DEFAULT: "hsl(0 0% 100%)",
+              foreground: "hsl(240 10% 3.9%)",
             },
           },
           borderRadius: {
-            lg: "var(--radius)",
-            md: "calc(var(--radius) - 2px)",
-            sm: "calc(var(--radius) - 4px)",
+            lg: "0.5rem",
+            md: "calc(0.5rem - 2px)",
+            sm: "calc(0.5rem - 4px)",
           },
           fontFamily: {
             sans: ["Inter", "sans-serif"],
@@ -73,30 +76,10 @@
     }
   </script>
 
-  <style>
-    :root {
-      --background: 0 0% 98%;
-      --foreground: 240 10% 3.9%;
-      --card: 0 0% 100%;
-      --card-foreground: 240 10% 3.9%;
-      --popover: 0 0% 100%;
-      --popover-foreground: 240 10% 3.9%;
-      --primary: 240 5.9% 10%;
-      --primary-foreground: 0 0% 98%;
-      --secondary: 240 4.8% 95.9%;
-      --secondary-foreground: 240 5.9% 10%;
-      --muted: 240 4.8% 95.9%;
-      --muted-foreground: 240 3.8% 46.1%;
-      --accent: 240 4.8% 95.9%;
-      --accent-foreground: 240 5.9% 10%;
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 0 0% 98%;
-      --border: 240 5.9% 90%;
-      --input: 240 5.9% 90%;
-      --ring: 240 5.9% 10%;
-      --radius: 0.5rem;
-    }
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <style>
     body {
       overscroll-behavior-y: none;
     }
@@ -124,35 +107,31 @@
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
+    ::-webkit-scrollbar-thumb { background: hsl(240 3.8% 46.1% / 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: hsl(240 3.8% 46.1% / 0.5); }
+    
+    #root { height: 100vh; }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "wouter": "https://esm.sh/wouter@3.0.0",
-        "framer-motion": "https://esm.sh/framer-motion@10.16.4",
-        "lucide-react": "https://esm.sh/lucide-react@0.292.0",
-        "clsx": "https://esm.sh/clsx",
-        "tailwind-merge": "https://esm.sh/tailwind-merge"
-      }
-    }
-  </script>
+  <!-- App Script -->
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
+    import { Switch, Route, Link, useLocation } from 'https://esm.sh/wouter@3.0.0';
+    import { motion, AnimatePresence } from 'https://esm.sh/framer-motion@10.16.4';
+    import { 
+      LayoutDashboard, Book, History as HistoryIcon, FolderOpen, Moon, Settings, 
+      Plus, Search, Filter, UploadCloud, MoreVertical, Clock, Pen, Highlighter, Eraser, 
+      ChevronLeft, FileText, Save, Check, Volume2, SkipBack, SkipForward, Play, Pause, 
+      ListMusic, Heart, Calendar 
+    } from 'https://esm.sh/lucide-react@0.292.0';
+    import { clsx } from 'https://esm.sh/clsx';
+    import { twMerge } from 'https://esm.sh/tailwind-merge';
 
-  <script type="module">
-    import React, { useState, useEffect, useRef } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { Switch, Route, Link, useLocation } from 'wouter';
-    import { motion, AnimatePresence } from 'framer-motion';
-    import * as LucideIcons from 'lucide-react';
-    import { clsx } from 'clsx';
-    import { twMerge } from 'tailwind-merge';
+    console.log("App starting...");
 
     // --- Utilities ---
     function cn(...inputs) {
@@ -175,137 +154,155 @@
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       };
-      return React.createElement("button", {
-        className: cn(
-          "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-          variants[variant],
-          sizes[size],
-          className
-        ),
-        ref,
-        ...props
-      });
+      return (
+        <button
+          className={cn(
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            variants[variant],
+            sizes[size],
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      );
     });
 
     const Input = React.forwardRef(({ className, type, ...props }, ref) => {
-      return React.createElement("input", {
-        type,
-        className: cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        ),
-        ref,
-        ...props
-      });
+      return (
+        <input
+          type={type}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )}
+          ref={ref}
+          {...props}
+        />
+      );
     });
 
     const Slider = React.forwardRef(({ className, value, onValueChange, min = 0, max = 100, step = 1, ...props }, ref) => {
-      return React.createElement("input", {
-        type: "range",
-        className: cn("w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary", className),
-        min, max, step,
-        value: value?.[0] ?? 0,
-        onChange: (e) => onValueChange([parseFloat(e.target.value)]),
-        ref,
-        ...props
-      });
+      return (
+        <input
+          type="range"
+          className={cn("w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary", className)}
+          min={min} max={max} step={step}
+          value={value?.[0] ?? 0}
+          onChange={(e) => onValueChange([parseFloat(e.target.value)])}
+          ref={ref}
+          {...props}
+        />
+      );
     });
 
     const Badge = ({ className, variant = "default", ...props }) => {
-      return React.createElement("div", {
-        className: cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className, "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent"),
-        ...props
-      });
+      return (
+        <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className, "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent")} {...props} />
+      );
     };
 
-    const Card = ({ className, ...props }) => React.createElement("div", { className: cn("rounded-lg border bg-card text-card-foreground shadow-sm", className), ...props });
-    const Separator = ({ className, orientation = "horizontal" }) => React.createElement("div", { className: cn("shrink-0 bg-border", orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className) });
-    const ScrollArea = ({ className, children }) => React.createElement("div", { className: cn("overflow-auto", className) }, children);
+    const Card = ({ className, ...props }) => <div className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />;
+    const Separator = ({ className, orientation = "horizontal" }) => <div className={cn("shrink-0 bg-border", orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className)} />;
+    const ScrollArea = ({ className, children }) => <div className={cn("overflow-auto", className)}>{children}</div>;
 
     // --- Feature Components ---
 
     function NotebookCard({ id, title, subject, color, lastModified, pageCount }) {
-      return React.createElement(Link, { href: `/editor/${id}` },
-        React.createElement(motion.div, {
-          whileHover: { y: -4, scale: 1.01 },
-          whileTap: { scale: 0.98 },
-          className: "group relative cursor-pointer"
-        },
-          // Spiral
-          React.createElement("div", { className: "absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2" },
-            Array.from({ length: 8 }).map((_, i) => 
-              React.createElement("div", { key: i, className: "w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300" })
-            )
-          ),
-          // Cover
-          React.createElement("div", { className: "relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50" },
-            React.createElement("div", { className: "h-1/3 w-full p-4 flex flex-col justify-between", style: { backgroundColor: color } },
-              React.createElement("div", { className: "self-end opacity-0 group-hover:opacity-100 transition-opacity" },
-                React.createElement("button", { className: "p-1 hover:bg-black/10 rounded-full text-black/60" }, React.createElement(LucideIcons.MoreVertical, { className: "w-5 h-5" }))
-              ),
-              React.createElement("div", { className: "bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm" }, subject)
-            ),
-            React.createElement("div", { className: "p-5 flex flex-col h-2/3 bg-gradient-to-b from-white to-neutral-50" },
-              React.createElement("h3", { className: "font-serif text-xl font-medium text-foreground leading-tight mb-2 line-clamp-2" }, title),
-              React.createElement("div", { className: "mt-auto space-y-3" },
-                React.createElement("div", { className: "flex items-center gap-2 text-xs text-muted-foreground" },
-                  React.createElement(LucideIcons.Clock, { className: "w-3.5 h-3.5" }),
-                  React.createElement("span", null, lastModified)
-                ),
-                React.createElement("div", { className: "flex items-center justify-between border-t border-border pt-3" },
-                  React.createElement("span", { className: "text-xs font-medium text-muted-foreground" }, `${pageCount} pages`),
-                  React.createElement("div", { className: "flex -space-x-2" },
-                    React.createElement("div", { className: "w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold" }, "A")
-                  )
-                )
-              )
-            )
-          )
-        )
+      return (
+        <Link href={`/editor/${id}`}>
+          <motion.div
+            whileHover={{ y: -4, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            className="group relative cursor-pointer"
+          >
+            {/* Spiral */}
+            <div className="absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300" />
+              ))}
+            </div>
+            {/* Cover */}
+            <div className="relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50">
+              <div className="h-1/3 w-full p-4 flex flex-col justify-between" style={{ backgroundColor: color }}>
+                <div className="self-end opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="p-1 hover:bg-black/10 rounded-full text-black/60">
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
+                  {subject}
+                </div>
+              </div>
+              <div className="p-5 flex flex-col h-2/3 bg-gradient-to-b from-white to-neutral-50">
+                <h3 className="font-serif text-xl font-medium text-foreground leading-tight mb-2 line-clamp-2">
+                  {title}
+                </h3>
+                <div className="mt-auto space-y-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{lastModified}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-border pt-3">
+                    <span className="text-xs font-medium text-muted-foreground">{pageCount} pages</span>
+                    <div className="flex -space-x-2">
+                      <div className="w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold">A</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
       );
     }
 
     function Sidebar() {
       const [location] = useLocation();
       const navItems = [
-        { icon: LucideIcons.LayoutDashboard, label: "Tableau de bord", path: "/" },
-        { icon: LucideIcons.Book, label: "Mes Cahiers", path: "/notebooks" },
-        { icon: LucideIcons.History, label: "Historique", path: "/history" },
-        { icon: LucideIcons.FolderOpen, label: "Fichiers", path: "/files" },
-        { icon: LucideIcons.Moon, label: "Coran", path: "/quran" },
-        { icon: LucideIcons.Settings, label: "Paramètres", path: "/settings" },
+        { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
+        { icon: Book, label: "Mes Cahiers", path: "/notebooks" },
+        { icon: HistoryIcon, label: "Historique", path: "/history" },
+        { icon: FolderOpen, label: "Fichiers", path: "/files" },
+        { icon: Moon, label: "Coran", path: "/quran" },
+        { icon: Settings, label: "Paramètres", path: "/settings" },
       ];
 
-      return React.createElement("div", { className: "h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0" },
-        React.createElement("div", { className: "mb-8 px-2 flex items-center gap-2" },
-          React.createElement("div", { className: "w-8 h-8 bg-primary rounded-lg flex items-center justify-center" },
-            React.createElement(LucideIcons.Book, { className: "text-primary-foreground w-5 h-5" })
-          ),
-          React.createElement("span", { className: "font-serif text-xl font-bold tracking-tight" }, "SmartNotes")
-        ),
-        React.createElement(Button, { className: "w-full mb-6 justify-start gap-2 shadow-sm", size: "lg" },
-          React.createElement(LucideIcons.Plus, { className: "w-5 h-5" }), "Nouvelle Note"
-        ),
-        React.createElement("nav", { className: "space-y-1 flex-1" },
-          navItems.map(item => {
-            const isActive = location === item.path;
-            return React.createElement(Link, { key: item.path, href: item.path },
-              React.createElement("div", { className: cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer", isActive ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground") },
-                React.createElement(item.icon, { className: cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-2") }),
-                item.label
-              )
-            );
-          })
-        ),
-        React.createElement("div", { className: "mt-auto pt-4 border-t border-border" },
-          React.createElement("div", { className: "flex items-center gap-3 px-2 py-2" },
-            React.createElement("div", { className: "w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 shadow-inner" }),
-            React.createElement("div", { className: "flex flex-col" },
-              React.createElement("span", { className: "text-sm font-medium" }, "Étudiant"),
-              React.createElement("span", { className: "text-xs text-muted-foreground" }, "Premium Plan")
-            )
-          )
-        )
+      return (
+        <div className="h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0">
+          <div className="mb-8 px-2 flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Book className="text-primary-foreground w-5 h-5" />
+            </div>
+            <span className="font-serif text-xl font-bold tracking-tight">SmartNotes</span>
+          </div>
+          <Button className="w-full mb-6 justify-start gap-2 shadow-sm" size="lg">
+            <Plus className="w-5 h-5" />
+            Nouvelle Note
+          </Button>
+          <nav className="space-y-1 flex-1">
+            {navItems.map(item => {
+              const isActive = location === item.path;
+              return (
+                <Link key={item.path} href={item.path}>
+                  <div className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer", isActive ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
+                    <item.icon className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-2")} />
+                    {item.label}
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+          <div className="mt-auto pt-4 border-t border-border">
+            <div className="flex items-center gap-3 px-2 py-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 shadow-inner" />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">Étudiant</span>
+                <span className="text-xs text-muted-foreground">Premium Plan</span>
+              </div>
+            </div>
+          </div>
+        </div>
       );
     }
 
@@ -384,16 +381,18 @@
         lastPoint.current = null;
       };
 
-      return React.createElement("div", { className: `w-full h-full relative overflow-hidden shadow-sm ${bgClass}` },
-        React.createElement("canvas", {
-          ref: canvasRef,
-          className: "w-full h-full touch-none cursor-crosshair",
-          onPointerDown: startDrawing,
-          onPointerMove: draw,
-          onPointerUp: stopDrawing,
-          onPointerLeave: stopDrawing,
-          style: { touchAction: "none" }
-        })
+      return (
+        <div className={`w-full h-full relative overflow-hidden shadow-sm ${bgClass}`}>
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full touch-none cursor-crosshair"
+            onPointerDown={startDrawing}
+            onPointerMove={draw}
+            onPointerUp={stopDrawing}
+            onPointerLeave={stopDrawing}
+            style={{ touchAction: "none" }}
+          />
+        </div>
       );
     }
 
@@ -406,58 +405,66 @@
         { value: "#0891B2", label: "Cyan" }, { value: "#DB2777", label: "Rose" },
       ];
 
-      return React.createElement("div", { className: "h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between" },
-        React.createElement("div", { className: "flex items-center gap-4" },
-          React.createElement(Link, { href: "/" },
-            React.createElement(Button, { variant: "ghost", size: "icon", className: "hover:bg-muted" }, React.createElement(LucideIcons.ChevronLeft, { className: "w-5 h-5" }))
-          ),
-          React.createElement("div", { className: "flex flex-col" },
-            React.createElement("h1", { className: "text-sm font-semibold flex items-center gap-2" }, "Devoir de Physique", React.createElement("span", { className: "text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded" }, "Chapitre 4")),
-            React.createElement("span", { className: "text-xs text-muted-foreground flex items-center gap-1" }, status)
-          )
-        ),
-        React.createElement("div", { className: "flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm relative" },
-           React.createElement("div", { className: "flex items-center gap-1 pr-2 border-r border-border/50" },
-             React.createElement(Button, { variant: activeTool === "pen" ? "secondary" : "ghost", size: "sm", onClick: () => setActiveTool("pen"), className: activeTool === "pen" ? "shadow-sm bg-white text-primary" : "text-muted-foreground" }, React.createElement(LucideIcons.Pen, { className: "w-4 h-4 mr-2" }), "Stylo"),
-             React.createElement(Button, { variant: activeTool === "highlighter" ? "secondary" : "ghost", size: "sm", onClick: () => setActiveTool("highlighter"), className: activeTool === "highlighter" ? "shadow-sm bg-white text-primary" : "text-muted-foreground" }, React.createElement(LucideIcons.Highlighter, { className: "w-4 h-4 mr-2" }), "Surligneur"),
-             React.createElement(Button, { variant: activeTool === "eraser" ? "secondary" : "ghost", size: "sm", onClick: () => setActiveTool("eraser"), className: activeTool === "eraser" ? "shadow-sm bg-white text-primary" : "text-muted-foreground" }, React.createElement(LucideIcons.Eraser, { className: "w-4 h-4 mr-2" }), "Gomme")
-           ),
-           React.createElement(Button, { variant: "outline", size: "sm", className: "gap-2 px-3 border-dashed", style: { borderColor: activeTool !== 'eraser' ? activeColor : 'transparent' }, onClick: () => setShowColorPicker(!showColorPicker) },
-             React.createElement("div", { className: "w-4 h-4 rounded-full border border-border", style: { backgroundColor: activeTool === 'eraser' ? '#ffffff' : activeColor } }),
-             React.createElement("span", { className: "hidden sm:inline" }, "Couleur & Taille")
-           ),
-           showColorPicker && React.createElement("div", { className: "absolute top-full mt-2 right-0 w-64 p-4 bg-popover rounded-md border shadow-md z-50" },
-              React.createElement("div", { className: "space-y-4" },
-                React.createElement("div", { className: "space-y-2" },
-                  React.createElement("label", { className: "text-xs text-muted-foreground uppercase font-bold tracking-wider" }, "Couleurs"),
-                  React.createElement("div", { className: "grid grid-cols-4 gap-2" },
-                    colors.map(c => React.createElement("button", {
-                      key: c.value,
-                      onClick: () => { setActiveColor(c.value); if (activeTool === 'eraser') setActiveTool('pen'); },
-                      className: "w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative flex items-center justify-center",
-                      style: { backgroundColor: c.value }
-                    }, activeColor === c.value && activeTool !== 'eraser' && React.createElement(LucideIcons.Check, { className: "w-4 h-4 text-white drop-shadow-md", strokeWidth: 3 })))
-                  )
-                ),
-                React.createElement(Separator),
-                React.createElement("div", { className: "space-y-3" },
-                  React.createElement("div", { className: "flex justify-between" },
-                    React.createElement("label", { className: "text-xs text-muted-foreground uppercase font-bold tracking-wider" }, "Épaisseur"),
-                    React.createElement("span", { className: "text-xs font-mono" }, `${strokeWidth}px`)
-                  ),
-                  React.createElement(Slider, { value: [strokeWidth], onValueChange: (vals) => setStrokeWidth(vals[0]), min: 1, max: 20 }),
-                  React.createElement("div", { className: "h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2" },
-                    React.createElement("div", { className: "rounded-full bg-current transition-all", style: { width: strokeWidth, height: strokeWidth, backgroundColor: activeTool === 'eraser' ? '#9ca3af' : activeColor } })
-                  )
-                ),
-                React.createElement(Button, { size: "sm", className: "w-full mt-2", onClick: () => setShowColorPicker(false) }, "Fermer")
-              )
-           )
-        ),
-        React.createElement("div", { className: "flex items-center gap-2" },
-          React.createElement(Link, { href: "/files" }, React.createElement(Button, { variant: "ghost", size: "icon" }, React.createElement(LucideIcons.FileText, { className: "w-4 h-4" }))),
-          React.createElement(Button, { size: "sm", onClick: onSave, className: "gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200" }, React.createElement(LucideIcons.Save, { className: "w-4 h-4" }), "Enregistrer")
-        )
+      return (
+        <div className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="ghost" size="icon" className="hover:bg-muted"><ChevronLeft className="w-5 h-5" /></Button>
+            </Link>
+            <div className="flex flex-col">
+              <h1 className="text-sm font-semibold flex items-center gap-2">Devoir de Physique <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Chapitre 4</span></h1>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">{status}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm relative">
+             <div className="flex items-center gap-1 pr-2 border-r border-border/50">
+               <Button variant={activeTool === "pen" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("pen")} className={activeTool === "pen" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Pen className="w-4 h-4 mr-2" />Stylo</Button>
+               <Button variant={activeTool === "highlighter" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("highlighter")} className={activeTool === "highlighter" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Highlighter className="w-4 h-4 mr-2" />Surligneur</Button>
+               <Button variant={activeTool === "eraser" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("eraser")} className={activeTool === "eraser" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Eraser className="w-4 h-4 mr-2" />Gomme</Button>
+             </div>
+             <Button variant="outline" size="sm" className="gap-2 px-3 border-dashed" style={{ borderColor: activeTool !== 'eraser' ? activeColor : 'transparent' }} onClick={() => setShowColorPicker(!showColorPicker)}>
+               <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: activeTool === 'eraser' ? '#ffffff' : activeColor }} />
+               <span className="hidden sm:inline">Couleur & Taille</span>
+             </Button>
+             {showColorPicker && (
+               <div className="absolute top-full mt-2 right-0 w-64 p-4 bg-popover rounded-md border shadow-md z-50">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Couleurs</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {colors.map(c => (
+                          <button
+                            key={c.value}
+                            onClick={() => { setActiveColor(c.value); if (activeTool === 'eraser') setActiveTool('pen'); }}
+                            className="w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative flex items-center justify-center"
+                            style={{ backgroundColor: c.value }}
+                          >
+                            {activeColor === c.value && activeTool !== 'eraser' && <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <Separator />
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Épaisseur</label>
+                        <span className="text-xs font-mono">{strokeWidth}px</span>
+                      </div>
+                      <Slider value={[strokeWidth]} onValueChange={(vals) => setStrokeWidth(vals[0])} min={1} max={20} />
+                      <div className="h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2">
+                        <div className="rounded-full bg-current transition-all" style={{ width: strokeWidth, height: strokeWidth, backgroundColor: activeTool === 'eraser' ? '#9ca3af' : activeColor }} />
+                      </div>
+                    </div>
+                    <Button size="sm" className="w-full mt-2" onClick={() => setShowColorPicker(false)}>Fermer</Button>
+                  </div>
+               </div>
+             )}
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/files"><Button variant="ghost" size="icon"><FileText className="w-4 h-4" /></Button></Link>
+            <Button size="sm" onClick={onSave} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"><Save className="w-4 h-4" />Enregistrer</Button>
+          </div>
+        </div>
       );
     }
 
@@ -477,42 +484,50 @@
         if (e.dataTransfer.files[0]) alert(`Fichier "${e.dataTransfer.files[0].name}" importé !`);
       };
 
-      return React.createElement("div", { className: "flex h-screen bg-background" },
-        React.createElement(Sidebar),
-        React.createElement("main", { className: "flex-1 overflow-auto" },
-          React.createElement("div", { className: "p-8 max-w-7xl mx-auto space-y-8" },
-            React.createElement("div", { className: "flex flex-col md:flex-row md:items-center justify-between gap-4" },
-              React.createElement("div", null, React.createElement("h1", { className: "font-serif text-3xl font-bold text-foreground" }, "Bonjour, Alex"), React.createElement("p", { className: "text-muted-foreground mt-1" }, "Prêt pour tes devoirs aujourd'hui ?")),
-              React.createElement("div", { className: "flex items-center gap-3" },
-                React.createElement("div", { className: "relative" }, React.createElement(LucideIcons.Search, { className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" }), React.createElement(Input, { placeholder: "Rechercher une note...", className: "pl-9 w-64 bg-card" })),
-                React.createElement(Button, { variant: "outline", size: "icon" }, React.createElement(LucideIcons.Filter, { className: "w-4 h-4" }))
-              )
-            ),
-            React.createElement(motion.div, {
-              className: `border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/30"}`,
-              onDragEnter: (e) => { e.preventDefault(); setDragActive(true); },
-              onDragLeave: (e) => { e.preventDefault(); setDragActive(false); },
-              onDragOver: (e) => { e.preventDefault(); },
-              onDrop: handleDrop,
-              whileHover: { scale: 1.005 },
-              onClick: () => alert("Sélecteur de fichiers...")
-            },
-              React.createElement("div", { className: "w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4" }, React.createElement(LucideIcons.UploadCloud, { className: "w-6 h-6" })),
-              React.createElement("h3", { className: "text-lg font-medium" }, "Importer un exercice ou un PDF"),
-              React.createElement("p", { className: "text-sm text-muted-foreground mt-1 max-w-md mx-auto" }, "Glissez-déposez votre fichier ici. L'IA le classera automatiquement.")
-            ),
-            React.createElement("div", { className: "space-y-4" },
-              React.createElement("div", { className: "flex items-center justify-between" }, React.createElement("h2", { className: "text-xl font-semibold" }, "Cahiers Récents"), React.createElement(Button, { variant: "ghost", className: "text-primary" }, "Tout voir")),
-              React.createElement("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" },
-                React.createElement(motion.div, { whileHover: { y: -4, scale: 1.01 }, whileTap: { scale: 0.98 }, className: "aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group" },
-                  React.createElement("div", { className: "w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors" }, React.createElement(LucideIcons.Plus, { className: "w-6 h-6 text-muted-foreground group-hover:text-primary" })),
-                  React.createElement("span", { className: "font-medium text-muted-foreground group-hover:text-primary" }, "Nouveau Cahier")
-                ),
-                MOCK_NOTEBOOKS.map(notebook => React.createElement(NotebookCard, { key: notebook.id, ...notebook }))
-              )
-            )
-          )
-        )
+      return (
+        <div className="flex h-screen bg-background">
+          <Sidebar />
+          <main className="flex-1 overflow-auto">
+            <div className="p-8 max-w-7xl mx-auto space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="font-serif text-3xl font-bold text-foreground">Bonjour, Alex</h1>
+                  <p className="text-muted-foreground mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input placeholder="Rechercher une note..." className="pl-9 w-64 bg-card" />
+                  </div>
+                  <Button variant="outline" size="icon"><Filter className="w-4 h-4" /></Button>
+                </div>
+              </div>
+              <motion.div
+                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/30"}`}
+                onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={(e) => { e.preventDefault(); setDragActive(false); }}
+                onDragOver={(e) => { e.preventDefault(); }}
+                onDrop={handleDrop}
+                whileHover={{ scale: 1.005 }}
+                onClick={() => alert("Sélecteur de fichiers...")}
+              >
+                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><UploadCloud className="w-6 h-6" /></div>
+                <h3 className="text-lg font-medium">Importer un exercice ou un PDF</h3>
+                <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">Glissez-déposez votre fichier ici. L'IA le classera automatiquement.</p>
+              </motion.div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between"><h2 className="text-xl font-semibold">Cahiers Récents</h2><Button variant="ghost" className="text-primary">Tout voir</Button></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <motion.div whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }} className="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group">
+                    <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors"><Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary" /></div>
+                    <span className="font-medium text-muted-foreground group-hover:text-primary">Nouveau Cahier</span>
+                  </motion.div>
+                  {MOCK_NOTEBOOKS.map(notebook => <NotebookCard key={notebook.id} {...notebook} />)}
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
       );
     }
 
@@ -527,18 +542,20 @@
         setTimeout(() => setSaveStatus("Enregistré"), 800);
       };
 
-      return React.createElement("div", { className: "h-screen flex flex-col bg-neutral-100 overflow-hidden" },
-        React.createElement(Toolbar, {
-          activeTool, 
-          setActiveTool: (t) => { setActiveTool(t); if(t==="pen") setStrokeWidth(2); if(t==="highlighter") setStrokeWidth(15); if(t==="eraser") setStrokeWidth(20); },
-          activeColor, setActiveColor, onSave: handleSave, status: saveStatus, strokeWidth, setStrokeWidth
-        }),
-        React.createElement("div", { className: "flex-1 flex justify-center p-4 sm:p-8 overflow-auto" },
-          React.createElement("div", { className: "w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95 duration-300" },
-            React.createElement("div", { className: "absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800" }, new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })),
-            React.createElement(Canvas, { tool: activeTool, color: activeColor, width: strokeWidth, backgroundType: "seyes" })
-          )
-        )
+      return (
+        <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
+          <Toolbar 
+            activeTool={activeTool} 
+            setActiveTool={(t) => { setActiveTool(t); if(t==="pen") setStrokeWidth(2); if(t==="highlighter") setStrokeWidth(15); if(t==="eraser") setStrokeWidth(20); }}
+            activeColor={activeColor} setActiveColor={setActiveColor} onSave={handleSave} status={saveStatus} strokeWidth={strokeWidth} setStrokeWidth={setStrokeWidth}
+          />
+          <div className="flex-1 flex justify-center p-4 sm:p-8 overflow-auto">
+            <div className="w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95 duration-300">
+              <div className="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+              <Canvas tool={activeTool} color={activeColor} width={strokeWidth} backgroundType="seyes" />
+            </div>
+          </div>
+        </div>
       );
     }
 
@@ -548,29 +565,31 @@
         { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé..." },
         { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore..." },
       ];
-      return React.createElement("div", { className: "flex h-screen bg-background" },
-        React.createElement(Sidebar),
-        React.createElement("main", { className: "flex-1 overflow-auto" },
-          React.createElement("div", { className: "p-8 max-w-5xl mx-auto space-y-8" },
-            React.createElement("div", { className: "flex flex-col md:flex-row md:items-center justify-between gap-4" },
-              React.createElement("div", null, React.createElement("h1", { className: "font-serif text-3xl font-bold text-foreground" }, "Historique"), React.createElement("p", { className: "text-muted-foreground mt-1" }, "Vos travaux enregistrés.")),
-              React.createElement(Input, { placeholder: "Rechercher...", className: "w-64" })
-            ),
-            React.createElement("div", { className: "bg-card rounded-xl border border-border shadow-sm overflow-hidden" },
-               React.createElement("div", { className: "divide-y divide-border" },
-                 HISTORY_ITEMS.map((item, i) => 
-                   React.createElement(motion.div, { key: item.id, className: "p-4 hover:bg-muted/50 flex items-center justify-between cursor-pointer", initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { delay: i*0.1 } },
-                     React.createElement("div", { className: "flex items-center gap-4" },
-                       React.createElement("div", { className: "w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600" }, React.createElement(LucideIcons.FileText, { className: "w-5 h-5" })),
-                       React.createElement("div", null, React.createElement("h3", { className: "font-medium" }, item.title), React.createElement("p", { className: "text-sm text-muted-foreground" }, item.subject))
-                     ),
-                     React.createElement("span", { className: "text-sm text-muted-foreground" }, item.date)
-                   )
-                 )
-               )
-            )
-          )
-        )
+      return (
+        <div className="flex h-screen bg-background">
+          <Sidebar />
+          <main className="flex-1 overflow-auto">
+            <div className="p-8 max-w-5xl mx-auto space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div><h1 className="font-serif text-3xl font-bold text-foreground">Historique</h1><p className="text-muted-foreground mt-1">Vos travaux enregistrés.</p></div>
+                <Input placeholder="Rechercher..." className="w-64" />
+              </div>
+              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                 <div className="divide-y divide-border">
+                   {HISTORY_ITEMS.map((item, i) => (
+                     <motion.div key={item.id} className="p-4 hover:bg-muted/50 flex items-center justify-between cursor-pointer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i*0.1 }}>
+                       <div className="flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><FileText className="w-5 h-5" /></div>
+                         <div><h3 className="font-medium">{item.title}</h3><p className="text-sm text-muted-foreground">{item.subject}</p></div>
+                       </div>
+                       <span className="text-sm text-muted-foreground">{item.date}</span>
+                     </motion.div>
+                   ))}
+                 </div>
+              </div>
+            </div>
+          </main>
+        </div>
       );
     }
 
@@ -600,59 +619,63 @@
         return () => clearInterval(interval);
       }, [isPlaying]);
 
-      return React.createElement("div", { className: "flex h-screen bg-background" },
-        React.createElement(Sidebar),
-        React.createElement("main", { className: "flex-1 overflow-auto p-8 space-y-8" },
-          React.createElement("div", { className: "flex justify-between" },
-             React.createElement("div", null, React.createElement("h1", { className: "font-serif text-3xl font-bold" }, "Saint Coran"), React.createElement("p", { className: "text-muted-foreground" }, "Écoutez les récitations."))
-          ),
-          React.createElement(Card, { className: "p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-none relative overflow-hidden" },
-             React.createElement("div", { className: "relative z-10 flex flex-col gap-6" },
-               React.createElement("div", { className: "flex justify-between items-start" },
-                 React.createElement("div", null, React.createElement(Badge, { className: "bg-white/20 hover:bg-white/30 text-white mb-2" }, "Lecture en cours"), React.createElement("h2", { className: "text-3xl font-serif font-bold" }, currentSurah.name)),
-                 React.createElement(LucideIcons.Volume2, { className: "w-6 h-6 animate-pulse" })
-               ),
-               React.createElement("div", { className: "flex items-center gap-4" },
-                 React.createElement("img", { src: currentReciter.image, className: "w-12 h-12 rounded-full border-2 border-white/20" }),
-                 React.createElement("div", null, React.createElement("p", { className: "font-medium" }, currentReciter.name), React.createElement("p", { className: "text-xs text-white/50" }, currentReciter.style))
-               ),
-               React.createElement(Slider, { value: [progress], max: 100 }),
-               React.createElement("div", { className: "flex justify-center gap-6" },
-                 React.createElement(Button, { size: "icon", variant: "ghost", className: "text-white" }, React.createElement(LucideIcons.SkipBack, { className: "w-5 h-5" })),
-                 React.createElement(Button, { size: "icon", className: "w-14 h-14 rounded-full bg-white text-indigo-900", onClick: () => setIsPlaying(!isPlaying) }, isPlaying ? React.createElement(LucideIcons.Pause, { className: "w-6 h-6" }) : React.createElement(LucideIcons.Play, { className: "w-6 h-6 ml-1" })),
-                 React.createElement(Button, { size: "icon", variant: "ghost", className: "text-white" }, React.createElement(LucideIcons.SkipForward, { className: "w-5 h-5" }))
-               )
-             )
-          ),
-          React.createElement("h3", { className: "text-xl font-semibold" }, "Sourates"),
-          React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" },
-             SURAHS.map(surah => 
-               React.createElement(motion.div, { key: surah.number, whileHover: { y: -2 }, className: `p-4 rounded-xl border bg-card cursor-pointer hover:border-primary ${currentSurah.number===surah.number ? "ring-2 ring-primary" : ""}`, onClick: () => { setCurrentSurah(surah); setIsPlaying(true); setProgress(0); } },
-                 React.createElement("div", { className: "flex justify-between mb-2" },
-                   React.createElement("div", { className: "w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs" }, surah.number),
-                   React.createElement(LucideIcons.Heart, { className: "w-4 h-4 text-muted-foreground hover:text-red-500" })
-                 ),
-                 React.createElement("h4", { className: "font-semibold" }, surah.name),
-                 React.createElement("p", { className: "text-sm text-muted-foreground" }, surah.englishName)
-               )
-             )
-          )
-        )
+      return (
+        <div className="flex h-screen bg-background">
+          <Sidebar />
+          <main className="flex-1 overflow-auto p-8 space-y-8">
+            <div className="flex justify-between">
+               <div><h1 className="font-serif text-3xl font-bold">Saint Coran</h1><p className="text-muted-foreground">Écoutez les récitations.</p></div>
+            </div>
+            <Card className="p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-none relative overflow-hidden">
+               <div className="relative z-10 flex flex-col gap-6">
+                 <div className="flex justify-between items-start">
+                   <div><Badge className="bg-white/20 hover:bg-white/30 text-white mb-2">Lecture en cours</Badge><h2 className="text-3xl font-serif font-bold">{currentSurah.name}</h2></div>
+                   <Volume2 className="w-6 h-6 animate-pulse" />
+                 </div>
+                 <div className="flex items-center gap-4">
+                   <img src={currentReciter.image} className="w-12 h-12 rounded-full border-2 border-white/20" />
+                   <div><p className="font-medium">{currentReciter.name}</p><p className="text-xs text-white/50">{currentReciter.style}</p></div>
+                 </div>
+                 <Slider value={[progress]} max={100} />
+                 <div className="flex justify-center gap-6">
+                   <Button size="icon" variant="ghost" className="text-white"><SkipBack className="w-5 h-5" /></Button>
+                   <Button size="icon" className="w-14 h-14 rounded-full bg-white text-indigo-900" onClick={() => setIsPlaying(!isPlaying)}>{isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}</Button>
+                   <Button size="icon" variant="ghost" className="text-white"><SkipForward className="w-5 h-5" /></Button>
+                 </div>
+               </div>
+            </Card>
+            <h3 className="text-xl font-semibold">Sourates</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+               {SURAHS.map(surah => (
+                 <motion.div key={surah.number} whileHover={{ y: -2 }} className={`p-4 rounded-xl border bg-card cursor-pointer hover:border-primary ${currentSurah.number===surah.number ? "ring-2 ring-primary" : ""}`} onClick={() => { setCurrentSurah(surah); setIsPlaying(true); setProgress(0); }}>
+                   <div className="flex justify-between mb-2">
+                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center font-bold text-xs">{surah.number}</div>
+                     <Heart className="w-4 h-4 text-muted-foreground hover:text-red-500" />
+                   </div>
+                   <h4 className="font-semibold">{surah.name}</h4>
+                   <p className="text-sm text-muted-foreground">{surah.englishName}</p>
+                 </motion.div>
+               ))}
+            </div>
+          </main>
+        </div>
       );
     }
 
     function App() {
-      return React.createElement(Switch, null,
-        React.createElement(Route, { path: "/", component: Dashboard }),
-        React.createElement(Route, { path: "/editor/:id", component: Editor }),
-        React.createElement(Route, { path: "/history", component: History }),
-        React.createElement(Route, { path: "/quran", component: Quran }),
-        React.createElement(Route, { component: () => React.createElement("div", { className: "p-10" }, "404 Not Found") })
+      return (
+        <Switch>
+          <Route path="/" component={Dashboard} />
+          <Route path="/editor/:id" component={Editor} />
+          <Route path="/history" component={History} />
+          <Route path="/quran" component={Quran} />
+          <Route component={() => <div className="p-10">404 Not Found</div>} />
+        </Switch>
       );
     }
 
     const root = createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
+    root.render(<App />);
   </script>
 </body>
 </html>
