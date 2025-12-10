@@ -72,9 +72,6 @@
     }
   </script>
 
-  <!-- Babel for JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <style>
     body {
       overscroll-behavior-y: none;
@@ -115,33 +112,83 @@
     ::-webkit-scrollbar-thumb:hover { background: hsl(240 3.8% 46.1% / 0.5); }
     
     #root { height: 100vh; }
+    
+    /* Animation classes */
+    .animate-in {
+      animation: animateIn 0.3s ease-out;
+    }
+    
+    .zoom-in-95 {
+      animation: zoomIn95 0.3s ease-out;
+    }
+    
+    @keyframes animateIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes zoomIn95 {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- App Script -->
-  <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+  <!-- App Script avec imports ES natifs -->
+  <script type="module">
+    import React, { useState, useEffect, useRef, createContext, useContext, forwardRef } from 'https://esm.sh/react@18.2.0';
     import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
     import { Switch, Route, Link, useLocation } from 'https://esm.sh/wouter@3.0.0';
     import { motion, AnimatePresence } from 'https://esm.sh/framer-motion@10.16.4';
-    import { 
-      LayoutDashboard, Book, History as HistoryIcon, FolderOpen, Moon, Settings, 
-      Plus, Search, Filter, UploadCloud, MoreVertical, Clock, Pen, Highlighter, Eraser, 
-      ChevronLeft, FileText, Save, Check, Volume2, SkipBack, SkipForward, Play, Pause, 
-      ListMusic, Heart, Calendar 
-    } from 'https://esm.sh/lucide-react@0.292.0';
-    import { clsx } from 'https://esm.sh/clsx';
-    import { twMerge } from 'https://esm.sh/tailwind-merge';
-
-    // --- Utilities ---
+    
+    // Fonction utilitaire pour combiner les classes
     function cn(...inputs) {
-      return twMerge(clsx(inputs));
+      return inputs.filter(Boolean).join(' ');
     }
 
+    // Composants d'icônes simplifiés
+    const Icon = ({ name, className, ...props }) => {
+      const icons = {
+        LayoutDashboard: '📊',
+        Book: '📕',
+        HistoryIcon: '🕐',
+        FolderOpen: '📁',
+        Moon: '🌙',
+        Settings: '⚙️',
+        Plus: '+',
+        Search: '🔍',
+        Filter: '⏳',
+        UploadCloud: '☁️',
+        MoreVertical: '⋮',
+        Clock: '🕐',
+        Pen: '✏️',
+        Highlighter: '🖍️',
+        Eraser: '🗑️',
+        ChevronLeft: '←',
+        FileText: '📄',
+        Save: '💾',
+        Check: '✓',
+        Volume2: '🔊',
+        SkipBack: '⏮️',
+        SkipForward: '⏭️',
+        Play: '▶️',
+        Pause: '⏸️',
+        ListMusic: '🎵',
+        Heart: '❤️',
+        Calendar: '📅'
+      };
+      
+      return (
+        <span className={cn("inline-flex items-center justify-center", className)} {...props}>
+          {icons[name] || '□'}
+        </span>
+      );
+    };
+
     // --- UI Components ---
-    const Button = React.forwardRef(({ className, variant = "default", size = "default", ...props }, ref) => {
+    const Button = forwardRef(({ className, variant = "default", size = "default", ...props }, ref) => {
       const variants = {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
@@ -170,7 +217,7 @@
       );
     });
 
-    const Input = React.forwardRef(({ className, type, ...props }, ref) => {
+    const Input = forwardRef(({ className, type, ...props }, ref) => {
       return (
         <input
           type={type}
@@ -184,14 +231,16 @@
       );
     });
 
-    const Slider = React.forwardRef(({ className, value, onValueChange, min = 0, max = 100, step = 1, ...props }, ref) => {
+    const Slider = forwardRef(({ className, value, onValueChange, min = 0, max = 100, step = 1, ...props }, ref) => {
       return (
         <input
           type="range"
           className={cn("w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary", className)}
-          min={min} max={max} step={step}
+          min={min}
+          max={max}
+          step={step}
           value={value?.[0] ?? 0}
-          onChange={(e) => onValueChange([parseFloat(e.target.value)])}
+          onChange={(e) => onValueChange && onValueChange([parseFloat(e.target.value)])}
           ref={ref}
           {...props}
         />
@@ -200,7 +249,7 @@
 
     const Badge = ({ className, variant = "default", ...props }) => {
       return (
-        <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", className, "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent")} {...props} />
+        <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent", className)} {...props} />
       );
     };
 
@@ -209,8 +258,8 @@
     const ScrollArea = ({ className, children }) => <div className={cn("overflow-auto", className)}>{children}</div>;
 
     // Simplified Toast System
-    const ToastContext = React.createContext({ toast: () => {} });
-    const useToast = () => React.useContext(ToastContext);
+    const ToastContext = createContext({ toast: () => {} });
+    const useToast = () => useContext(ToastContext);
     
     function Toaster({ children }) {
         const [toasts, setToasts] = useState([]);
@@ -243,7 +292,6 @@
         );
     }
 
-
     // --- Feature Components ---
 
     function NotebookCard({ id, title, subject, color, lastModified, pageCount }) {
@@ -265,7 +313,7 @@
               <div className="h-1/3 w-full p-4 flex flex-col justify-between" style={{ backgroundColor: color }}>
                 <div className="self-end opacity-0 group-hover:opacity-100 transition-opacity">
                   <button className="p-1 hover:bg-black/10 rounded-full text-black/60">
-                    <MoreVertical className="w-5 h-5" />
+                    <Icon name="MoreVertical" className="w-5 h-5" />
                   </button>
                 </div>
                 <div className="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
@@ -278,7 +326,7 @@
                 </h3>
                 <div className="mt-auto space-y-3">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="w-3.5 h-3.5" />
+                    <Icon name="Clock" className="w-3.5 h-3.5" />
                     <span>{lastModified}</span>
                   </div>
                   <div className="flex items-center justify-between border-t border-border pt-3">
@@ -298,24 +346,24 @@
     function Sidebar() {
       const [location] = useLocation();
       const navItems = [
-        { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
-        { icon: Book, label: "Mes Cahiers", path: "/notebooks" },
-        { icon: HistoryIcon, label: "Historique", path: "/history" },
-        { icon: FolderOpen, label: "Fichiers", path: "/files" },
-        { icon: Moon, label: "Coran", path: "/quran" },
-        { icon: Settings, label: "Paramètres", path: "/settings" },
+        { icon: "LayoutDashboard", label: "Tableau de bord", path: "/" },
+        { icon: "Book", label: "Mes Cahiers", path: "/notebooks" },
+        { icon: "HistoryIcon", label: "Historique", path: "/history" },
+        { icon: "FolderOpen", label: "Fichiers", path: "/files" },
+        { icon: "Moon", label: "Coran", path: "/quran" },
+        { icon: "Settings", label: "Paramètres", path: "/settings" },
       ];
 
       return (
         <div className="h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0">
           <div className="mb-8 px-2 flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Book className="text-primary-foreground w-5 h-5" />
+              <Icon name="Book" className="text-primary-foreground w-5 h-5" />
             </div>
             <span className="font-serif text-xl font-bold tracking-tight">SmartNotes</span>
           </div>
           <Button className="w-full mb-6 justify-start gap-2 shadow-sm" size="lg">
-            <Plus className="w-5 h-5" />
+            <Icon name="Plus" className="w-5 h-5" />
             Nouvelle Note
           </Button>
           <nav className="space-y-1 flex-1">
@@ -324,7 +372,7 @@
               return (
                 <Link key={item.path} href={item.path}>
                   <div className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer", isActive ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                    <item.icon className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-2")} />
+                    <Icon name={item.icon} className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-2")} />
                     {item.label}
                   </div>
                 </Link>
@@ -447,7 +495,9 @@
         <div className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/">
-              <Button variant="ghost" size="icon" className="hover:bg-muted"><ChevronLeft className="w-5 h-5" /></Button>
+              <Button variant="ghost" size="icon" className="hover:bg-muted">
+                <Icon name="ChevronLeft" className="w-5 h-5" />
+              </Button>
             </Link>
             <div className="flex flex-col">
               <h1 className="text-sm font-semibold flex items-center gap-2">Devoir de Physique <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Chapitre 4</span></h1>
@@ -456,11 +506,38 @@
           </div>
           <div className="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm relative">
              <div className="flex items-center gap-1 pr-2 border-r border-border/50">
-               <Button variant={activeTool === "pen" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("pen")} className={activeTool === "pen" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Pen className="w-4 h-4 mr-2" />Stylo</Button>
-               <Button variant={activeTool === "highlighter" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("highlighter")} className={activeTool === "highlighter" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Highlighter className="w-4 h-4 mr-2" />Surligneur</Button>
-               <Button variant={activeTool === "eraser" ? "secondary" : "ghost"} size="sm" onClick={() => setActiveTool("eraser")} className={activeTool === "eraser" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}><Eraser className="w-4 h-4 mr-2" />Gomme</Button>
+               <Button 
+                 variant={activeTool === "pen" ? "secondary" : "ghost"} 
+                 size="sm" 
+                 onClick={() => setActiveTool("pen")} 
+                 className={activeTool === "pen" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
+               >
+                 <Icon name="Pen" className="w-4 h-4 mr-2" />Stylo
+               </Button>
+               <Button 
+                 variant={activeTool === "highlighter" ? "secondary" : "ghost"} 
+                 size="sm" 
+                 onClick={() => setActiveTool("highlighter")} 
+                 className={activeTool === "highlighter" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
+               >
+                 <Icon name="Highlighter" className="w-4 h-4 mr-2" />Surligneur
+               </Button>
+               <Button 
+                 variant={activeTool === "eraser" ? "secondary" : "ghost"} 
+                 size="sm" 
+                 onClick={() => setActiveTool("eraser")} 
+                 className={activeTool === "eraser" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
+               >
+                 <Icon name="Eraser" className="w-4 h-4 mr-2" />Gomme
+               </Button>
              </div>
-             <Button variant="outline" size="sm" className="gap-2 px-3 border-dashed" style={{ borderColor: activeTool !== 'eraser' ? activeColor : 'transparent' }} onClick={() => setShowColorPicker(!showColorPicker)}>
+             <Button 
+               variant="outline" 
+               size="sm" 
+               className="gap-2 px-3 border-dashed" 
+               style={{ borderColor: activeTool !== 'eraser' ? activeColor : 'transparent' }} 
+               onClick={() => setShowColorPicker(!showColorPicker)}
+             >
                <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: activeTool === 'eraser' ? '#ffffff' : activeColor }} />
                <span className="hidden sm:inline">Couleur & Taille</span>
              </Button>
@@ -477,7 +554,7 @@
                             className="w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative flex items-center justify-center"
                             style={{ backgroundColor: c.value }}
                           >
-                            {activeColor === c.value && activeTool !== 'eraser' && <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />}
+                            {activeColor === c.value && activeTool !== 'eraser' && <Icon name="Check" className="w-4 h-4 text-white drop-shadow-md" />}
                           </button>
                         ))}
                       </div>
@@ -490,7 +567,10 @@
                       </div>
                       <Slider value={[strokeWidth]} onValueChange={(vals) => setStrokeWidth(vals[0])} min={1} max={20} />
                       <div className="h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2">
-                        <div className="rounded-full bg-current transition-all" style={{ width: strokeWidth, height: strokeWidth, backgroundColor: activeTool === 'eraser' ? '#9ca3af' : activeColor }} />
+                        <div 
+                          className="rounded-full bg-current transition-all" 
+                          style={{ width: strokeWidth, height: strokeWidth, backgroundColor: activeTool === 'eraser' ? '#9ca3af' : activeColor }} 
+                        />
                       </div>
                     </div>
                     <Button size="sm" className="w-full mt-2" onClick={() => setShowColorPicker(false)}>Fermer</Button>
@@ -499,8 +579,18 @@
              )}
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/files"><Button variant="ghost" size="icon"><FileText className="w-4 h-4" /></Button></Link>
-            <Button size="sm" onClick={onSave} className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"><Save className="w-4 h-4" />Enregistrer</Button>
+            <Link href="/files">
+              <Button variant="ghost" size="icon">
+                <Icon name="FileText" className="w-4 h-4" />
+              </Button>
+            </Link>
+            <Button 
+              size="sm" 
+              onClick={onSave} 
+              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"
+            >
+              <Icon name="Save" className="w-4 h-4" />Enregistrer
+            </Button>
           </div>
         </div>
       );
@@ -519,8 +609,15 @@
       ];
       
       const handleDrop = (e) => {
-        e.preventDefault(); e.stopPropagation(); setDragActive(false);
-        if (e.dataTransfer.files[0]) toast({ title: "Fichier importé !", description: `Importé: ${e.dataTransfer.files[0].name}` });
+        e.preventDefault(); 
+        e.stopPropagation(); 
+        setDragActive(false);
+        if (e.dataTransfer.files[0]) {
+          toast({ 
+            title: "Fichier importé !", 
+            description: `Importé: ${e.dataTransfer.files[0].name}` 
+          });
+        }
       };
 
       return (
@@ -535,27 +632,43 @@
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input placeholder="Rechercher une note..." className="pl-9 w-64 bg-card" />
                   </div>
-                  <Button variant="outline" size="icon"><Filter className="w-4 h-4" /></Button>
+                  <Button variant="outline" size="icon">
+                    <Icon name="Filter" className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
               <motion.div 
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/30"}`}
-                onDragEnter={() => setDragActive(true)} onDragLeave={() => setDragActive(false)} onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}
+                onDragEnter={() => setDragActive(true)} 
+                onDragLeave={() => setDragActive(false)} 
+                onDragOver={(e) => e.preventDefault()} 
+                onDrop={handleDrop}
                 whileHover={{ scale: 1.005 }}
                 onClick={() => toast({ title: "Importation manuelle", description: "Sélecteur de fichiers ouvert..." })}
               >
-                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4"><UploadCloud className="w-6 h-6" /></div>
+                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon name="UploadCloud" className="w-6 h-6" />
+                </div>
                 <h3 className="text-lg font-medium">Importer un exercice ou un PDF</h3>
                 <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">Glissez-déposez votre fichier ici. L'IA le classera automatiquement.</p>
               </motion.div>
               <div className="space-y-4">
-                <div className="flex items-center justify-between"><h2 className="text-xl font-semibold">Cahiers Récents</h2><Button variant="ghost" className="text-primary">Tout voir</Button></div>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Cahiers Récents</h2>
+                  <Button variant="ghost" className="text-primary">Tout voir</Button>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <motion.div whileHover={{ y: -4, scale: 1.01 }} whileTap={{ scale: 0.98 }} className="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group">
-                    <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors"><Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary" /></div>
+                  <motion.div 
+                    whileHover={{ y: -4, scale: 1.01 }} 
+                    whileTap={{ scale: 0.98 }} 
+                    className="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors">
+                      <Icon name="Plus" className="w-6 h-6 text-muted-foreground group-hover:text-primary" />
+                    </div>
                     <span className="font-medium text-muted-foreground group-hover:text-primary">Nouveau Cahier</span>
                   </motion.div>
                   {MOCK_NOTEBOOKS.map(n => <NotebookCard key={n.id} {...n} />)}
@@ -578,7 +691,10 @@
         setSaveStatus("Enregistrement...");
         setTimeout(() => {
           setSaveStatus("Enregistré");
-          toast({ title: "Sauvegarde effectuée", description: "Vos modifications sont synchronisées." });
+          toast({ 
+            title: "Sauvegarde effectuée", 
+            description: "Vos modifications sont synchronisées." 
+          });
         }, 800);
       };
 
@@ -591,10 +707,21 @@
 
       return (
         <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
-          <Toolbar activeTool={activeTool} setActiveTool={handleToolChange} activeColor={activeColor} setActiveColor={setActiveColor} onSave={handleSave} status={saveStatus} strokeWidth={strokeWidth} setStrokeWidth={setStrokeWidth} />
+          <Toolbar 
+            activeTool={activeTool} 
+            setActiveTool={handleToolChange} 
+            activeColor={activeColor} 
+            setActiveColor={setActiveColor} 
+            onSave={handleSave} 
+            status={saveStatus} 
+            strokeWidth={strokeWidth} 
+            setStrokeWidth={setStrokeWidth} 
+          />
           <div className="flex-1 flex justify-center p-4 sm:p-8 overflow-auto">
             <div className="w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95 duration-300">
-               <div className="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+               <div className="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">
+                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+               </div>
               <Canvas tool={activeTool} color={activeColor} width={strokeWidth} backgroundType="seyes" />
             </div>
           </div>
@@ -608,25 +735,56 @@
         { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé..." },
         { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore..." },
       ];
+      
       return (
         <div className="flex h-screen bg-background">
           <Sidebar />
           <main className="flex-1 overflow-auto">
             <div className="p-8 max-w-5xl mx-auto space-y-8">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div><h1 className="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1><p className="text-muted-foreground mt-1">Retrouvez tous vos travaux.</p></div>
-                <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" /></div>
+                <div>
+                  <h1 className="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1>
+                  <p className="text-muted-foreground mt-1">Retrouvez tous vos travaux.</p>
+                </div>
+                <div className="relative">
+                  <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" />
+                </div>
               </div>
               <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-border"><h2 className="font-semibold flex items-center gap-2"><Clock className="w-5 h-5 text-primary" /> Dernières modifications</h2></div>
+                <div className="p-6 border-b border-border">
+                  <h2 className="font-semibold flex items-center gap-2">
+                    <Icon name="Clock" className="w-5 h-5 text-primary" /> 
+                    Dernières modifications
+                  </h2>
+                </div>
                 <div className="divide-y divide-border">
                   {HISTORY_ITEMS.map((item, index) => (
-                    <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }} className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group cursor-pointer">
+                    <motion.div 
+                      key={item.id} 
+                      initial={{ opacity: 0, y: 10 }} 
+                      animate={{ opacity: 1, y: 0 }} 
+                      transition={{ delay: index * 0.1 }} 
+                      className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group cursor-pointer"
+                    >
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' : item.subject === 'Français' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'}`}><FileText className="w-5 h-5" /></div>
-                        <div><h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{item.title}</h3><p className="text-sm text-muted-foreground">{item.subject} • {item.preview}</p></div>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' : item.subject === 'Français' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'}`}>
+                          <Icon name="FileText" className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{item.title}</h3>
+                          <p className="text-sm text-muted-foreground">{item.subject} • {item.preview}</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-6"><div className="flex items-center gap-2 text-sm text-muted-foreground"><Calendar className="w-4 h-4" />{item.date}</div><Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">Ouvrir</Button></div>
+                      <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Icon name="Calendar" className="w-4 h-4" />
+                          {item.date}
+                        </div>
+                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          Ouvrir
+                        </Button>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -645,26 +803,63 @@
         { number: 2, name: "Al-Baqarah", englishName: "The Cow", verses: 286, duration: "2:45:12" },
         { number: 3, name: "Al-Imran", englishName: "The Family of Imran", verses: 200, duration: "1:22:45" },
       ];
+      
       return (
         <div className="flex h-screen bg-background font-sans">
           <Sidebar />
           <main className="flex-1 flex flex-col overflow-hidden">
              <div className="flex-1 overflow-auto p-8 space-y-8">
                <div className="flex justify-between items-center">
-                 <div><h1 className="font-serif text-3xl font-bold">Saint Coran</h1><p className="text-muted-foreground">Écoutez les récitations.</p></div>
-                 <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" /></div>
+                 <div>
+                   <h1 className="font-serif text-3xl font-bold">Saint Coran</h1>
+                   <p className="text-muted-foreground">Écoutez les récitations.</p>
+                 </div>
+                 <div className="relative">
+                   <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                   <Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" />
+                 </div>
                </div>
                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                  <Card className="col-span-1 lg:col-span-2 p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-none overflow-hidden relative">
                     <div className="relative z-10 flex flex-col h-full justify-between gap-8">
-                      <div><Badge className="bg-white/20 hover:bg-white/30 text-white border-none mb-4">Lecture en cours</Badge><h2 className="text-3xl font-serif font-bold">Al-Fatiha</h2><p className="text-white/70">The Opening</p></div>
+                      <div>
+                        <Badge className="bg-white/20 hover:bg-white/30 text-white border-none mb-4">Lecture en cours</Badge>
+                        <h2 className="text-3xl font-serif font-bold">Al-Fatiha</h2>
+                        <p className="text-white/70">The Opening</p>
+                      </div>
                       <div className="space-y-4">
                         <Slider value={[progress]} max={100} onValueChange={v => setProgress(v[0])} className="[&>.absolute]:bg-white/20 [&_[role=slider]]:bg-white" />
-                        <div className="flex justify-center items-center gap-6"><Button size="icon" variant="ghost" className="text-white"><SkipBack className="w-5 h-5" /></Button><Button size="icon" className="w-14 h-14 rounded-full bg-white text-indigo-900 hover:bg-indigo-50" onClick={() => setIsPlaying(!isPlaying)}>{isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}</Button><Button size="icon" variant="ghost" className="text-white"><SkipForward className="w-5 h-5" /></Button></div>
+                        <div className="flex justify-center items-center gap-6">
+                          <Button size="icon" variant="ghost" className="text-white">
+                            <Icon name="SkipBack" className="w-5 h-5" />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            className="w-14 h-14 rounded-full bg-white text-indigo-900 hover:bg-indigo-50" 
+                            onClick={() => setIsPlaying(!isPlaying)}
+                          >
+                            {isPlaying ? <Icon name="Pause" className="w-6 h-6 fill-current" /> : <Icon name="Play" className="w-6 h-6 fill-current ml-1" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" className="text-white">
+                            <Icon name="SkipForward" className="w-5 h-5" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                  </Card>
-                 <Card className="col-span-1 p-4"><h3 className="font-semibold mb-4 flex items-center gap-2"><ListMusic className="w-4 h-4" /> Sourates</h3><div className="space-y-2">{SURAHS.map(s => <div key={s.number} className="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center"><div className="font-medium">{s.number}. {s.name}</div><div className="text-xs text-muted-foreground">{s.duration}</div></div>)}</div></Card>
+                 <Card className="col-span-1 p-4">
+                   <h3 className="font-semibold mb-4 flex items-center gap-2">
+                     <Icon name="ListMusic" className="w-4 h-4" /> Sourates
+                   </h3>
+                   <div className="space-y-2">
+                     {SURAHS.map(s => (
+                       <div key={s.number} className="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center">
+                         <div className="font-medium">{s.number}. {s.name}</div>
+                         <div className="text-xs text-muted-foreground">{s.duration}</div>
+                       </div>
+                     ))}
+                   </div>
+                 </Card>
                </div>
              </div>
           </main>
@@ -675,19 +870,46 @@
     function App() {
       return (
         <Toaster>
-            <Switch>
+          <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/editor/:id" component={Editor} />
             <Route path="/history" component={History} />
             <Route path="/quran" component={Quran} />
-            <Route path="/files" component={() => <div className="flex h-screen"><Sidebar/><div className="flex-1 flex items-center justify-center text-muted-foreground">Page Fichiers (En construction)</div></div>} />
-            <Route path="/settings" component={() => <div className="flex h-screen"><Sidebar/><div className="flex-1 flex items-center justify-center text-muted-foreground">Page Paramètres (En construction)</div></div>} />
-            <Route component={() => <div className="flex h-screen items-center justify-center">404 - Page non trouvée</div>} />
-            </Switch>
+            <Route path="/notebooks" component={() => (
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  Page Mes Cahiers (En construction)
+                </div>
+              </div>
+            )} />
+            <Route path="/files" component={() => (
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  Page Fichiers (En construction)
+                </div>
+              </div>
+            )} />
+            <Route path="/settings" component={() => (
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                  Page Paramètres (En construction)
+                </div>
+              </div>
+            )} />
+            <Route component={() => (
+              <div className="flex h-screen items-center justify-center">
+                404 - Page non trouvée
+              </div>
+            )} />
+          </Switch>
         </Toaster>
       );
     }
 
+    // Rendu de l'application
     const root = createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
