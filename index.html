@@ -2,81 +2,26 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartNotes</title>
-  
-  <meta property="og:title" content="SmartNotes - Cahier Numérique Intelligent" />
-  <meta property="og:description" content="L'application de devoirs intelligente qui organise vos notes automatiquement." />
-  <meta property="og:type" content="website" />
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Kalam:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: ["class"],
-      theme: {
-        extend: {
-          colors: {
-            border: "hsl(240 5.9% 90%)",
-            input: "hsl(240 5.9% 90%)",
-            ring: "hsl(240 5.9% 10%)",
-            background: "hsl(0 0% 98%)",
-            foreground: "hsl(240 10% 3.9%)",
-            primary: {
-              DEFAULT: "hsl(240 5.9% 10%)",
-              foreground: "hsl(0 0% 98%)",
-            },
-            secondary: {
-              DEFAULT: "hsl(240 4.8% 95.9%)",
-              foreground: "hsl(240 5.9% 10%)",
-            },
-            destructive: {
-              DEFAULT: "hsl(0 84.2% 60.2%)",
-              foreground: "hsl(0 0% 98%)",
-            },
-            muted: {
-              DEFAULT: "hsl(240 4.8% 95.9%)",
-              foreground: "hsl(240 3.8% 46.1%)",
-            },
-            accent: {
-              DEFAULT: "hsl(240 4.8% 95.9%)",
-              foreground: "hsl(240 5.9% 10%)",
-            },
-            popover: {
-              DEFAULT: "hsl(0 0% 100%)",
-              foreground: "hsl(240 10% 3.9%)",
-            },
-            card: {
-              DEFAULT: "hsl(0 0% 100%)",
-              foreground: "hsl(240 10% 3.9%)",
-            },
-          },
-          borderRadius: {
-            lg: "0.5rem",
-            md: "calc(0.5rem - 2px)",
-            sm: "calc(0.5rem - 4px)",
-          },
-          fontFamily: {
-            sans: ["Inter", "sans-serif"],
-            serif: ["Playfair Display", "serif"],
-            hand: ["Kalam", "cursive"],
-          },
-        },
-      },
-    }
-  </script>
-
+  
+  <!-- React & ReactDOM (UMD) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  
+  <!-- Wouter pour le routing -->
+  <script src="https://unpkg.com/wouter@3.0.0/wouter.js"></script>
+  
   <style>
     body {
-      overscroll-behavior-y: none;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     }
-
+    
     .bg-seyes {
       background-color: #ffffff;
       background-image: 
@@ -88,830 +33,438 @@
       background-position: 0 0, 0 0, 40px 0, 0 0;
     }
     
-    .bg-grid-paper {
-        background-color: #ffffff;
-        background-image: 
-          linear-gradient(#e5e7eb 1px, transparent 1px),
-          linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
-        background-size: 20px 20px;
+    #root {
+      height: 100vh;
+      width: 100vw;
     }
-
+    
     .paper-shadow {
-      box-shadow: 
-        0 1px 1px hsl(0deg 0% 0% / 0.075),
-        0 2px 2px hsl(0deg 0% 0% / 0.075),
-        0 4px 4px hsl(0deg 0% 0% / 0.075),
-        0 8px 8px hsl(0deg 0% 0% / 0.075),
-        0 16px 16px hsl(0deg 0% 0% / 0.075);
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: hsl(240 3.8% 46.1% / 0.3); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: hsl(240 3.8% 46.1% / 0.5); }
-    
-    #root { height: 100vh; }
-    
-    /* Animation classes */
-    .animate-in {
-      animation: animateIn 0.3s ease-out;
-    }
-    
-    .zoom-in-95 {
-      animation: zoomIn95 0.3s ease-out;
-    }
-    
-    @keyframes animateIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    @keyframes zoomIn95 {
-      from { transform: scale(0.95); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- App Script avec imports ES natifs -->
-  <script type="module">
-    import React, { useState, useEffect, useRef, createContext, useContext, forwardRef } from 'https://esm.sh/react@18.2.0';
-    import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
-    import { Switch, Route, Link, useLocation } from 'https://esm.sh/wouter@3.0.0';
-    import { motion, AnimatePresence } from 'https://esm.sh/framer-motion@10.16.4';
-    
-    // Fonction utilitaire pour combiner les classes
-    function cn(...inputs) {
-      return inputs.filter(Boolean).join(' ');
-    }
+  <script>
+    // Accès aux librairies globales
+    const { useState, useEffect, useRef } = React;
+    const { createRoot } = ReactDOM;
+    const { Link, Route, Switch, useLocation } = wouter;
 
-    // Composants d'icônes simplifiés
+    // Composant d'icône simplifié
     const Icon = ({ name, className, ...props }) => {
       const icons = {
-        LayoutDashboard: '📊',
+        Dashboard: '📊',
         Book: '📕',
-        HistoryIcon: '🕐',
-        FolderOpen: '📁',
+        History: '🕐',
+        Folder: '📁',
         Moon: '🌙',
         Settings: '⚙️',
         Plus: '+',
         Search: '🔍',
         Filter: '⏳',
-        UploadCloud: '☁️',
-        MoreVertical: '⋮',
+        Upload: '☁️',
+        Menu: '⋮',
         Clock: '🕐',
         Pen: '✏️',
         Highlighter: '🖍️',
         Eraser: '🗑️',
-        ChevronLeft: '←',
-        FileText: '📄',
+        Back: '←',
+        File: '📄',
         Save: '💾',
         Check: '✓',
-        Volume2: '🔊',
-        SkipBack: '⏮️',
-        SkipForward: '⏭️',
         Play: '▶️',
         Pause: '⏸️',
-        ListMusic: '🎵',
-        Heart: '❤️',
+        Music: '🎵',
         Calendar: '📅'
       };
       
-      return (
-        <span className={cn("inline-flex items-center justify-center", className)} {...props}>
-          {icons[name] || '□'}
-        </span>
-      );
+      return React.createElement('span', {
+        className: `inline-flex items-center justify-center ${className || ''}`,
+        ...props
+      }, icons[name] || '□');
     };
 
-    // --- UI Components ---
-    const Button = forwardRef(({ className, variant = "default", size = "default", ...props }, ref) => {
+    // Composant Button simplifié
+    const Button = ({ children, onClick, className = '', variant = 'default', ...props }) => {
+      const baseClasses = "px-4 py-2 rounded-lg font-medium transition-all active:scale-95";
       const variants = {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-blue-600 text-white hover:bg-blue-700",
+        outline: "border border-gray-300 hover:bg-gray-50",
+        ghost: "hover:bg-gray-100"
       };
-      const sizes = {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      };
-      return (
-        <button
-          className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-            variants[variant],
-            sizes[size],
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-      );
-    });
-
-    const Input = forwardRef(({ className, type, ...props }, ref) => {
-      return (
-        <input
-          type={type}
-          className={cn(
-            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-      );
-    });
-
-    const Slider = forwardRef(({ className, value, onValueChange, min = 0, max = 100, step = 1, ...props }, ref) => {
-      return (
-        <input
-          type="range"
-          className={cn("w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary", className)}
-          min={min}
-          max={max}
-          step={step}
-          value={value?.[0] ?? 0}
-          onChange={(e) => onValueChange && onValueChange([parseFloat(e.target.value)])}
-          ref={ref}
-          {...props}
-        />
-      );
-    });
-
-    const Badge = ({ className, variant = "default", ...props }) => {
-      return (
-        <div className={cn("inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2", "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent", className)} {...props} />
-      );
+      
+      return React.createElement('button', {
+        className: `${baseClasses} ${variants[variant]} ${className}`,
+        onClick,
+        ...props
+      }, children);
     };
 
-    const Card = ({ className, children, ...props }) => <div className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props}>{children}</div>;
-    const Separator = ({ className, orientation = "horizontal" }) => <div className={cn("shrink-0 bg-border", orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]", className)} />;
-    const ScrollArea = ({ className, children }) => <div className={cn("overflow-auto", className)}>{children}</div>;
+    // Composant Input simplifié
+    const Input = ({ placeholder, className = '', ...props }) => {
+      return React.createElement('input', {
+        type: "text",
+        placeholder,
+        className: `px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`,
+        ...props
+      });
+    };
 
-    // Simplified Toast System
-    const ToastContext = createContext({ toast: () => {} });
-    const useToast = () => useContext(ToastContext);
-    
-    function Toaster({ children }) {
-        const [toasts, setToasts] = useState([]);
-        const toast = ({ title, description }) => {
-            const id = Math.random();
-            setToasts(prev => [...prev, { id, title, description }]);
-            setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
-        };
+    // --- PAGES ---
+
+    // Tableau de bord
+    function Dashboard() {
+      const [notebooks] = useState([
+        { id: "1", title: "Physique - Chapitre 4", subject: "Physique", color: "#E0F2FE", lastModified: "Il y a 2h", pageCount: 12 },
+        { id: "2", title: "Chimie - Acides/Bases", subject: "Chimie", color: "#DCFCE7", lastModified: "Hier", pageCount: 4 },
+        { id: "3", title: "Français - Molière", subject: "Français", color: "#FAE8FF", lastModified: "Il y a 2j", pageCount: 8 },
+      ]);
+
+      return React.createElement('div', { className: "h-screen flex bg-gray-50" },
+        // Sidebar
+        React.createElement('div', { className: "w-64 bg-white border-r hidden md:flex flex-col p-4" },
+          React.createElement('div', { className: "mb-8 flex items-center gap-2" },
+            React.createElement('div', { className: "w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center" },
+              React.createElement(Icon, { name: "Book", className: "text-white w-5 h-5" })
+            ),
+            React.createElement('span', { className: "text-xl font-bold" }, "SmartNotes")
+          ),
+          React.createElement(Button, { 
+            className: "w-full mb-6 justify-center gap-2",
+            variant: "default" 
+          },
+            React.createElement(Icon, { name: "Plus" }),
+            "Nouvelle Note"
+          ),
+          React.createElement('nav', { className: "space-y-1 flex-1" },
+            ['Tableau de bord', 'Mes Cahiers', 'Historique', 'Fichiers', 'Coran', 'Paramètres'].map((item, idx) =>
+              React.createElement(Link, { 
+                key: idx, 
+                href: idx === 0 ? "/" : `/${item.toLowerCase().replace(' ', '-')}` 
+              },
+                React.createElement('div', { 
+                  className: "px-3 py-2.5 rounded-lg text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-3"
+                },
+                  React.createElement(Icon, { name: item.split(' ')[0] }),
+                  item
+                )
+              )
+            )
+          ),
+          React.createElement('div', { className: "mt-auto pt-4 border-t" },
+            React.createElement('div', { className: "flex items-center gap-3 px-2 py-2" },
+              React.createElement('div', { className: "w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500" }),
+              React.createElement('div', { className: "flex flex-col" },
+                React.createElement('span', { className: "text-sm font-medium" }, "Étudiant"),
+                React.createElement('span', { className: "text-xs text-gray-500" }, "Premium Plan")
+              )
+            )
+          )
+        ),
         
-        return (
-            <ToastContext.Provider value={{ toast }}>
-                {children}
-                <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
-                    <AnimatePresence>
-                        {toasts.map(t => (
-                            <motion.div 
-                                key={t.id}
-                                initial={{ opacity: 0, y: 20, scale: 0.9 }} 
-                                animate={{ opacity: 1, y: 0, scale: 1 }} 
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="bg-white border border-border shadow-lg rounded-lg p-4 w-80"
-                            >
-                                <h4 className="font-semibold text-sm">{t.title}</h4>
-                                {t.description && <p className="text-sm text-muted-foreground mt-1">{t.description}</p>}
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
-            </ToastContext.Provider>
-        );
-    }
-
-    // --- Feature Components ---
-
-    function NotebookCard({ id, title, subject, color, lastModified, pageCount }) {
-      return (
-        <Link href={`/editor/${id}`}>
-          <motion.div
-            whileHover={{ y: -4, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            className="group relative cursor-pointer"
-          >
-            {/* Spiral */}
-            <div className="absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300" />
-              ))}
-            </div>
-            {/* Cover */}
-            <div className="relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50">
-              <div className="h-1/3 w-full p-4 flex flex-col justify-between" style={{ backgroundColor: color }}>
-                <div className="self-end opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-1 hover:bg-black/10 rounded-full text-black/60">
-                    <Icon name="MoreVertical" className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
-                  {subject}
-                </div>
-              </div>
-              <div className="p-5 flex flex-col h-2/3 bg-gradient-to-b from-white to-neutral-50">
-                <h3 className="font-serif text-xl font-medium text-foreground leading-tight mb-2 line-clamp-2">
-                  {title}
-                </h3>
-                <div className="mt-auto space-y-3">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Icon name="Clock" className="w-3.5 h-3.5" />
-                    <span>{lastModified}</span>
-                  </div>
-                  <div className="flex items-center justify-between border-t border-border pt-3">
-                    <span className="text-xs font-medium text-muted-foreground">{pageCount} pages</span>
-                    <div className="flex -space-x-2">
-                      <div className="w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold">A</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        </Link>
+        // Contenu principal
+        React.createElement('main', { className: "flex-1 overflow-auto p-8" },
+          React.createElement('div', { className: "max-w-7xl mx-auto space-y-8" },
+            // En-tête
+            React.createElement('div', { className: "flex flex-col md:flex-row justify-between gap-4" },
+              React.createElement('div', null,
+                React.createElement('h1', { className: "text-3xl font-bold" }, "Bonjour, Alex"),
+                React.createElement('p', { className: "text-gray-600 mt-1" }, "Prêt pour tes devoirs aujourd'hui ?")
+              ),
+              React.createElement('div', { className: "flex items-center gap-3" },
+                React.createElement('div', { className: "relative" },
+                  React.createElement(Icon, { name: "Search", className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" }),
+                  React.createElement(Input, { placeholder: "Rechercher une note...", className: "pl-10 w-64" })
+                ),
+                React.createElement(Button, { variant: "outline", className: "p-2" },
+                  React.createElement(Icon, { name: "Filter" })
+                )
+              )
+            ),
+            
+            // Zone d'import
+            React.createElement('div', { 
+              className: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
+            },
+              React.createElement('div', { className: "w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4" },
+                React.createElement(Icon, { name: "Upload", className: "w-6 h-6" })
+              ),
+              React.createElement('h3', { className: "text-lg font-medium" }, "Importer un exercice ou un PDF"),
+              React.createElement('p', { className: "text-gray-600 mt-1 max-w-md mx-auto" }, "Glissez-déposez votre fichier ici")
+            ),
+            
+            // Cahiers récents
+            React.createElement('div', { className: "space-y-4" },
+              React.createElement('div', { className: "flex justify-between items-center" },
+                React.createElement('h2', { className: "text-xl font-semibold" }, "Cahiers Récents"),
+                React.createElement(Button, { variant: "ghost" }, "Tout voir")
+              ),
+              React.createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" },
+                // Nouveau cahier
+                React.createElement('div', { 
+                  className: "aspect-[3/4] rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                },
+                  React.createElement('div', { className: "w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3" },
+                    React.createElement(Icon, { name: "Plus", className: "w-6 h-6 text-gray-500" })
+                  ),
+                  React.createElement('span', { className: "font-medium text-gray-600" }, "Nouveau Cahier")
+                ),
+                
+                // Cahiers existants
+                ...notebooks.map(notebook =>
+                  React.createElement(Link, { key: notebook.id, href: `/editor/${notebook.id}` },
+                    React.createElement('div', { 
+                      className: "aspect-[3/4] rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                    },
+                      React.createElement('div', { 
+                        className: "h-1/3 rounded-t-xl p-4",
+                        style: { backgroundColor: notebook.color }
+                      },
+                        React.createElement('div', { className: "flex justify-end" },
+                          React.createElement(Button, { variant: "ghost", className: "p-1" },
+                            React.createElement(Icon, { name: "Menu", className: "w-4 h-4" })
+                          )
+                        ),
+                        React.createElement('div', { className: "bg-white/90 self-start px-2 py-1 rounded text-xs font-semibold uppercase" },
+                          notebook.subject
+                        )
+                      ),
+                      React.createElement('div', { className: "p-5 flex flex-col h-2/3" },
+                        React.createElement('h3', { className: "text-lg font-medium mb-2 line-clamp-2" }, notebook.title),
+                        React.createElement('div', { className: "mt-auto space-y-3" },
+                          React.createElement('div', { className: "flex items-center gap-2 text-xs text-gray-500" },
+                            React.createElement(Icon, { name: "Clock", className: "w-3.5 h-3.5" }),
+                            notebook.lastModified
+                          ),
+                          React.createElement('div', { className: "flex justify-between items-center border-t pt-3" },
+                            React.createElement('span', { className: "text-xs font-medium text-gray-500" }, `${notebook.pageCount} pages`),
+                            React.createElement('div', { className: "w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700" }, "A")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
       );
     }
 
-    function Sidebar() {
-      const [location] = useLocation();
-      const navItems = [
-        { icon: "LayoutDashboard", label: "Tableau de bord", path: "/" },
-        { icon: "Book", label: "Mes Cahiers", path: "/notebooks" },
-        { icon: "HistoryIcon", label: "Historique", path: "/history" },
-        { icon: "FolderOpen", label: "Fichiers", path: "/files" },
-        { icon: "Moon", label: "Coran", path: "/quran" },
-        { icon: "Settings", label: "Paramètres", path: "/settings" },
-      ];
-
-      return (
-        <div className="h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0">
-          <div className="mb-8 px-2 flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Icon name="Book" className="text-primary-foreground w-5 h-5" />
-            </div>
-            <span className="font-serif text-xl font-bold tracking-tight">SmartNotes</span>
-          </div>
-          <Button className="w-full mb-6 justify-start gap-2 shadow-sm" size="lg">
-            <Icon name="Plus" className="w-5 h-5" />
-            Nouvelle Note
-          </Button>
-          <nav className="space-y-1 flex-1">
-            {navItems.map(item => {
-              const isActive = location === item.path;
-              return (
-                <Link key={item.path} href={item.path}>
-                  <div className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer", isActive ? "bg-primary/5 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                    <Icon name={item.icon} className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-2")} />
-                    {item.label}
-                  </div>
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="mt-auto pt-4 border-t border-border">
-            <div className="flex items-center gap-3 px-2 py-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 shadow-inner" />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">Étudiant</span>
-                <span className="text-xs text-muted-foreground">Premium Plan</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function Canvas({ tool, color, width, backgroundType }) {
+    // Éditeur
+    function Editor() {
+      const [tool, setTool] = useState("pen");
+      const [color, setColor] = useState("#000000");
       const canvasRef = useRef(null);
       const [isDrawing, setIsDrawing] = useState(false);
       const lastPoint = useRef(null);
-      const bgClass = { seyes: "bg-seyes", grid: "bg-grid-paper", blank: "bg-white" }[backgroundType];
-
-      useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.scale(dpr, dpr);
-          ctx.lineCap = "round";
-          ctx.lineJoin = "round";
-        }
-        const handleResize = () => {
-          if (!canvas) return;
-          const rect = canvas.getBoundingClientRect();
-          canvas.width = rect.width * dpr;
-          canvas.height = rect.height * dpr;
-          if (ctx) ctx.scale(dpr, dpr);
-        };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-      }, []);
-
-      const getPoint = (e) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return { x: 0, y: 0, pressure: 0.5 };
-        const rect = canvas.getBoundingClientRect();
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top, pressure: e.pressure || 0.5 };
-      };
 
       const startDrawing = (e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        lastPoint.current = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
         setIsDrawing(true);
-        lastPoint.current = getPoint(e);
       };
 
       const draw = (e) => {
         if (!isDrawing || !lastPoint.current || !canvasRef.current) return;
-        const ctx = canvasRef.current.getContext("2d");
-        const currentPoint = getPoint(e);
+        
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const currentPoint = {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+
         ctx.beginPath();
         ctx.moveTo(lastPoint.current.x, lastPoint.current.y);
         ctx.lineTo(currentPoint.x, currentPoint.y);
-        if (tool === "eraser") {
-          ctx.globalCompositeOperation = "destination-out";
-          ctx.lineWidth = width * 2;
-        } else {
-          ctx.globalCompositeOperation = tool === "highlighter" ? "multiply" : "source-over";
-          const pressureMultiplier = e.pointerType === 'pen' ? currentPoint.pressure : 1;
-          ctx.strokeStyle = color;
-          ctx.lineWidth = width * pressureMultiplier;
-          if (tool === "highlighter") {
-            ctx.globalAlpha = 0.4;
-            ctx.lineWidth = width * 3;
-          } else {
-            ctx.globalAlpha = 1;
-          }
-        }
+        ctx.strokeStyle = tool === "eraser" ? "#FFFFFF" : color;
+        ctx.lineWidth = tool === "eraser" ? 20 : tool === "highlighter" ? 15 : 2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        if (tool === "highlighter") ctx.globalAlpha = 0.4;
         ctx.stroke();
+        
         lastPoint.current = currentPoint;
       };
 
-      const stopDrawing = (e) => {
-        e.currentTarget.releasePointerCapture(e.pointerId);
+      const stopDrawing = () => {
         setIsDrawing(false);
         lastPoint.current = null;
       };
 
-      return (
-        <div className={`w-full h-full relative overflow-hidden shadow-sm ${bgClass}`}>
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full touch-none cursor-crosshair"
-            onPointerDown={startDrawing}
-            onPointerMove={draw}
-            onPointerUp={stopDrawing}
-            onPointerLeave={stopDrawing}
-            style={{ touchAction: "none" }}
-          />
-        </div>
+      return React.createElement('div', { className: "h-screen flex flex-col" },
+        // Barre d'outils
+        React.createElement('div', { className: "h-16 border-b bg-white flex items-center justify-between px-4" },
+          React.createElement('div', { className: "flex items-center gap-4" },
+            React.createElement(Link, { href: "/" },
+              React.createElement(Button, { variant: "ghost", className: "p-2" },
+                React.createElement(Icon, { name: "Back" })
+              )
+            ),
+            React.createElement('div', null,
+              React.createElement('h1', { className: "text-sm font-semibold" }, "Devoir de Physique"),
+              React.createElement('span', { className: "text-xs text-gray-500" }, "Enregistré")
+            )
+          ),
+          
+          React.createElement('div', { className: "flex items-center gap-2" },
+            React.createElement(Button, {
+              variant: tool === "pen" ? "default" : "outline",
+              onClick: () => setTool("pen"),
+              className: "flex items-center gap-2"
+            },
+              React.createElement(Icon, { name: "Pen" }),
+              "Stylo"
+            ),
+            React.createElement(Button, {
+              variant: tool === "highlighter" ? "default" : "outline",
+              onClick: () => setTool("highlighter"),
+              className: "flex items-center gap-2"
+            },
+              React.createElement(Icon, { name: "Highlighter" }),
+              "Surligneur"
+            ),
+            React.createElement(Button, {
+              variant: tool === "eraser" ? "default" : "outline",
+              onClick: () => setTool("eraser"),
+              className: "flex items-center gap-2"
+            },
+              React.createElement(Icon, { name: "Eraser" }),
+              "Gomme"
+            )
+          ),
+          
+          React.createElement('div', { className: "flex items-center gap-2" },
+            React.createElement('input', {
+              type: "color",
+              value: color,
+              onChange: (e) => setColor(e.target.value),
+              className: "w-8 h-8 cursor-pointer"
+            }),
+            React.createElement(Button, { 
+              className: "flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+            },
+              React.createElement(Icon, { name: "Save" }),
+              "Enregistrer"
+            )
+          )
+        ),
+        
+        // Canvas
+        React.createElement('div', { className: "flex-1 flex justify-center items-center p-8 bg-gray-100" },
+          React.createElement('div', { className: "bg-white paper-shadow" },
+            React.createElement('canvas', {
+              ref: canvasRef,
+              className: "bg-seyes",
+              width: "800",
+              height: "1131",
+              onMouseDown: startDrawing,
+              onMouseMove: draw,
+              onMouseUp: stopDrawing,
+              onMouseLeave: stopDrawing,
+              style: { cursor: "crosshair" }
+            })
+          )
+        )
       );
     }
 
-    function Toolbar({ activeTool, setActiveTool, activeColor, setActiveColor, onSave, status, strokeWidth, setStrokeWidth }) {
-      const [showColorPicker, setShowColorPicker] = useState(false);
-      const colors = [
-        { value: "#1F2937", label: "Noir Classique" }, { value: "#2563EB", label: "Bleu Roi" },
-        { value: "#DC2626", label: "Rouge Vif" }, { value: "#16A34A", label: "Vert Correction" },
-        { value: "#9333EA", label: "Violet" }, { value: "#EA580C", label: "Orange" },
-        { value: "#0891B2", label: "Cyan" }, { value: "#DB2777", label: "Rose" },
-      ];
-
-      return (
-        <div className="h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/">
-              <Button variant="ghost" size="icon" className="hover:bg-muted">
-                <Icon name="ChevronLeft" className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div className="flex flex-col">
-              <h1 className="text-sm font-semibold flex items-center gap-2">Devoir de Physique <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Chapitre 4</span></h1>
-              <span className="text-xs text-muted-foreground flex items-center gap-1">{status}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm relative">
-             <div className="flex items-center gap-1 pr-2 border-r border-border/50">
-               <Button 
-                 variant={activeTool === "pen" ? "secondary" : "ghost"} 
-                 size="sm" 
-                 onClick={() => setActiveTool("pen")} 
-                 className={activeTool === "pen" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
-               >
-                 <Icon name="Pen" className="w-4 h-4 mr-2" />Stylo
-               </Button>
-               <Button 
-                 variant={activeTool === "highlighter" ? "secondary" : "ghost"} 
-                 size="sm" 
-                 onClick={() => setActiveTool("highlighter")} 
-                 className={activeTool === "highlighter" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
-               >
-                 <Icon name="Highlighter" className="w-4 h-4 mr-2" />Surligneur
-               </Button>
-               <Button 
-                 variant={activeTool === "eraser" ? "secondary" : "ghost"} 
-                 size="sm" 
-                 onClick={() => setActiveTool("eraser")} 
-                 className={activeTool === "eraser" ? "shadow-sm bg-white text-primary" : "text-muted-foreground"}
-               >
-                 <Icon name="Eraser" className="w-4 h-4 mr-2" />Gomme
-               </Button>
-             </div>
-             <Button 
-               variant="outline" 
-               size="sm" 
-               className="gap-2 px-3 border-dashed" 
-               style={{ borderColor: activeTool !== 'eraser' ? activeColor : 'transparent' }} 
-               onClick={() => setShowColorPicker(!showColorPicker)}
-             >
-               <div className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: activeTool === 'eraser' ? '#ffffff' : activeColor }} />
-               <span className="hidden sm:inline">Couleur & Taille</span>
-             </Button>
-             {showColorPicker && (
-               <div className="absolute top-full mt-2 right-0 w-64 p-4 bg-popover rounded-md border shadow-md z-50">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Couleurs</label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {colors.map(c => (
-                          <button
-                            key={c.value}
-                            onClick={() => { setActiveColor(c.value); if (activeTool === 'eraser') setActiveTool('pen'); }}
-                            className="w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative flex items-center justify-center"
-                            style={{ backgroundColor: c.value }}
-                          >
-                            {activeColor === c.value && activeTool !== 'eraser' && <Icon name="Check" className="w-4 h-4 text-white drop-shadow-md" />}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <Separator />
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Épaisseur</label>
-                        <span className="text-xs font-mono">{strokeWidth}px</span>
-                      </div>
-                      <Slider value={[strokeWidth]} onValueChange={(vals) => setStrokeWidth(vals[0])} min={1} max={20} />
-                      <div className="h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2">
-                        <div 
-                          className="rounded-full bg-current transition-all" 
-                          style={{ width: strokeWidth, height: strokeWidth, backgroundColor: activeTool === 'eraser' ? '#9ca3af' : activeColor }} 
-                        />
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full mt-2" onClick={() => setShowColorPicker(false)}>Fermer</Button>
-                  </div>
-               </div>
-             )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/files">
-              <Button variant="ghost" size="icon">
-                <Icon name="FileText" className="w-4 h-4" />
-              </Button>
-            </Link>
-            <Button 
-              size="sm" 
-              onClick={onSave} 
-              className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200"
-            >
-              <Icon name="Save" className="w-4 h-4" />Enregistrer
-            </Button>
-          </div>
-        </div>
-      );
-    }
-
-    // --- Pages ---
-    function Dashboard() {
-      const [dragActive, setDragActive] = useState(false);
-      const { toast } = useToast();
-      const MOCK_NOTEBOOKS = [
-        { id: "1", title: "Exercices de Thermodynamique", subject: "Physique", color: "#E0F2FE", lastModified: "Il y a 2h", pageCount: 12 },
-        { id: "2", title: "Formules Acides/Bases", subject: "Chimie", color: "#DCFCE7", lastModified: "Hier", pageCount: 4 },
-        { id: "3", title: "Analyse de texte: Molière", subject: "Français", color: "#FAE8FF", lastModified: "Il y a 2j", pageCount: 8 },
-        { id: "4", title: "Géométrie dans l'espace", subject: "Maths", color: "#F1F5F9", lastModified: "La semaine dernière", pageCount: 24 },
-        { id: "5", title: "Histoire de la Guerre Froide", subject: "Histoire", color: "#FEF3C7", lastModified: "12 Nov", pageCount: 15 },
-      ];
-      
-      const handleDrop = (e) => {
-        e.preventDefault(); 
-        e.stopPropagation(); 
-        setDragActive(false);
-        if (e.dataTransfer.files[0]) {
-          toast({ 
-            title: "Fichier importé !", 
-            description: `Importé: ${e.dataTransfer.files[0].name}` 
-          });
-        }
-      };
-
-      return (
-        <div className="flex h-screen bg-background">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="p-8 max-w-7xl mx-auto space-y-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h1 className="font-serif text-3xl font-bold text-foreground">Bonjour, Alex</h1>
-                  <p className="text-muted-foreground mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input placeholder="Rechercher une note..." className="pl-9 w-64 bg-card" />
-                  </div>
-                  <Button variant="outline" size="icon">
-                    <Icon name="Filter" className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <motion.div 
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/30"}`}
-                onDragEnter={() => setDragActive(true)} 
-                onDragLeave={() => setDragActive(false)} 
-                onDragOver={(e) => e.preventDefault()} 
-                onDrop={handleDrop}
-                whileHover={{ scale: 1.005 }}
-                onClick={() => toast({ title: "Importation manuelle", description: "Sélecteur de fichiers ouvert..." })}
-              >
-                <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="UploadCloud" className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-medium">Importer un exercice ou un PDF</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">Glissez-déposez votre fichier ici. L'IA le classera automatiquement.</p>
-              </motion.div>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Cahiers Récents</h2>
-                  <Button variant="ghost" className="text-primary">Tout voir</Button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <motion.div 
-                    whileHover={{ y: -4, scale: 1.01 }} 
-                    whileTap={{ scale: 0.98 }} 
-                    className="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors">
-                      <Icon name="Plus" className="w-6 h-6 text-muted-foreground group-hover:text-primary" />
-                    </div>
-                    <span className="font-medium text-muted-foreground group-hover:text-primary">Nouveau Cahier</span>
-                  </motion.div>
-                  {MOCK_NOTEBOOKS.map(n => <NotebookCard key={n.id} {...n} />)}
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      );
-    }
-
-    function Editor() {
-      const [activeTool, setActiveTool] = useState("pen");
-      const [activeColor, setActiveColor] = useState("#1F2937");
-      const [strokeWidth, setStrokeWidth] = useState(2);
-      const [saveStatus, setSaveStatus] = useState("Enregistré");
-      const { toast } = useToast();
-
-      const handleSave = () => {
-        setSaveStatus("Enregistrement...");
-        setTimeout(() => {
-          setSaveStatus("Enregistré");
-          toast({ 
-            title: "Sauvegarde effectuée", 
-            description: "Vos modifications sont synchronisées." 
-          });
-        }, 800);
-      };
-
-      const handleToolChange = (tool) => {
-        setActiveTool(tool);
-        if (tool === "pen") setStrokeWidth(2);
-        if (tool === "highlighter") setStrokeWidth(15);
-        if (tool === "eraser") setStrokeWidth(20);
-      };
-
-      return (
-        <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
-          <Toolbar 
-            activeTool={activeTool} 
-            setActiveTool={handleToolChange} 
-            activeColor={activeColor} 
-            setActiveColor={setActiveColor} 
-            onSave={handleSave} 
-            status={saveStatus} 
-            strokeWidth={strokeWidth} 
-            setStrokeWidth={setStrokeWidth} 
-          />
-          <div className="flex-1 flex justify-center p-4 sm:p-8 overflow-auto">
-            <div className="w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95 duration-300">
-               <div className="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">
-                 {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-               </div>
-              <Canvas tool={activeTool} color={activeColor} width={strokeWidth} backgroundType="seyes" />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function History() {
-      const HISTORY_ITEMS = [
-        { id: 1, title: "Devoir de Physique - Chapitre 4", subject: "Physique", date: "Aujourd'hui, 14:30", preview: "Thermodynamique..." },
-        { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé..." },
-        { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore..." },
-      ];
-      
-      return (
-        <div className="flex h-screen bg-background">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">
-            <div className="p-8 max-w-5xl mx-auto space-y-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h1 className="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1>
-                  <p className="text-muted-foreground mt-1">Retrouvez tous vos travaux.</p>
-                </div>
-                <div className="relative">
-                  <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" />
-                </div>
-              </div>
-              <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-                <div className="p-6 border-b border-border">
-                  <h2 className="font-semibold flex items-center gap-2">
-                    <Icon name="Clock" className="w-5 h-5 text-primary" /> 
-                    Dernières modifications
-                  </h2>
-                </div>
-                <div className="divide-y divide-border">
-                  {HISTORY_ITEMS.map((item, index) => (
-                    <motion.div 
-                      key={item.id} 
-                      initial={{ opacity: 0, y: 10 }} 
-                      animate={{ opacity: 1, y: 0 }} 
-                      transition={{ delay: index * 0.1 }} 
-                      className="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' : item.subject === 'Français' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'}`}>
-                          <Icon name="FileText" className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium text-foreground group-hover:text-primary transition-colors">{item.title}</h3>
-                          <p className="text-sm text-muted-foreground">{item.subject} • {item.preview}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Icon name="Calendar" className="w-4 h-4" />
-                          {item.date}
-                        </div>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          Ouvrir
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      );
-    }
-    
+    // Page Coran
     function Quran() {
-      const [isPlaying, setIsPlaying] = useState(false);
-      const [progress, setProgress] = useState(0);
-      const SURAHS = [
-        { number: 1, name: "Al-Fatiha", englishName: "The Opening", verses: 7, duration: "0:48" },
-        { number: 2, name: "Al-Baqarah", englishName: "The Cow", verses: 286, duration: "2:45:12" },
-        { number: 3, name: "Al-Imran", englishName: "The Family of Imran", verses: 200, duration: "1:22:45" },
-      ];
-      
-      return (
-        <div className="flex h-screen bg-background font-sans">
-          <Sidebar />
-          <main className="flex-1 flex flex-col overflow-hidden">
-             <div className="flex-1 overflow-auto p-8 space-y-8">
-               <div className="flex justify-between items-center">
-                 <div>
-                   <h1 className="font-serif text-3xl font-bold">Saint Coran</h1>
-                   <p className="text-muted-foreground">Écoutez les récitations.</p>
-                 </div>
-                 <div className="relative">
-                   <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                   <Input placeholder="Rechercher..." className="pl-9 w-64 bg-card" />
-                 </div>
-               </div>
-               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                 <Card className="col-span-1 lg:col-span-2 p-6 bg-gradient-to-br from-indigo-900 to-slate-900 text-white border-none overflow-hidden relative">
-                    <div className="relative z-10 flex flex-col h-full justify-between gap-8">
-                      <div>
-                        <Badge className="bg-white/20 hover:bg-white/30 text-white border-none mb-4">Lecture en cours</Badge>
-                        <h2 className="text-3xl font-serif font-bold">Al-Fatiha</h2>
-                        <p className="text-white/70">The Opening</p>
-                      </div>
-                      <div className="space-y-4">
-                        <Slider value={[progress]} max={100} onValueChange={v => setProgress(v[0])} className="[&>.absolute]:bg-white/20 [&_[role=slider]]:bg-white" />
-                        <div className="flex justify-center items-center gap-6">
-                          <Button size="icon" variant="ghost" className="text-white">
-                            <Icon name="SkipBack" className="w-5 h-5" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            className="w-14 h-14 rounded-full bg-white text-indigo-900 hover:bg-indigo-50" 
-                            onClick={() => setIsPlaying(!isPlaying)}
-                          >
-                            {isPlaying ? <Icon name="Pause" className="w-6 h-6 fill-current" /> : <Icon name="Play" className="w-6 h-6 fill-current ml-1" />}
-                          </Button>
-                          <Button size="icon" variant="ghost" className="text-white">
-                            <Icon name="SkipForward" className="w-5 h-5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                 </Card>
-                 <Card className="col-span-1 p-4">
-                   <h3 className="font-semibold mb-4 flex items-center gap-2">
-                     <Icon name="ListMusic" className="w-4 h-4" /> Sourates
-                   </h3>
-                   <div className="space-y-2">
-                     {SURAHS.map(s => (
-                       <div key={s.number} className="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center">
-                         <div className="font-medium">{s.number}. {s.name}</div>
-                         <div className="text-xs text-muted-foreground">{s.duration}</div>
-                       </div>
-                     ))}
-                   </div>
-                 </Card>
-               </div>
-             </div>
-          </main>
-        </div>
+      return React.createElement('div', { className: "h-screen flex bg-gray-50" },
+        React.createElement('div', { className: "w-64 bg-white border-r hidden md:flex flex-col p-4" },
+          React.createElement('div', { className: "mb-8 flex items-center gap-2" },
+            React.createElement(Icon, { name: "Book", className: "text-blue-600 w-8 h-8" }),
+            React.createElement('span', { className: "text-xl font-bold" }, "SmartNotes")
+          )
+        ),
+        
+        React.createElement('main', { className: "flex-1 p-8" },
+          React.createElement('div', { className: "max-w-4xl mx-auto" },
+            React.createElement('h1', { className: "text-3xl font-bold mb-2" }, "Saint Coran"),
+            React.createElement('p', { className: "text-gray-600 mb-8" }, "Écoutez les récitations"),
+            
+            React.createElement('div', { className: "bg-gradient-to-br from-blue-900 to-purple-900 text-white rounded-xl p-8 mb-8" },
+              React.createElement('div', { className: "mb-6" },
+                React.createElement('span', { className: "bg-white/20 px-3 py-1 rounded-full text-sm" }, "Lecture en cours"),
+                React.createElement('h2', { className: "text-2xl font-bold mt-2" }, "Al-Fatiha"),
+                React.createElement('p', { className: "text-white/70" }, "The Opening")
+              ),
+              
+              React.createElement('div', null,
+                React.createElement('input', {
+                  type: "range",
+                  className: "w-full h-2 bg-white/20 rounded-lg appearance-none",
+                  defaultValue: "30"
+                }),
+                React.createElement('div', { className: "flex justify-center gap-6 mt-6" },
+                  React.createElement(Button, { variant: "ghost", className: "text-white p-3" },
+                    React.createElement(Icon, { name: "Back", className: "w-6 h-6" })
+                  ),
+                  React.createElement(Button, { className: "bg-white text-blue-900 p-4 rounded-full w-14 h-14" },
+                    React.createElement(Icon, { name: "Play", className: "w-6 h-6" })
+                  ),
+                  React.createElement(Button, { variant: "ghost", className: "text-white p-3" },
+                    React.createElement(Icon, { name: "Back", className: "w-6 h-6 rotate-180" })
+                  )
+                )
+              )
+            ),
+            
+            React.createElement('div', { className: "bg-white rounded-xl p-6" },
+              React.createElement('h3', { className: "font-semibold mb-4 flex items-center gap-2" },
+                React.createElement(Icon, { name: "Music" }),
+                "Sourates"
+              ),
+              React.createElement('div', { className: "space-y-3" },
+                [
+                  { number: 1, name: "Al-Fatiha", duration: "0:48" },
+                  { number: 2, name: "Al-Baqarah", duration: "2:45:12" },
+                  { number: 3, name: "Al-Imran", duration: "1:22:45" }
+                ].map(surah =>
+                  React.createElement('div', { 
+                    key: surah.number,
+                    className: "p-3 hover:bg-gray-50 rounded-lg cursor-pointer flex justify-between items-center"
+                  },
+                    React.createElement('div', { className: "font-medium" }, `${surah.number}. ${surah.name}`),
+                    React.createElement('span', { className: "text-sm text-gray-500" }, surah.duration)
+                  )
+                )
+              )
+            )
+          )
+        )
       );
     }
 
+    // Application principale
     function App() {
-      return (
-        <Toaster>
-          <Switch>
-            <Route path="/" component={Dashboard} />
-            <Route path="/editor/:id" component={Editor} />
-            <Route path="/history" component={History} />
-            <Route path="/quran" component={Quran} />
-            <Route path="/notebooks" component={() => (
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                  Page Mes Cahiers (En construction)
-                </div>
-              </div>
-            )} />
-            <Route path="/files" component={() => (
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                  Page Fichiers (En construction)
-                </div>
-              </div>
-            )} />
-            <Route path="/settings" component={() => (
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                  Page Paramètres (En construction)
-                </div>
-              </div>
-            )} />
-            <Route component={() => (
-              <div className="flex h-screen items-center justify-center">
-                404 - Page non trouvée
-              </div>
-            )} />
-          </Switch>
-        </Toaster>
+      return React.createElement(Switch, null,
+        React.createElement(Route, { path: "/", component: Dashboard }),
+        React.createElement(Route, { path: "/editor/:id", component: Editor }),
+        React.createElement(Route, { path: "/coran", component: Quran }),
+        React.createElement(Route, null,
+          React.createElement('div', { className: "h-screen flex items-center justify-center" },
+            "404 - Page non trouvée"
+          )
+        )
       );
     }
 
     // Rendu de l'application
     const root = createRoot(document.getElementById('root'));
-    root.render(<App />);
+    root.render(React.createElement(App));
   </script>
 </body>
 </html>
