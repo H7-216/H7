@@ -129,6 +129,63 @@
         /* Effets hover */
         .hover-lift:hover { transform: translateY(-4px); transition: transform 0.2s ease; }
         .hover-scale:hover { transform: scale(1.02); transition: transform 0.2s ease; }
+        
+        /* Player audio */
+        .audio-progress::-webkit-slider-thumb {
+            appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Settings toggle */
+        .settings-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .settings-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .settings-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .settings-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .settings-slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .settings-slider:before {
+            transform: translateX(30px);
+        }
     </style>
 </head>
 <body>
@@ -140,23 +197,43 @@
 
     <script>
         // ==============================================
-        // SMARTNOTES - VERSION COMPLÈTE
-        // Toutes les fonctionnalités du code original
+        // SMARTNOTES - VERSION COMPLÈTE AVEC TOUTES LES PAGES
         // ==============================================
         
-        // ========== DONNÉES DE L'APPLICATION ==========
-        const appData = {
-            currentPage: 'dashboard',
+        // ========== ÉTAT GLOBAL DE L'APPLICATION ==========
+        const AppState = {
+            currentPage: getCurrentPageFromURL() || 'dashboard',
             currentTool: 'pen',
             currentColor: '#1F2937',
             strokeWidth: 2,
             activeNotebookId: null,
             canvasState: null,
-            toasts: [],
             user: {
-                name: "Alex",
+                name: "Alex Martin",
+                email: "alex@student.com",
                 plan: "Premium",
-                avatarColor: "from-indigo-500 to-purple-500"
+                avatarColor: "from-indigo-500 to-purple-500",
+                studyTime: "24h 30m",
+                notebooksCount: 8
+            },
+            quranPlayer: {
+                isPlaying: false,
+                currentSurah: 1,
+                currentTime: 0,
+                duration: 48, // secondes
+                volume: 80,
+                isRepeating: false,
+                isShuffling: false
+            },
+            settings: {
+                darkMode: false,
+                autoSave: true,
+                syncEnabled: true,
+                notifications: true,
+                handwritingSmoothing: 3,
+                paperType: "seyes",
+                language: "fr",
+                fontSize: "medium"
             },
             
             notebooks: [
@@ -167,8 +244,10 @@
                     color: "#E0F2FE", 
                     lastModified: "Il y a 2h", 
                     pageCount: 12,
-                    tags: ["Chaleur", "Énergie"],
-                    shared: true
+                    tags: ["Chaleur", "Énergie", "Thermodynamique"],
+                    shared: true,
+                    createdAt: "2024-01-15",
+                    favorite: true
                 },
                 { 
                     id: "2", 
@@ -177,8 +256,10 @@
                     color: "#DCFCE7", 
                     lastModified: "Hier", 
                     pageCount: 4,
-                    tags: ["pH", "Réactions"],
-                    shared: false
+                    tags: ["pH", "Réactions", "Chimie Organique"],
+                    shared: false,
+                    createdAt: "2024-01-10",
+                    favorite: false
                 },
                 { 
                     id: "3", 
@@ -187,8 +268,10 @@
                     color: "#FAE8FF", 
                     lastModified: "Il y a 2j", 
                     pageCount: 8,
-                    tags: ["Théâtre", "XVIIe"],
-                    shared: true
+                    tags: ["Théâtre", "XVIIe", "Littérature"],
+                    shared: true,
+                    createdAt: "2024-01-05",
+                    favorite: true
                 },
                 { 
                     id: "4", 
@@ -197,8 +280,10 @@
                     color: "#F1F5F9", 
                     lastModified: "La semaine dernière", 
                     pageCount: 24,
-                    tags: ["Vecteurs", "3D"],
-                    shared: false
+                    tags: ["Vecteurs", "3D", "Géométrie"],
+                    shared: false,
+                    createdAt: "2024-01-01",
+                    favorite: false
                 },
                 { 
                     id: "5", 
@@ -207,25 +292,29 @@
                     color: "#FEF3C7", 
                     lastModified: "12 Nov", 
                     pageCount: 15,
-                    tags: ["XXe siècle", "Politique"],
-                    shared: true
+                    tags: ["XXe siècle", "Politique", "Guerre"],
+                    shared: true,
+                    createdAt: "2023-12-20",
+                    favorite: true
                 },
             ],
             
             historyItems: [
-                { id: 1, title: "Devoir de Physique - Chapitre 4", subject: "Physique", date: "Aujourd'hui, 14:30", preview: "Thermodynamique : transfert de chaleur..." },
-                { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé : l'hypocrisie sociale..." },
-                { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore applications..." },
-                { id: 4, title: "Résumé Biologie Cellulaire", subject: "SVT", date: "Ven 3 Déc, 09:20", preview: "Mitose et méiose comparées..." },
+                { id: 1, title: "Devoir de Physique - Chapitre 4", subject: "Physique", date: "Aujourd'hui, 14:30", preview: "Thermodynamique : transfert de chaleur...", type: "edit", duration: "45 min" },
+                { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé : l'hypocrisie sociale...", type: "create", duration: "1h 20min" },
+                { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore applications...", type: "edit", duration: "30 min" },
+                { id: 4, title: "Résumé Biologie Cellulaire", subject: "SVT", date: "Ven 3 Déc, 09:20", preview: "Mitose et méiose comparées...", type: "create", duration: "55 min" },
+                { id: 5, title: "Carte mentale Révolution", subject: "Histoire", date: "Mer 1 Déc, 14:10", preview: "Causes et conséquences...", type: "edit", duration: "40 min" },
             ],
             
             surahs: [
-                { number: 1, name: "Al-Fatiha", englishName: "The Opening", verses: 7, duration: "0:48" },
-                { number: 2, name: "Al-Baqarah", englishName: "The Cow", verses: 286, duration: "2:45:12" },
-                { number: 3, name: "Al-Imran", englishName: "The Family of Imran", verses: 200, duration: "1:22:45" },
-                { number: 36, name: "Ya Sin", englishName: "Ya Sin", verses: 83, duration: "12:30" },
-                { number: 55, name: "Ar-Rahman", englishName: "The Beneficent", verses: 78, duration: "9:45" },
-                { number: 67, name: "Al-Mulk", englishName: "The Sovereignty", verses: 30, duration: "8:15" },
+                { number: 1, name: "Al-Fatiha", englishName: "The Opening", verses: 7, duration: "0:48", reciter: "Mishary Alafasy", favorite: true },
+                { number: 2, name: "Al-Baqarah", englishName: "The Cow", verses: 286, duration: "2:45:12", reciter: "Abdul Rahman Al-Sudais", favorite: true },
+                { number: 3, name: "Al-Imran", englishName: "The Family of Imran", verses: 200, duration: "1:22:45", reciter: "Saad Al-Ghamdi", favorite: false },
+                { number: 36, name: "Ya Sin", englishName: "Ya Sin", verses: 83, duration: "12:30", reciter: "Maher Al-Muaiqly", favorite: true },
+                { number: 55, name: "Ar-Rahman", englishName: "The Beneficent", verses: 78, duration: "9:45", reciter: "Hani Rifai", favorite: false },
+                { number: 67, name: "Al-Mulk", englishName: "The Sovereignty", verses: 30, duration: "8:15", reciter: "Abdul Basit", favorite: true },
+                { number: 112, name: "Al-Ikhlas", englishName: "The Sincerity", verses: 4, duration: "0:42", reciter: "Mishary Alafasy", favorite: true },
             ],
             
             colors: [
@@ -252,10 +341,30 @@
                 { id: "pen", name: "Stylo", icon: "✏️", defaultWidth: 2 },
                 { id: "highlighter", name: "Surligneur", icon: "🖍️", defaultWidth: 15 },
                 { id: "eraser", name: "Gomme", icon: "🗑️", defaultWidth: 20 },
+            ],
+            
+            files: [
+                { id: 1, name: "Devoir_Physique.pdf", type: "pdf", size: "2.4 MB", uploaded: "Aujourd'hui", subject: "Physique" },
+                { id: 2, name: "Cours_Chimie_Organique.pptx", type: "ppt", size: "8.7 MB", uploaded: "Hier", subject: "Chimie" },
+                { id: 3, name: "Notes_Maths.png", type: "image", size: "1.2 MB", uploaded: "3 jours", subject: "Maths" },
+                { id: 4, name: "Résumé_Histoire.txt", type: "text", size: "156 KB", uploaded: "1 semaine", subject: "Histoire" },
+                { id: 5, name: "Exercices_SVT.docx", type: "doc", size: "3.1 MB", uploaded: "2 semaines", subject: "SVT" },
             ]
         };
         
         // ========== FONCTIONS UTILITAIRES ==========
+        function getCurrentPageFromURL() {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                return hash;
+            }
+            return null;
+        }
+        
+        function updateURL(page) {
+            window.location.hash = page;
+        }
+        
         function cn(...classes) {
             return classes.filter(Boolean).join(' ');
         }
@@ -288,7 +397,6 @@
             
             toastContainer.appendChild(toast);
             
-            // Supprimer après 3 secondes
             setTimeout(() => {
                 const toastEl = document.getElementById(toastId);
                 if (toastEl) {
@@ -299,123 +407,21 @@
             }, 3000);
         }
         
-        function formatDate(date) {
-            return new Date(date).toLocaleDateString('fr-FR', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
         
-        // ========== COMPOSANTS UI ==========
-        function createButton({ 
-            text = "", 
-            onClick = () => {}, 
-            className = "", 
-            variant = "default",
-            size = "default",
-            icon = null,
-            disabled = false
-        }) {
-            const button = document.createElement('button');
+        // ========== ROUTAGE ET NAVIGATION ==========
+        function changePage(page) {
+            AppState.currentPage = page;
+            updateURL(page);
+            renderApp();
             
-            const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
-            
-            const variants = {
-                default: "bg-primary text-primary-foreground hover:bg-primary/90",
-                destructive: "bg-red-600 text-white hover:bg-red-700",
-                outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-                ghost: "hover:bg-accent hover:text-accent-foreground",
-                link: "text-primary underline-offset-4 hover:underline",
-            };
-            
-            const sizes = {
-                default: "h-10 px-4 py-2",
-                sm: "h-9 rounded-md px-3",
-                lg: "h-11 rounded-md px-8",
-                icon: "h-10 w-10",
-            };
-            
-            button.className = cn(
-                baseClasses,
-                variants[variant],
-                sizes[size],
-                className
-            );
-            
-            button.onclick = onClick;
-            button.disabled = disabled;
-            
-            if (icon) {
-                const iconSpan = document.createElement('span');
-                iconSpan.className = "mr-2";
-                iconSpan.textContent = icon;
-                button.appendChild(iconSpan);
-            }
-            
-            if (text) {
-                button.appendChild(document.createTextNode(text));
-            }
-            
-            return button;
-        }
-        
-        function createInput({ 
-            placeholder = "", 
-            value = "", 
-            onChange = () => {},
-            className = "",
-            type = "text"
-        }) {
-            const input = document.createElement('input');
-            input.type = type;
-            input.placeholder = placeholder;
-            input.value = value;
-            input.className = cn(
-                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                className
-            );
-            
-            input.oninput = (e) => onChange(e.target.value);
-            return input;
-        }
-        
-        function createCard({ children, className = "" }) {
-            const card = document.createElement('div');
-            card.className = cn("rounded-lg border bg-card text-card-foreground shadow-sm", className);
-            
-            if (typeof children === 'string') {
-                card.innerHTML = children;
-            } else if (Array.isArray(children)) {
-                children.forEach(child => {
-                    if (child instanceof Node) {
-                        card.appendChild(child);
-                    } else {
-                        card.appendChild(document.createTextNode(child));
-                    }
-                });
-            } else if (children instanceof Node) {
-                card.appendChild(children);
-            }
-            
-            return card;
-        }
-        
-        function createBadge({ text, className = "", variant = "default" }) {
-            const badge = document.createElement('div');
-            badge.className = cn(
-                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
-                variant === "default" ? "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent" : "",
-                variant === "secondary" ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" : "",
-                variant === "outline" ? "text-foreground" : "",
-                className
-            );
-            badge.textContent = text;
-            return badge;
+            const app = document.getElementById('app');
+            app.classList.add('animate-in');
+            setTimeout(() => app.classList.remove('animate-in'), 300);
         }
         
         // ========== SIDEBAR ==========
@@ -424,6 +430,7 @@
             sidebar.className = "h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0";
             
             sidebar.innerHTML = `
+                <!-- Logo -->
                 <div class="mb-8 px-2 flex items-center gap-2">
                     <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                         <span class="text-primary-foreground text-lg">📕</span>
@@ -431,41 +438,44 @@
                     <span class="font-serif text-xl font-bold tracking-tight">SmartNotes</span>
                 </div>
                 
-                <div class="mb-6">
-                    ${createButton({
-                        text: "Nouvelle Note",
-                        icon: "+",
-                        className: "w-full justify-start gap-2 shadow-sm",
-                        size: "lg",
-                        onClick: () => changePage('editor')
-                    }).outerHTML}
-                </div>
+                <!-- Bouton Nouvelle Note -->
+                <button onclick="createNewNotebook()" 
+                        class="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium mb-6 hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <span class="text-lg">+</span>
+                    Nouvelle Note
+                </button>
                 
+                <!-- Navigation -->
                 <nav class="space-y-1 flex-1">
-                    ${appData.menuItems.map(item => `
-                        <div onclick="changePage('${item.id}')" 
-                             class="${cn(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer",
-                                appData.currentPage === item.id 
-                                    ? "bg-primary/5 text-primary" 
-                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                             )}">
+                    ${AppState.menuItems.map(item => `
+                        <button onclick="changePage('${item.id}')" 
+                                class="${cn(
+                                    "w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                    AppState.currentPage === item.id 
+                                        ? "bg-primary/5 text-primary" 
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}">
                             <span class="text-lg">${item.icon}</span>
                             <div class="flex-1">
                                 <div>${item.name}</div>
                                 <div class="text-xs text-muted-foreground">${item.description}</div>
                             </div>
-                        </div>
+                            ${AppState.currentPage === item.id ? '<span class="w-2 h-2 bg-primary rounded-full"></span>' : ''}
+                        </button>
                     `).join('')}
                 </nav>
                 
+                <!-- Profil utilisateur -->
                 <div class="mt-auto pt-4 border-t border-border">
                     <div class="flex items-center gap-3 px-2 py-2">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${appData.user.avatarColor}"></div>
-                        <div class="flex flex-col">
-                            <span class="text-sm font-medium">${appData.user.name}</span>
-                            <span class="text-xs text-muted-foreground">${appData.user.plan} Plan</span>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${AppState.user.avatarColor}"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">${AppState.user.name}</div>
+                            <div class="text-xs text-muted-foreground">${AppState.user.plan} Plan</div>
                         </div>
+                        <button onclick="changePage('settings')" class="p-1 hover:bg-muted rounded">
+                            <span>⚙️</span>
+                        </button>
                     </div>
                 </div>
             `;
@@ -473,15 +483,13 @@
             return sidebar;
         }
         
-        // ========== DASHBOARD ==========
+        // ========== PAGE DASHBOARD ==========
         function renderDashboard() {
             const container = document.createElement('div');
             container.className = 'flex h-screen bg-background';
             
-            // Sidebar
             container.appendChild(renderSidebar());
             
-            // Contenu principal
             const main = document.createElement('main');
             main.className = 'flex-1 overflow-auto';
             
@@ -490,13 +498,14 @@
                     <!-- En-tête -->
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h1 class="font-serif text-3xl font-bold text-foreground">Bonjour, ${appData.user.name}</h1>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Bonjour, ${AppState.user.name.split(' ')[0]} 👋</h1>
                             <p class="text-muted-foreground mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
-                                <input placeholder="Rechercher une note..." 
+                                <input type="text" 
+                                       placeholder="Rechercher une note..." 
                                        class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                             </div>
                             <button class="p-2 border border-input rounded-md hover:bg-muted">
@@ -505,7 +514,78 @@
                         </div>
                     </div>
                     
-                    <!-- Zone d'import -->
+                    <!-- Statistiques -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="bg-card rounded-xl border border-border p-6 hover-lift">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Cahiers actifs</p>
+                                    <p class="text-2xl font-bold mt-1">${AppState.notebooks.length}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-blue-600 text-xl">📕</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6 hover-lift">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Pages écrites</p>
+                                    <p class="text-2xl font-bold mt-1">${AppState.notebooks.reduce((sum, n) => sum + n.pageCount, 0)}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-green-600 text-xl">📝</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6 hover-lift">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Temps d'étude</p>
+                                    <p class="text-2xl font-bold mt-1">${AppState.user.studyTime}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-purple-600 text-xl">🕐</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-purple-500 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6 hover-lift">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Objectif quotidien</p>
+                                    <p class="text-2xl font-bold mt-1">2h 30m</p>
+                                </div>
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-orange-600 text-xl">⭐</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-orange-500 rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone d'import rapide -->
                     <div onclick="handleFileImport()" 
                          class="border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer border-border hover:border-primary/50 hover:bg-muted/30 group">
                         <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -515,6 +595,9 @@
                         <p class="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
                             Glissez-déposez votre fichier ici. L'IA le classera automatiquement.
                         </p>
+                        <button class="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm">
+                            Sélectionner un fichier
+                        </button>
                     </div>
                     
                     <!-- Cahiers récents -->
@@ -522,8 +605,8 @@
                         <div class="flex items-center justify-between">
                             <h2 class="text-xl font-semibold">Cahiers Récents</h2>
                             <button onclick="changePage('notebooks')" 
-                                    class="text-primary hover:text-primary/80 font-medium">
-                                Tout voir
+                                    class="text-primary hover:text-primary/80 font-medium flex items-center gap-1">
+                                Tout voir <span>→</span>
                             </button>
                         </div>
                         
@@ -538,12 +621,12 @@
                             </div>
                             
                             <!-- Cahiers existants -->
-                            ${appData.notebooks.slice(0, 4).map(notebook => `
+                            ${AppState.notebooks.slice(0, 4).map(notebook => `
                                 <div onclick="openNotebook('${notebook.id}')" 
                                      class="group relative cursor-pointer hover-lift">
                                     <!-- Spiral -->
                                     <div class="absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2">
-                                        ${Array.from({ length: 8 }).map((_, i) => `
+                                        ${Array.from({ length: 8 }).map(() => `
                                             <div class="w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300"></div>
                                         `).join('')}
                                     </div>
@@ -551,10 +634,8 @@
                                     <!-- Cover -->
                                     <div class="relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50">
                                         <div class="h-1/3 w-full p-4 flex flex-col justify-between" style="background-color: ${notebook.color}">
-                                            <div class="self-end opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button class="p-1 hover:bg-black/10 rounded-full text-black/60">
-                                                    <span>⋮</span>
-                                                </button>
+                                            <div class="self-end">
+                                                ${notebook.favorite ? '<span class="text-red-500">❤️</span>' : ''}
                                             </div>
                                             <div class="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
                                                 ${notebook.subject}
@@ -565,7 +646,7 @@
                                                 ${notebook.title}
                                             </h3>
                                             <div class="flex flex-wrap gap-1 mb-3">
-                                                ${notebook.tags.map(tag => `
+                                                ${notebook.tags.slice(0, 2).map(tag => `
                                                     <span class="text-xs px-2 py-0.5 bg-muted rounded-full">${tag}</span>
                                                 `).join('')}
                                             </div>
@@ -577,7 +658,8 @@
                                                 </div>
                                                 <div class="flex items-center justify-between border-t border-border pt-3">
                                                     <span class="text-xs font-medium text-muted-foreground">${notebook.pageCount} pages</span>
-                                                    <div class="flex -space-x-2">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-xs text-gray-500">${notebook.createdAt}</span>
                                                         <div class="w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold">A</div>
                                                     </div>
                                                 </div>
@@ -589,40 +671,692 @@
                         </div>
                     </div>
                     
-                    <!-- Statistiques -->
+                    <!-- Activité récente -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-4">Activité récente</h2>
+                        <div class="space-y-3">
+                            ${AppState.historyItems.slice(0, 3).map(item => `
+                                <div class="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${
+                                            item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' :
+                                            item.subject === 'Français' ? 'bg-purple-100 text-purple-600' :
+                                            item.subject === 'Maths' ? 'bg-green-100 text-green-600' :
+                                            'bg-gray-100 text-gray-600'
+                                        }">
+                                            ${item.type === 'create' ? '📄' : '✏️'}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium text-sm">${item.title}</h3>
+                                            <p class="text-xs text-muted-foreground">${item.date} • ${item.duration}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="openHistoryItem(${item.id})" 
+                                            class="text-xs px-3 py-1 border rounded-lg hover:bg-muted">
+                                        Ouvrir
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== PAGE MES CAHIERS ==========
+        function renderNotebooks() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-8';
+            
+            main.innerHTML = `
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Mes Cahiers</h1>
+                            <p class="text-muted-foreground mt-1">${AppState.notebooks.length} cahiers organisés</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                                <input type="text" 
+                                       placeholder="Rechercher un cahier..." 
+                                       class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
+                            </div>
+                            <button class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                                <span>📂</span>
+                                Nouveau dossier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Filtres -->
+                    <div class="flex flex-wrap gap-2">
+                        <button class="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm">
+                            Tous (${AppState.notebooks.length})
+                        </button>
+                        <button class="px-3 py-1.5 border rounded-lg text-sm hover:bg-muted">
+                            Favoris (${AppState.notebooks.filter(n => n.favorite).length})
+                        </button>
+                        <button class="px-3 py-1.5 border rounded-lg text-sm hover:bg-muted">
+                            Partagés (${AppState.notebooks.filter(n => n.shared).length})
+                        </button>
+                        <button class="px-3 py-1.5 border rounded-lg text-sm hover:bg-muted">
+                            Physique (${AppState.notebooks.filter(n => n.subject === 'Physique').length})
+                        </button>
+                        <button class="px-3 py-1.5 border rounded-lg text-sm hover:bg-muted">
+                            Maths (${AppState.notebooks.filter(n => n.subject === 'Maths').length})
+                        </button>
+                    </div>
+                    
+                    <!-- Grille de cahiers -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <!-- Nouveau cahier -->
+                        <div onclick="createNewNotebook()" 
+                             class="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group hover-lift">
+                            <div class="w-16 h-16 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-4 transition-colors">
+                                <span class="text-muted-foreground group-hover:text-primary text-2xl">+</span>
+                            </div>
+                            <span class="font-medium text-muted-foreground group-hover:text-primary">Nouveau Cahier</span>
+                            <p class="text-xs text-muted-foreground mt-1">Commencer à prendre des notes</p>
+                        </div>
+                        
+                        <!-- Tous les cahiers -->
+                        ${AppState.notebooks.map(notebook => `
+                            <div onclick="openNotebook('${notebook.id}')" 
+                                 class="group relative cursor-pointer hover-lift">
+                                <!-- Spiral -->
+                                <div class="absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2">
+                                    ${Array.from({ length: 8 }).map(() => `
+                                        <div class="w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300"></div>
+                                    `).join('')}
+                                </div>
+                                
+                                <!-- Cover -->
+                                <div class="relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50">
+                                    <div class="h-1/3 w-full p-4 flex flex-col justify-between" style="background-color: ${notebook.color}">
+                                        <div class="flex justify-between">
+                                            <button onclick="event.stopPropagation(); toggleFavorite('${notebook.id}')" 
+                                                    class="p-1 hover:bg-black/10 rounded-full">
+                                                <span class="${notebook.favorite ? 'text-red-500' : 'text-black/60'}">${notebook.favorite ? '❤️' : '🤍'}</span>
+                                            </button>
+                                            <button onclick="event.stopPropagation();" 
+                                                    class="p-1 hover:bg-black/10 rounded-full">
+                                                <span>⋮</span>
+                                            </button>
+                                        </div>
+                                        <div class="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
+                                            ${notebook.subject}
+                                        </div>
+                                    </div>
+                                    <div class="p-5 flex flex-col h-2/3 bg-gradient-to-b from-white to-neutral-50">
+                                        <h3 class="font-serif text-xl font-medium text-foreground leading-tight mb-2 line-clamp-2">
+                                            ${notebook.title}
+                                        </h3>
+                                        <div class="flex flex-wrap gap-1 mb-3">
+                                            ${notebook.tags.map(tag => `
+                                                <span class="text-xs px-2 py-0.5 bg-muted rounded-full">${tag}</span>
+                                            `).join('')}
+                                        </div>
+                                        <div class="mt-auto space-y-3">
+                                            <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>🕐</span>
+                                                <span>${notebook.lastModified}</span>
+                                                ${notebook.shared ? '<span class="text-blue-600">👥</span>' : ''}
+                                            </div>
+                                            <div class="flex items-center justify-between border-t border-border pt-3">
+                                                <span class="text-xs font-medium text-muted-foreground">${notebook.pageCount} pages</span>
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick="event.stopPropagation(); shareNotebook('${notebook.id}')" 
+                                                            class="text-xs px-2 py-1 border rounded hover:bg-muted">
+                                                        Partager
+                                                    </button>
+                                                    <div class="w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold">A</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== PAGE HISTORIQUE ==========
+        function renderHistory() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-8';
+            
+            main.innerHTML = `
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1>
+                            <p class="text-muted-foreground mt-1">Retrouvez tous vos travaux et modifications</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                                <input type="text" 
+                                       placeholder="Rechercher dans l'historique..." 
+                                       class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
+                            </div>
+                            <button class="px-4 py-2 border rounded-lg hover:bg-muted flex items-center gap-2">
+                                <span>⏳</span>
+                                Filtrer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline -->
+                    <div class="space-y-6">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <span>📅</span>
+                            Dernières 24 heures
+                        </h2>
+                        
+                        ${AppState.historyItems.slice(0, 3).map(item => `
+                            <div class="bg-card rounded-xl border border-border p-6 hover-lift cursor-pointer" onclick="openHistoryItem(${item.id})">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-start gap-4">
+                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center ${
+                                            item.type === 'create' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                                        }">
+                                            ${item.type === 'create' ? '📄' : '✏️'}
+                                        </div>
+                                        <div>
+                                            <h3 class="font-semibold text-lg">${item.title}</h3>
+                                            <p class="text-muted-foreground mt-1">${item.preview}</p>
+                                            <div class="flex items-center gap-4 mt-3">
+                                                <span class="flex items-center gap-1 text-sm">
+                                                    <span>📚</span> ${item.subject}
+                                                </span>
+                                                <span class="flex items-center gap-1 text-sm">
+                                                    <span>🕐</span> ${item.duration}
+                                                </span>
+                                                <span class="flex items-center gap-1 text-sm">
+                                                    <span>📅</span> ${item.date}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="p-2 hover:bg-muted rounded-lg">
+                                        <span>↗️</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <!-- Historique plus ancien -->
+                    <div class="space-y-6">
+                        <h2 class="text-xl font-semibold flex items-center gap-2">
+                            <span>📚</span>
+                            Historique plus ancien
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${AppState.historyItems.slice(3).map(item => `
+                                <div class="bg-card rounded-xl border border-border p-4 hover-lift cursor-pointer" onclick="openHistoryItem(${item.id})">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center ${
+                                            item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' :
+                                            item.subject === 'Français' ? 'bg-purple-100 text-purple-600' :
+                                            'bg-gray-100 text-gray-600'
+                                        }">
+                                            ${item.type === 'create' ? '📄' : '✏️'}
+                                        </div>
+                                        <div>
+                                            <h4 class="font-medium">${item.title}</h4>
+                                            <p class="text-xs text-muted-foreground">${item.subject}</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-muted-foreground line-clamp-2">${item.preview}</p>
+                                    <div class="flex items-center justify-between mt-4">
+                                        <span class="text-xs text-muted-foreground">${item.date}</span>
+                                        <span class="text-xs px-2 py-1 bg-muted rounded">${item.duration}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques d'activité -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6">Statistiques d'activité</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-primary">${AppState.historyItems.length}</div>
+                                <p class="text-sm text-muted-foreground mt-1">Modifications totales</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-green-600">12h 45m</div>
+                                <p class="text-sm text-muted-foreground mt-1">Temps total d'étude</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-blue-600">${AppState.notebooks.length}</div>
+                                <p class="text-sm text-muted-foreground mt-1">Cahiers créés</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600">7</div>
+                                <p class="text-sm text-muted-foreground mt-1">Jours actifs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== PAGE FICHIERS ==========
+        function renderFiles() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-8';
+            
+            main.innerHTML = `
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Fichiers & Documents</h1>
+                            <p class="text-muted-foreground mt-1">Importez et organisez vos documents</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="handleFileImport()" 
+                                    class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                                <span>📤</span>
+                                Importer
+                            </button>
+                            <button class="px-4 py-2 border rounded-lg hover:bg-muted flex items-center gap-2">
+                                <span>📂</span>
+                                Nouveau dossier
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Espace de stockage -->
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-xl font-semibold">Espace de stockage</h2>
+                                <p class="text-blue-100 mt-1">Utilisé 3.2 Go sur 15 Go (21%)</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                <span class="text-xl">💾</span>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full h-3 bg-white/30 rounded-full overflow-hidden">
+                                <div class="h-full bg-white rounded-full" style="width: 21%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm mt-2">
+                                <span>3.2 Go utilisés</span>
+                                <span>11.8 Go disponibles</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tous les fichiers -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold">Tous les fichiers</h2>
+                            <div class="flex items-center gap-2">
+                                <button class="p-2 hover:bg-muted rounded">
+                                    <span>📋</span>
+                                </button>
+                                <button class="p-2 hover:bg-muted rounded">
+                                    <span>⏳</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border overflow-hidden">
+                            <!-- En-tête du tableau -->
+                            <div class="grid grid-cols-12 gap-4 p-4 border-b bg-muted/30 text-sm font-medium text-muted-foreground">
+                                <div class="col-span-6">Nom</div>
+                                <div class="col-span-2">Type</div>
+                                <div class="col-span-2">Taille</div>
+                                <div class="col-span-2">Date</div>
+                            </div>
+                            
+                            <!-- Liste des fichiers -->
+                            <div class="divide-y divide-border">
+                                ${AppState.files.map(file => `
+                                    <div class="grid grid-cols-12 gap-4 p-4 hover:bg-muted/30 cursor-pointer">
+                                        <div class="col-span-6 flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center ${
+                                                file.type === 'pdf' ? 'bg-red-100 text-red-600' :
+                                                file.type === 'ppt' ? 'bg-orange-100 text-orange-600' :
+                                                file.type === 'image' ? 'bg-green-100 text-green-600' :
+                                                file.type === 'text' ? 'bg-blue-100 text-blue-600' :
+                                                'bg-gray-100 text-gray-600'
+                                            }">
+                                                ${file.type === 'pdf' ? '📕' :
+                                                  file.type === 'ppt' ? '📊' :
+                                                  file.type === 'image' ? '🖼️' :
+                                                  file.type === 'text' ? '📝' : '📄'}
+                                            </div>
+                                            <div>
+                                                <div class="font-medium">${file.name}</div>
+                                                <div class="text-xs text-muted-foreground">${file.subject}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-span-2 flex items-center">
+                                            <span class="px-2 py-1 bg-muted rounded text-xs">${file.type.toUpperCase()}</span>
+                                        </div>
+                                        <div class="col-span-2 flex items-center text-sm">${file.size}</div>
+                                        <div class="col-span-2 flex items-center justify-between">
+                                            <span class="text-sm text-muted-foreground">${file.uploaded}</span>
+                                            <button class="p-1 hover:bg-muted rounded">
+                                                <span>⋮</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dossiers récents -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-card rounded-xl border border-border p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-muted-foreground">Cahiers actifs</p>
-                                    <p class="text-2xl font-bold mt-1">${appData.notebooks.length}</p>
-                                </div>
-                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-blue-600 text-xl">📕</span>
-                                </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-semibold">Physique</h3>
+                                <span class="text-xs px-2 py-1 bg-blue-100 text-blue-600 rounded">8 fichiers</span>
                             </div>
+                            <p class="text-sm text-muted-foreground mb-4">Exercices et cours de physique</p>
+                            <button class="w-full px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+                                Ouvrir le dossier
+                            </button>
                         </div>
                         
                         <div class="bg-card rounded-xl border border-border p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-muted-foreground">Pages écrites</p>
-                                    <p class="text-2xl font-bold mt-1">${appData.notebooks.reduce((sum, n) => sum + n.pageCount, 0)}</p>
-                                </div>
-                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-green-600 text-xl">📝</span>
-                                </div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-semibold">Maths</h3>
+                                <span class="text-xs px-2 py-1 bg-green-100 text-green-600 rounded">12 fichiers</span>
                             </div>
+                            <p class="text-sm text-muted-foreground mb-4">Géométrie et algèbre</p>
+                            <button class="w-full px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+                                Ouvrir le dossier
+                            </button>
                         </div>
                         
                         <div class="bg-card rounded-xl border border-border p-6">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-muted-foreground">Temps d'étude</p>
-                                    <p class="text-2xl font-bold mt-1">24h</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-semibold">Projets</h3>
+                                <span class="text-xs px-2 py-1 bg-purple-100 text-purple-600 rounded">5 fichiers</span>
+                            </div>
+                            <p class="text-sm text-muted-foreground mb-4">Travaux et recherches</p>
+                            <button class="w-full px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+                                Ouvrir le dossier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== PAGE CORAN COMPLÈTE ==========
+        function renderQuran() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-8';
+            
+            main.innerHTML = `
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Saint Coran</h1>
+                            <p class="text-muted-foreground mt-1">Écoutez, lisez et méditez</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                                <input type="text" 
+                                       placeholder="Rechercher une sourate..." 
+                                       class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
+                            </div>
+                            <button class="p-2 border rounded-lg hover:bg-muted">
+                                <span>⭐</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lecteur audio principal -->
+                    <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-8 border-none overflow-hidden">
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <!-- Informations de la sourate -->
+                            <div class="lg:w-2/3">
+                                <div class="flex items-center gap-2 mb-6">
+                                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Lecture en cours</span>
+                                    ${AppState.quranPlayer.isPlaying ? '<span class="bg-green-500/20 px-3 py-1 rounded-full text-sm text-green-300">🔊 En lecture</span>' : ''}
                                 </div>
-                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-purple-600 text-xl">🕐</span>
+                                
+                                <h2 class="text-4xl font-serif font-bold mb-2">Al-Fatiha</h2>
+                                <p class="text-white/70 text-lg mb-6">The Opening • 7 versets</p>
+                                
+                                <!-- Contrôles du lecteur -->
+                                <div class="space-y-6">
+                                    <!-- Barre de progression -->
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span>${formatTime(AppState.quranPlayer.currentTime)}</span>
+                                            <span>${formatTime(AppState.quranPlayer.duration)}</span>
+                                        </div>
+                                        <input type="range" 
+                                               min="0" 
+                                               max="${AppState.quranPlayer.duration}" 
+                                               value="${AppState.quranPlayer.currentTime}"
+                                               oninput="updateQuranTime(this.value)"
+                                               class="w-full h-2 bg-white/20 rounded-lg appearance-none audio-progress">
+                                    </div>
+                                    
+                                    <!-- Contrôles principaux -->
+                                    <div class="flex items-center justify-center gap-6">
+                                        <button onclick="toggleRepeat()" 
+                                                class="p-3 text-white hover:bg-white/10 rounded-full ${AppState.quranPlayer.isRepeating ? 'bg-white/20' : ''}">
+                                            <span class="text-xl">🔁</span>
+                                        </button>
+                                        <button onclick="previousSurah()" 
+                                                class="p-3 text-white hover:bg-white/10 rounded-full">
+                                            <span class="text-xl">⏮️</span>
+                                        </button>
+                                        <button onclick="togglePlay()" 
+                                                class="w-16 h-16 rounded-full bg-white text-indigo-900 hover:bg-indigo-50 flex items-center justify-center">
+                                            <span class="text-2xl">${AppState.quranPlayer.isPlaying ? '⏸️' : '▶️'}</span>
+                                        </button>
+                                        <button onclick="nextSurah()" 
+                                                class="p-3 text-white hover:bg-white/10 rounded-full">
+                                            <span class="text-xl">⏭️</span>
+                                        </button>
+                                        <button onclick="toggleShuffle()" 
+                                                class="p-3 text-white hover:bg-white/10 rounded-full ${AppState.quranPlayer.isShuffling ? 'bg-white/20' : ''}">
+                                            <span class="text-xl">🔀</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Contrôles secondaires -->
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span class="text-lg">📖</span>
+                                            </button>
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span class="text-lg">🎧</span>
+                                            </button>
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span class="text-lg">⏱️</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center gap-4">
+                                            <button onclick="toggleFavoriteSurah(1)" class="p-2 text-white/70 hover:text-white">
+                                                <span class="text-lg">${AppState.surahs.find(s => s.number === 1)?.favorite ? '❤️' : '🤍'}</span>
+                                            </button>
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span class="text-lg">📥</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Liste des récitateurs -->
+                            <div class="lg:w-1/3">
+                                <h3 class="text-xl font-semibold mb-4">Récitateurs</h3>
+                                <div class="space-y-3">
+                                    ${['Mishary Alafasy', 'Abdul Rahman Al-Sudais', 'Saad Al-Ghamdi', 'Maher Al-Muaiqly'].map((reciter, idx) => `
+                                        <button onclick="changeReciter('${reciter}')" 
+                                                class="w-full p-3 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-between transition-colors ${idx === 0 ? 'bg-white/20' : ''}">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                                    <span class="text-lg">🎤</span>
+                                                </div>
+                                                <span>${reciter}</span>
+                                            </div>
+                                            ${idx === 0 ? '<span class="text-green-400">✓</span>' : ''}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                
+                                <!-- Contrôle du volume -->
+                                <div class="mt-6">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm">Volume</span>
+                                        <span class="text-sm">${AppState.quranPlayer.volume}%</span>
+                                    </div>
+                                    <input type="range" 
+                                           min="0" 
+                                           max="100" 
+                                           value="${AppState.quranPlayer.volume}"
+                                           oninput="updateVolume(this.value)"
+                                           class="w-full h-2 bg-white/20 rounded-lg appearance-none audio-progress">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Liste des sourates -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Sourates favorites -->
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <span>⭐</span>
+                                Sourates favorites
+                            </h2>
+                            <div class="space-y-3 max-h-[400px] overflow-auto">
+                                ${AppState.surahs.filter(s => s.favorite).map(surah => `
+                                    <div onclick="playSurah(${surah.number})" 
+                                         class="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center group border border-border">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                                <span class="font-semibold">${surah.number}</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium group-hover:text-primary">${surah.name}</div>
+                                                <div class="text-xs text-muted-foreground">${surah.englishName} • ${surah.verses} versets</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-sm text-muted-foreground">${surah.duration}</span>
+                                            <button onclick="event.stopPropagation(); toggleFavoriteSurah(${surah.number})" 
+                                                    class="p-1 hover:bg-muted rounded text-red-500">
+                                                <span>❤️</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Toutes les sourates -->
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                                <span>📖</span>
+                                Toutes les sourates
+                            </h2>
+                            <div class="space-y-3 max-h-[400px] overflow-auto">
+                                ${AppState.surahs.map(surah => `
+                                    <div onclick="playSurah(${surah.number})" 
+                                         class="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center group">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                                                <span class="text-sm font-semibold">${surah.number}</span>
+                                            </div>
+                                            <div>
+                                                <div class="font-medium group-hover:text-primary">${surah.name}</div>
+                                                <div class="text-xs text-muted-foreground">${surah.reciter}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs px-2 py-1 bg-muted rounded">${surah.duration}</span>
+                                            <button onclick="event.stopPropagation(); toggleFavoriteSurah(${surah.number})" 
+                                                    class="p-1 hover:bg-muted rounded ${surah.favorite ? 'text-red-500' : 'text-gray-400'}">
+                                                ${surah.favorite ? '❤️' : '🤍'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiques de lecture -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6">Votre progression</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="text-center p-4">
+                                <div class="text-3xl font-bold text-primary">3/114</div>
+                                <p class="text-sm text-muted-foreground mt-1">Sourates mémorisées</p>
+                                <div class="w-full h-2 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full" style="width: 3%"></div>
+                                </div>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="text-3xl font-bold text-green-600">7</div>
+                                <p class="text-sm text-muted-foreground mt-1">Jours consécutifs</p>
+                                <div class="w-full h-2 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            <div class="text-center p-4">
+                                <div class="text-3xl font-bold text-blue-600">45m</div>
+                                <p class="text-sm text-muted-foreground mt-1">Temps d'écoute</p>
+                                <div class="w-full h-2 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: 60%"></div>
                                 </div>
                             </div>
                         </div>
@@ -634,12 +1368,249 @@
             return container;
         }
         
-        // ========== ÉDITEUR AVANCÉ ==========
+        // ========== PAGE PARAMÈTRES ==========
+        function renderSettings() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-8';
+            
+            main.innerHTML = `
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Paramètres</h1>
+                            <p class="text-muted-foreground mt-1">Personnalisez votre expérience SmartNotes</p>
+                        </div>
+                        <button onclick="saveSettings()" 
+                                class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                            <span>💾</span>
+                            Enregistrer les modifications
+                        </button>
+                    </div>
+                    
+                    <!-- Profil utilisateur -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <span>👤</span>
+                            Profil utilisateur
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Nom complet</label>
+                                <input type="text" 
+                                       value="${AppState.user.name}"
+                                       class="w-full bg-card border border-input rounded-md px-3 py-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Adresse email</label>
+                                <input type="email" 
+                                       value="${AppState.user.email}"
+                                       class="w-full bg-card border border-input rounded-md px-3 py-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Plan actuel</label>
+                                <div class="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br ${AppState.user.avatarColor}"></div>
+                                    <div>
+                                        <div class="font-medium">${AppState.user.plan} Plan</div>
+                                        <div class="text-xs text-muted-foreground">Accès à toutes les fonctionnalités</div>
+                                    </div>
+                                    <button class="ml-auto px-3 py-1 border rounded-lg hover:bg-muted text-sm">
+                                        Mettre à niveau
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Photo de profil</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br ${AppState.user.avatarColor}"></div>
+                                    <button class="px-4 py-2 border rounded-lg hover:bg-muted text-sm">
+                                        Changer la photo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Préférences d'application -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <span>⚙️</span>
+                            Préférences d'application
+                        </h2>
+                        <div class="space-y-6">
+                            <!-- Thème -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium">Mode sombre</div>
+                                    <div class="text-sm text-muted-foreground">Activez l'interface sombre</div>
+                                </div>
+                                <label class="settings-toggle">
+                                    <input type="checkbox" ${AppState.settings.darkMode ? 'checked' : ''} onchange="toggleDarkMode()">
+                                    <span class="settings-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- Sauvegarde automatique -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium">Sauvegarde automatique</div>
+                                    <div class="text-sm text-muted-foreground">Sauvegarde automatique des modifications</div>
+                                </div>
+                                <label class="settings-toggle">
+                                    <input type="checkbox" ${AppState.settings.autoSave ? 'checked' : ''} onchange="toggleSetting('autoSave')">
+                                    <span class="settings-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- Synchronisation -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium">Synchronisation cloud</div>
+                                    <div class="text-sm text-muted-foreground">Sync entre vos appareils</div>
+                                </div>
+                                <label class="settings-toggle">
+                                    <input type="checkbox" ${AppState.settings.syncEnabled ? 'checked' : ''} onchange="toggleSetting('syncEnabled')">
+                                    <span class="settings-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <!-- Notifications -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium">Notifications</div>
+                                    <div class="text-sm text-muted-foreground">Alertes et rappels</div>
+                                </div>
+                                <label class="settings-toggle">
+                                    <input type="checkbox" ${AppState.settings.notifications ? 'checked' : ''} onchange="toggleSetting('notifications')">
+                                    <span class="settings-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Préférences d'écriture -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <span>✏️</span>
+                            Préférences d'écriture
+                        </h2>
+                        <div class="space-y-6">
+                            <!-- Type de papier -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Type de papier</label>
+                                <div class="flex gap-2">
+                                    ${['seyes', 'grid', 'blank', 'lined'].map(type => `
+                                        <button onclick="changePaperType('${type}')" 
+                                                class="px-4 py-2 border rounded-lg hover:bg-muted ${AppState.settings.paperType === type ? 'bg-primary text-primary-foreground border-primary' : ''}">
+                                            ${type === 'seyes' ? 'Seyes' :
+                                              type === 'grid' ? 'Quadrillé' :
+                                              type === 'blank' ? 'Blanc' : 'Ligné'}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <!-- Lissage d'écriture -->
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-sm font-medium">Lissage d'écriture</label>
+                                    <span class="text-sm text-muted-foreground">Niveau ${AppState.settings.handwritingSmoothing}/5</span>
+                                </div>
+                                <input type="range" 
+                                       min="1" 
+                                       max="5" 
+                                       value="${AppState.settings.handwritingSmoothing}"
+                                       oninput="updateSmoothing(this.value)"
+                                       class="w-full h-2 bg-gray-200 rounded-lg appearance-none accent-primary">
+                                <div class="flex justify-between text-xs text-muted-foreground mt-1">
+                                    <span>Faible</span>
+                                    <span>Fort</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Taille de police -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Taille de police de l'interface</label>
+                                <div class="flex gap-2">
+                                    ${['small', 'medium', 'large'].map(size => `
+                                        <button onclick="changeFontSize('${size}')" 
+                                                class="px-4 py-2 border rounded-lg hover:bg-muted ${AppState.settings.fontSize === size ? 'bg-primary text-primary-foreground border-primary' : ''}">
+                                            ${size === 'small' ? 'Petit' :
+                                              size === 'medium' ? 'Moyen' : 'Grand'}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Langue et région -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                            <span>🌐</span>
+                            Langue et région
+                        </h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Langue de l'interface</label>
+                                <select class="w-full bg-card border border-input rounded-md px-3 py-2 text-sm">
+                                    <option ${AppState.settings.language === 'fr' ? 'selected' : ''}>Français</option>
+                                    <option ${AppState.settings.language === 'en' ? 'selected' : ''}>Anglais</option>
+                                    <option ${AppState.settings.language === 'ar' ? 'selected' : ''}>Arabe</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Format de date</label>
+                                <select class="w-full bg-card border border-input rounded-md px-3 py-2 text-sm">
+                                    <option>15 janvier 2024</option>
+                                    <option>15/01/2024</option>
+                                    <option>2024-01-15</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone dangereuse -->
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-red-800 flex items-center gap-2">
+                            <span>⚠️</span>
+                            Zone dangereuse
+                        </h2>
+                        <div class="space-y-4">
+                            <p class="text-sm text-red-700">
+                                Ces actions sont irréversibles. Soyez certain de ce que vous faites.
+                            </p>
+                            <div class="flex gap-3">
+                                <button onclick="exportAllData()" 
+                                        class="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100">
+                                    Exporter toutes les données
+                                </button>
+                                <button onclick="deleteAccount()" 
+                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                    Supprimer le compte
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== ÉDITEUR (inchangé mais fonctionnel) ==========
         function renderEditor() {
             const container = document.createElement('div');
             container.className = 'h-screen flex flex-col bg-neutral-100 overflow-hidden';
             
-            // Toolbar avancée
+            // Toolbar
             const toolbar = document.createElement('div');
             toolbar.className = 'h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between';
             
@@ -665,11 +1636,11 @@
                 
                 <div class="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm">
                     <div class="flex items-center gap-1 pr-2 border-r border-border/50">
-                        ${appData.tools.map(tool => `
+                        ${AppState.tools.map(tool => `
                             <button onclick="setTool('${tool.id}')" 
                                     class="${cn(
                                         "px-3 py-1.5 rounded text-sm font-medium flex items-center gap-2",
-                                        appData.currentTool === tool.id 
+                                        AppState.currentTool === tool.id 
                                             ? "bg-white text-primary shadow-sm" 
                                             : "text-muted-foreground hover:text-foreground"
                                     )}">
@@ -681,7 +1652,7 @@
                     
                     <button onclick="toggleColorPicker()" 
                             class="px-3 py-1.5 border rounded-lg flex items-center gap-2 hover:bg-white">
-                        <div class="w-4 h-4 rounded-full border" style="background-color: ${appData.currentTool === 'eraser' ? '#ffffff' : appData.currentColor}"></div>
+                        <div class="w-4 h-4 rounded-full border" style="background-color: ${AppState.currentTool === 'eraser' ? '#ffffff' : AppState.currentColor}"></div>
                         <span>Couleur & Taille</span>
                     </button>
                 </div>
@@ -698,14 +1669,14 @@
                 </div>
             `;
             
-            // Canvas avec papier Seyès
+            // Canvas
             const canvasArea = document.createElement('div');
             canvasArea.className = 'flex-1 flex justify-center p-4 sm:p-8 overflow-auto';
             
             canvasArea.innerHTML = `
                 <div class="w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95">
                     <div class="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">
-                        ${formatDate(new Date())}
+                        ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </div>
                     <canvas id="mainCanvas" 
                             class="w-full h-full bg-seyes touch-none"
@@ -714,17 +1685,17 @@
                     </canvas>
                 </div>
                 
-                <!-- Sélecteur de couleur (caché par défaut) -->
+                <!-- Sélecteur de couleur -->
                 <div id="colorPicker" class="hidden absolute top-20 right-4 w-64 p-4 bg-popover rounded-md border shadow-md z-50">
                     <div class="space-y-4">
                         <div class="space-y-2">
                             <label class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Couleurs</label>
                             <div class="grid grid-cols-4 gap-2">
-                                ${appData.colors.map(color => `
+                                ${AppState.colors.map(color => `
                                     <button onclick="setColor('${color.value}')"
                                             class="w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative"
                                             style="background-color: ${color.value}">
-                                        ${appData.currentColor === color.value ? '<span class="absolute inset-0 flex items-center justify-center text-white">✓</span>' : ''}
+                                        ${AppState.currentColor === color.value ? '<span class="absolute inset-0 flex items-center justify-center text-white">✓</span>' : ''}
                                     </button>
                                 `).join('')}
                             </div>
@@ -733,18 +1704,18 @@
                         <div class="space-y-3">
                             <div class="flex justify-between">
                                 <label class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Épaisseur</label>
-                                <span class="text-xs font-mono">${appData.strokeWidth}px</span>
+                                <span class="text-xs font-mono">${AppState.strokeWidth}px</span>
                             </div>
                             <input type="range" 
                                    min="1" 
                                    max="20" 
-                                   value="${appData.strokeWidth}"
+                                   value="${AppState.strokeWidth}"
                                    oninput="setStrokeWidth(this.value)"
                                    class="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary">
                             
                             <div class="h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2">
                                 <div class="rounded-full transition-all" 
-                                     style="width: ${appData.strokeWidth}px; height: ${appData.strokeWidth}px; background-color: ${appData.currentTool === 'eraser' ? '#9ca3af' : appData.currentColor}">
+                                     style="width: ${AppState.strokeWidth}px; height: ${AppState.strokeWidth}px; background-color: ${AppState.currentTool === 'eraser' ? '#9ca3af' : AppState.currentColor}">
                                 </div>
                             </div>
                         </div>
@@ -755,7 +1726,6 @@
             container.appendChild(toolbar);
             container.appendChild(canvasArea);
             
-            // Initialiser le canvas
             setTimeout(() => {
                 initAdvancedCanvas();
             }, 100);
@@ -763,324 +1733,218 @@
             return container;
         }
         
-        // ========== PAGE HISTORIQUE ==========
-        function renderHistory() {
-            const container = document.createElement('div');
-            container.className = 'flex h-screen bg-background';
-            
-            container.appendChild(renderSidebar());
-            
-            const main = document.createElement('main');
-            main.className = 'flex-1 overflow-auto';
-            
-            main.innerHTML = `
-                <div class="p-8 max-w-5xl mx-auto space-y-8">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <h1 class="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1>
-                            <p class="text-muted-foreground mt-1">Retrouvez tous vos travaux.</p>
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
-                            <input placeholder="Rechercher..." 
-                                   class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
-                        </div>
-                    </div>
-                    
-                    <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-                        <div class="p-6 border-b border-border">
-                            <h2 class="font-semibold flex items-center gap-2">
-                                <span class="text-primary">🕐</span>
-                                Dernières modifications
-                            </h2>
-                        </div>
-                        
-                        <div class="divide-y divide-border">
-                            ${appData.historyItems.map((item, index) => `
-                                <div class="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group cursor-pointer animate-in fade-in"
-                                     style="animation-delay: ${index * 100}ms">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center ${
-                                            item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' :
-                                            item.subject === 'Français' ? 'bg-purple-100 text-purple-600' :
-                                            item.subject === 'Maths' ? 'bg-green-100 text-green-600' :
-                                            'bg-gray-100 text-gray-600'
-                                        }">
-                                            <span>📄</span>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-medium text-foreground group-hover:text-primary transition-colors">
-                                                ${item.title}
-                                            </h3>
-                                            <p class="text-sm text-muted-foreground">
-                                                ${item.subject} • ${item.preview}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-6">
-                                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <span>📅</span>
-                                            ${item.date}
-                                        </div>
-                                        <button onclick="openHistoryItem('${item.id}')"
-                                                class="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 text-sm border rounded-lg hover:bg-muted">
-                                            Ouvrir
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    
-                    <!-- Stats de révision -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-card rounded-xl border border-border p-6">
-                            <h3 class="font-semibold mb-4">Activité cette semaine</h3>
-                            <div class="space-y-3">
-                                ${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => `
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm">${day}</span>
-                                        <div class="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                                            <div class="h-full bg-primary rounded-full" style="width: ${20 + (i * 10)}%"></div>
-                                        </div>
-                                        <span class="text-sm text-muted-foreground">${20 + (i * 10)}min</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                        
-                        <div class="bg-card rounded-xl border border-border p-6">
-                            <h3 class="font-semibold mb-4">Matières révisées</h3>
-                            <div class="space-y-3">
-                                ${['Physique', 'Maths', 'Français', 'Chimie', 'Histoire'].map((subject, i) => `
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-sm">${subject}</span>
-                                        <div class="flex-1 mx-4">
-                                            <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
-                                                <div class="h-full ${
-                                                    i === 0 ? 'bg-blue-500' :
-                                                    i === 1 ? 'bg-green-500' :
-                                                    i === 2 ? 'bg-purple-500' :
-                                                    i === 3 ? 'bg-red-500' : 'bg-yellow-500'
-                                                } rounded-full" style="width: ${30 + (i * 15)}%"></div>
-                                            </div>
-                                        </div>
-                                        <span class="text-sm text-muted-foreground">${30 + (i * 15)}%</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(main);
-            return container;
+        // ========== FONCTIONS DE L'APPLICATION ==========
+        // Fonctions de navigation et d'état
+        function setTool(toolId) {
+            AppState.currentTool = toolId;
+            const tool = AppState.tools.find(t => t.id === toolId);
+            if (tool) {
+                AppState.strokeWidth = tool.defaultWidth;
+            }
+            if (AppState.currentPage === 'editor') renderApp();
         }
         
-        // ========== PAGE CORAN AVANCÉE ==========
-        function renderQuran() {
-            const container = document.createElement('div');
-            container.className = 'flex h-screen bg-background font-sans';
-            
-            container.appendChild(renderSidebar());
-            
-            const main = document.createElement('main');
-            main.className = 'flex-1 flex flex-col overflow-hidden';
-            
-            main.innerHTML = `
-                <div class="flex-1 overflow-auto p-8 space-y-8">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h1 class="font-serif text-3xl font-bold">Saint Coran</h1>
-                            <p class="text-muted-foreground">Écoutez les récitations.</p>
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
-                            <input placeholder="Rechercher une sourate..." 
-                                   class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <!-- Lecteur principal -->
-                        <div class="col-span-1 lg:col-span-2">
-                            <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-8 border-none overflow-hidden relative">
-                                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
-                                    <div>
-                                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Lecture en cours</span>
-                                        <h2 class="text-3xl font-serif font-bold mt-2">Al-Fatiha</h2>
-                                        <p class="text-white/70">The Opening - 7 versets</p>
-                                    </div>
-                                    <div class="space-y-4">
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between text-sm">
-                                                <span>0:24</span>
-                                                <span>0:48</span>
-                                            </div>
-                                            <input type="range" value="50" 
-                                                   class="w-full h-2 bg-white/20 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white">
-                                        </div>
-                                        <div class="flex justify-center items-center gap-6">
-                                            <button class="p-3 text-white hover:bg-white/10 rounded-full">
-                                                <span class="text-xl">⏮️</span>
-                                            </button>
-                                            <button class="w-14 h-14 rounded-full bg-white text-indigo-900 hover:bg-indigo-50 flex items-center justify-center">
-                                                <span class="text-xl ml-1">▶️</span>
-                                            </button>
-                                            <button class="p-3 text-white hover:bg-white/10 rounded-full">
-                                                <span class="text-xl">⏭️</span>
-                                            </button>
-                                        </div>
-                                        <div class="flex justify-center gap-4">
-                                            <button class="p-2 text-white/70 hover:text-white">
-                                                <span>🔁</span>
-                                            </button>
-                                            <button class="p-2 text-white/70 hover:text-white">
-                                                <span>🔀</span>
-                                            </button>
-                                            <button class="p-2 text-white/70 hover:text-white">
-                                                <span>🔊</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Liste des sourates -->
-                        <div class="col-span-1">
-                            <div class="bg-card rounded-xl border border-border p-6">
-                                <h3 class="font-semibold mb-4 flex items-center gap-2">
-                                    <span>🎵</span>
-                                    Sourates
-                                </h3>
-                                <div class="space-y-2 max-h-[500px] overflow-auto">
-                                    ${appData.surahs.map(surah => `
-                                        <div class="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center group"
-                                             onclick="playSurah(${surah.number})">
-                                            <div>
-                                                <div class="font-medium group-hover:text-primary">${surah.number}. ${surah.name}</div>
-                                                <div class="text-xs text-muted-foreground">${surah.englishName} • ${surah.verses} versets</div>
-                                            </div>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-xs text-muted-foreground">${surah.duration}</span>
-                                                <span class="text-lg opacity-0 group-hover:opacity-100">▶️</span>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                            
-                            <!-- Contrôles rapides -->
-                            <div class="mt-6 bg-card rounded-xl border border-border p-6">
-                                <h3 class="font-semibold mb-4">Contrôles rapides</h3>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
-                                        <span class="text-xl mb-1">📖</span>
-                                        <span class="text-sm">Lire</span>
-                                    </button>
-                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
-                                        <span class="text-xl mb-1">🎧</span>
-                                        <span class="text-sm">Écouter</span>
-                                    </button>
-                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
-                                        <span class="text-xl mb-1">⭐</span>
-                                        <span class="text-sm">Favoris</span>
-                                    </button>
-                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
-                                        <span class="text-xl mb-1">⏱️</span>
-                                        <span class="text-sm">Timer</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progression -->
-                    <div class="bg-card rounded-xl border border-border p-6">
-                        <h3 class="font-semibold mb-4">Votre progression</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-sm">Sourates mémorisées</span>
-                                    <span class="text-sm font-medium">3/114</span>
-                                </div>
-                                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
-                                    <div class="h-full bg-green-500 rounded-full" style="width: 8%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between mb-1">
-                                    <span class="text-sm">Jours consécutifs</span>
-                                    <span class="text-sm font-medium">7</span>
-                                </div>
-                                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
-                                    <div class="h-full bg-blue-500 rounded-full" style="width: 30%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(main);
-            return container;
+        function setColor(color) {
+            AppState.currentColor = color;
+            if (AppState.currentTool === 'eraser') AppState.currentTool = 'pen';
+            const picker = document.getElementById('colorPicker');
+            if (picker) picker.classList.add('hidden');
+            if (AppState.currentPage === 'editor') renderApp();
         }
         
-        // ========== AUTRES PAGES ==========
-        function renderPageByType() {
-            switch(appData.currentPage) {
-                case 'dashboard':
-                    return renderDashboard();
-                case 'editor':
-                    return renderEditor();
-                case 'history':
-                    return renderHistory();
-                case 'quran':
-                    return renderQuran();
-                case 'notebooks':
-                    return renderGenericPage('Mes Cahiers', 'Gérez tous vos cahiers de notes');
-                case 'files':
-                    return renderGenericPage('Fichiers', 'Importez et organisez vos documents');
-                case 'settings':
-                    return renderGenericPage('Paramètres', 'Personnalisez votre expérience');
-                default:
-                    return renderDashboard();
+        function setStrokeWidth(width) {
+            AppState.strokeWidth = parseInt(width);
+            if (AppState.currentPage === 'editor') renderApp();
+        }
+        
+        function toggleColorPicker() {
+            const picker = document.getElementById('colorPicker');
+            if (picker) picker.classList.toggle('hidden');
+        }
+        
+        function openNotebook(id) {
+            AppState.activeNotebookId = id;
+            changePage('editor');
+            showToast('Cahier ouvert', 'Vous pouvez maintenant prendre des notes', 'success');
+        }
+        
+        function createNewNotebook() {
+            const newId = (AppState.notebooks.length + 1).toString();
+            const subjects = ['Physique', 'Chimie', 'Maths', 'Français', 'Histoire', 'SVT'];
+            const colors = ['#E0F2FE', '#DCFCE7', '#FAE8FF', '#FEF3C7', '#FCE7F3', '#E0E7FF'];
+            
+            const newNotebook = {
+                id: newId,
+                title: "Nouveau Cahier",
+                subject: subjects[Math.floor(Math.random() * subjects.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
+                lastModified: "À l'instant",
+                pageCount: 1,
+                tags: ["Nouveau"],
+                shared: false,
+                createdAt: new Date().toISOString().split('T')[0],
+                favorite: false
+            };
+            
+            AppState.notebooks.unshift(newNotebook);
+            openNotebook(newId);
+        }
+        
+        function toggleFavorite(id) {
+            const notebook = AppState.notebooks.find(n => n.id === id);
+            if (notebook) {
+                notebook.favorite = !notebook.favorite;
+                showToast(
+                    notebook.favorite ? 'Ajouté aux favoris' : 'Retiré des favoris',
+                    notebook.favorite ? 'Le cahier a été ajouté à vos favoris' : 'Le cahier a été retiré de vos favoris',
+                    'success'
+                );
+                renderApp();
             }
         }
         
-        function renderGenericPage(title, description) {
-            const container = document.createElement('div');
-            container.className = 'flex h-screen bg-background';
-            
-            container.appendChild(renderSidebar());
-            
-            const main = document.createElement('main');
-            main.className = 'flex-1 flex items-center justify-center p-8';
-            
-            main.innerHTML = `
-                <div class="text-center max-w-md">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span class="text-primary text-2xl">🚧</span>
-                    </div>
-                    <h1 class="text-2xl font-bold text-foreground mb-2">${title}</h1>
-                    <p class="text-muted-foreground mb-6">${description}</p>
-                    <p class="text-sm text-muted-foreground mb-8">
-                        Cette fonctionnalité est en cours de développement. Elle sera disponible prochainement.
-                    </p>
-                    <button onclick="changePage('dashboard')" 
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-                        Retour au tableau de bord
-                    </button>
-                </div>
-            `;
-            
-            container.appendChild(main);
-            return container;
+        function shareNotebook(id) {
+            showToast('Partage', 'Lien de partage copié dans le presse-papier', 'success');
         }
         
-        // ========== FONCTIONS CANVAS AVANCÉES ==========
+        function openHistoryItem(id) {
+            showToast('Ouverture', 'Chargement de la version historique...', 'info');
+            setTimeout(() => changePage('editor'), 500);
+        }
+        
+        function handleFileImport() {
+            showToast('Importation', 'Sélectionnez un fichier à importer', 'info');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.png,.doc,.txt';
+            input.onchange = (e) => {
+                if (e.target.files[0]) {
+                    showToast('Fichier importé', `${e.target.files[0].name} a été importé avec succès`, 'success');
+                    createNewNotebook();
+                }
+            };
+            input.click();
+        }
+        
+        // Fonctions Coran
+        function togglePlay() {
+            AppState.quranPlayer.isPlaying = !AppState.quranPlayer.isPlaying;
+            showToast(
+                AppState.quranPlayer.isPlaying ? 'Lecture démarrée' : 'Lecture mise en pause',
+                AppState.quranPlayer.isPlaying ? 'Al-Fatiha en cours de lecture' : 'Lecture suspendue',
+                'info'
+            );
+            renderApp();
+        }
+        
+        function updateQuranTime(time) {
+            AppState.quranPlayer.currentTime = parseInt(time);
+            renderApp();
+        }
+        
+        function updateVolume(volume) {
+            AppState.quranPlayer.volume = parseInt(volume);
+            renderApp();
+        }
+        
+        function toggleRepeat() {
+            AppState.quranPlayer.isRepeating = !AppState.quranPlayer.isRepeating;
+            renderApp();
+        }
+        
+        function toggleShuffle() {
+            AppState.quranPlayer.isShuffling = !AppState.quranPlayer.isShuffling;
+            renderApp();
+        }
+        
+        function previousSurah() {
+            if (AppState.quranPlayer.currentSurah > 1) {
+                AppState.quranPlayer.currentSurah--;
+                playSurah(AppState.quranPlayer.currentSurah);
+            }
+        }
+        
+        function nextSurah() {
+            if (AppState.quranPlayer.currentSurah < 114) {
+                AppState.quranPlayer.currentSurah++;
+                playSurah(AppState.quranPlayer.currentSurah);
+            }
+        }
+        
+        function playSurah(number) {
+            AppState.quranPlayer.currentSurah = number;
+            AppState.quranPlayer.isPlaying = true;
+            const surah = AppState.surahs.find(s => s.number === number);
+            if (surah) {
+                showToast(`Sourate ${surah.name}`, `Lecture de ${surah.englishName} démarrée`, 'info');
+            }
+            renderApp();
+        }
+        
+        function toggleFavoriteSurah(number) {
+            const surah = AppState.surahs.find(s => s.number === number);
+            if (surah) {
+                surah.favorite = !surah.favorite;
+                showToast(
+                    surah.favorite ? 'Ajouté aux favoris' : 'Retiré des favoris',
+                    surah.favorite ? 'La sourate a été ajoutée à vos favoris' : 'La sourate a été retirée de vos favoris',
+                    'success'
+                );
+                renderApp();
+            }
+        }
+        
+        function changeReciter(reciter) {
+            showToast('Récitateur changé', `Passage à ${reciter}`, 'info');
+            renderApp();
+        }
+        
+        // Fonctions Paramètres
+        function toggleDarkMode() {
+            AppState.settings.darkMode = !AppState.settings.darkMode;
+            document.body.classList.toggle('dark', AppState.settings.darkMode);
+            showToast('Mode sombre', AppState.settings.darkMode ? 'Activé' : 'Désactivé', 'info');
+        }
+        
+        function toggleSetting(setting) {
+            AppState.settings[setting] = !AppState.settings[setting];
+            showToast('Paramètre mis à jour', `${setting} ${AppState.settings[setting] ? 'activé' : 'désactivé'}`, 'info');
+        }
+        
+        function changePaperType(type) {
+            AppState.settings.paperType = type;
+            showToast('Type de papier', `Passage au papier ${type}`, 'info');
+        }
+        
+        function updateSmoothing(value) {
+            AppState.settings.handwritingSmoothing = parseInt(value);
+            renderApp();
+        }
+        
+        function changeFontSize(size) {
+            AppState.settings.fontSize = size;
+            showToast('Taille de police', `Taille ${size} appliquée`, 'info');
+        }
+        
+        function saveSettings() {
+            showToast('Paramètres enregistrés', 'Vos préférences ont été sauvegardées', 'success');
+        }
+        
+        function exportAllData() {
+            showToast('Export démarré', 'Vos données sont en cours d\'export...', 'info');
+            setTimeout(() => {
+                showToast('Export terminé', 'Vos données ont été exportées avec succès', 'success');
+            }, 2000);
+        }
+        
+        function deleteAccount() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) {
+                showToast('Compte supprimé', 'Votre compte a été supprimé avec succès', 'success');
+                setTimeout(() => changePage('dashboard'), 1000);
+            }
+        }
+        
+        // Fonctions Canvas
         function initAdvancedCanvas() {
             const canvas = document.getElementById('mainCanvas');
             if (!canvas) return;
@@ -1093,13 +1957,10 @@
             let lastX = 0;
             let lastY = 0;
             
-            // Restaurer l'état précédent si existant
-            if (appData.canvasState) {
+            if (AppState.canvasState) {
                 const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0);
-                };
-                img.src = appData.canvasState;
+                img.onload = () => ctx.drawImage(img, 0, 0);
+                img.src = AppState.canvasState;
             }
             
             function startDrawing(e) {
@@ -1120,20 +1981,19 @@
                 ctx.moveTo(lastX, lastY);
                 ctx.lineTo(x, y);
                 
-                // Appliquer les paramètres actuels
-                if (appData.currentTool === 'eraser') {
+                if (AppState.currentTool === 'eraser') {
                     ctx.strokeStyle = '#FFFFFF';
                     ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = appData.strokeWidth * 2;
+                    ctx.lineWidth = AppState.strokeWidth * 2;
                 } else {
-                    ctx.strokeStyle = appData.currentColor;
+                    ctx.strokeStyle = AppState.currentColor;
                     ctx.globalCompositeOperation = 'source-over';
-                    if (appData.currentTool === 'highlighter') {
+                    if (AppState.currentTool === 'highlighter') {
                         ctx.globalAlpha = 0.4;
-                        ctx.lineWidth = appData.strokeWidth * 3;
+                        ctx.lineWidth = AppState.strokeWidth * 3;
                     } else {
                         ctx.globalAlpha = 1;
-                        ctx.lineWidth = appData.strokeWidth;
+                        ctx.lineWidth = AppState.strokeWidth;
                     }
                 }
                 
@@ -1145,17 +2005,16 @@
             
             function stopDrawing() {
                 isDrawing = false;
-                // Sauvegarder l'état
-                appData.canvasState = canvas.toDataURL();
+                AppState.canvasState = canvas.toDataURL();
             }
             
-            // Événements souris
+            // Événements
             canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', stopDrawing);
             canvas.addEventListener('mouseout', stopDrawing);
             
-            // Événements tactiles
+            // Touch events
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (e.touches.length === 1) {
@@ -1179,19 +2038,19 @@
                     ctx.moveTo(lastX, lastY);
                     ctx.lineTo(x, y);
                     
-                    if (appData.currentTool === 'eraser') {
+                    if (AppState.currentTool === 'eraser') {
                         ctx.strokeStyle = '#FFFFFF';
                         ctx.globalCompositeOperation = 'destination-out';
-                        ctx.lineWidth = appData.strokeWidth * 2;
+                        ctx.lineWidth = AppState.strokeWidth * 2;
                     } else {
-                        ctx.strokeStyle = appData.currentColor;
+                        ctx.strokeStyle = AppState.currentColor;
                         ctx.globalCompositeOperation = 'source-over';
-                        if (appData.currentTool === 'highlighter') {
+                        if (AppState.currentTool === 'highlighter') {
                             ctx.globalAlpha = 0.4;
-                            ctx.lineWidth = appData.strokeWidth * 3;
+                            ctx.lineWidth = AppState.strokeWidth * 3;
                         } else {
                             ctx.globalAlpha = 1;
-                            ctx.lineWidth = appData.strokeWidth;
+                            ctx.lineWidth = AppState.strokeWidth;
                         }
                     }
                     
@@ -1203,159 +2062,77 @@
             });
             
             canvas.addEventListener('touchend', stopDrawing);
-            canvas.addEventListener('touchcancel', stopDrawing);
-        }
-        
-        // ========== FONCTIONS DE L'APPLICATION ==========
-        function changePage(page) {
-            appData.currentPage = page;
-            renderApp();
-            
-            // Ajouter une animation
-            const app = document.getElementById('app');
-            app.classList.add('animate-in');
-            setTimeout(() => app.classList.remove('animate-in'), 300);
-        }
-        
-        function setTool(toolId) {
-            appData.currentTool = toolId;
-            const tool = appData.tools.find(t => t.id === toolId);
-            if (tool) {
-                appData.strokeWidth = tool.defaultWidth;
-            }
-            
-            if (appData.currentPage === 'editor') {
-                renderApp();
-            }
-        }
-        
-        function setColor(color) {
-            appData.currentColor = color;
-            if (appData.currentTool === 'eraser') {
-                appData.currentTool = 'pen';
-            }
-            
-            // Fermer le color picker
-            const picker = document.getElementById('colorPicker');
-            if (picker) {
-                picker.classList.add('hidden');
-            }
-            
-            if (appData.currentPage === 'editor') {
-                renderApp();
-            }
-        }
-        
-        function setStrokeWidth(width) {
-            appData.strokeWidth = parseInt(width);
-            
-            if (appData.currentPage === 'editor') {
-                renderApp();
-            }
-        }
-        
-        function toggleColorPicker() {
-            const picker = document.getElementById('colorPicker');
-            if (picker) {
-                picker.classList.toggle('hidden');
-            }
-        }
-        
-        function openNotebook(id) {
-            appData.activeNotebookId = id;
-            changePage('editor');
-            showToast('Cahier ouvert', 'Vous pouvez maintenant prendre des notes', 'success');
-        }
-        
-        function createNewNotebook() {
-            const newId = (appData.notebooks.length + 1).toString();
-            const subjects = ['Physique', 'Chimie', 'Maths', 'Français', 'Histoire', 'SVT'];
-            const colors = ['#E0F2FE', '#DCFCE7', '#FAE8FF', '#FEF3C7', '#FCE7F3', '#E0E7FF'];
-            
-            const newNotebook = {
-                id: newId,
-                title: "Nouveau Cahier",
-                subject: subjects[Math.floor(Math.random() * subjects.length)],
-                color: colors[Math.floor(Math.random() * colors.length)],
-                lastModified: "À l'instant",
-                pageCount: 1,
-                tags: ["Nouveau"],
-                shared: false
-            };
-            
-            appData.notebooks.unshift(newNotebook);
-            openNotebook(newId);
         }
         
         function saveCanvas() {
             const canvas = document.getElementById('mainCanvas');
             if (canvas) {
-                appData.canvasState = canvas.toDataURL();
+                AppState.canvasState = canvas.toDataURL();
                 showToast('Sauvegarde réussie', 'Vos modifications ont été enregistrées', 'success');
                 
-                // Simuler un enregistrement dans l'historique
                 const newHistoryItem = {
-                    id: appData.historyItems.length + 1,
+                    id: AppState.historyItems.length + 1,
                     title: "Devoir de Physique - Chapitre 4",
                     subject: "Physique",
                     date: "À l'instant",
-                    preview: "Dernière modification sauvegardée"
+                    preview: "Dernière modification sauvegardée",
+                    type: "edit",
+                    duration: "5 min"
                 };
-                appData.historyItems.unshift(newHistoryItem);
+                AppState.historyItems.unshift(newHistoryItem);
             }
         }
         
-        function handleFileImport() {
-            showToast('Importation', 'Sélectionnez un fichier à importer', 'info');
-            // Simuler un input file
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.pdf,.jpg,.png,.doc,.txt';
-            input.onchange = (e) => {
-                if (e.target.files[0]) {
-                    showToast('Fichier importé', `${e.target.files[0].name} a été importé avec succès`, 'success');
-                    
-                    // Créer un nouveau cahier pour le fichier
-                    createNewNotebook();
-                }
-            };
-            input.click();
-        }
-        
-        function playSurah(number) {
-            const surah = appData.surahs.find(s => s.number === number);
-            if (surah) {
-                showToast(`Sourate ${surah.name}`, `Lecture de ${surah.englishName} démarrée`, 'info');
-            }
-        }
-        
-        function openHistoryItem(id) {
-            showToast('Ouverture', 'Chargement de la version historique...', 'info');
-            setTimeout(() => {
-                changePage('editor');
-            }, 500);
-        }
-        
-        // ========== RENDU PRINCIPAL ==========
+        // ========== ROUTAGE PRINCIPAL ==========
         function renderApp() {
             const app = document.getElementById('app');
             app.innerHTML = '';
             
-            const page = renderPageByType();
+            let page;
+            switch(AppState.currentPage) {
+                case 'dashboard':
+                    page = renderDashboard();
+                    break;
+                case 'notebooks':
+                    page = renderNotebooks();
+                    break;
+                case 'history':
+                    page = renderHistory();
+                    break;
+                case 'files':
+                    page = renderFiles();
+                    break;
+                case 'quran':
+                    page = renderQuran();
+                    break;
+                case 'settings':
+                    page = renderSettings();
+                    break;
+                case 'editor':
+                    page = renderEditor();
+                    break;
+                default:
+                    page = renderDashboard();
+            }
+            
             app.appendChild(page);
         }
         
         // ========== INITIALISATION ==========
         document.addEventListener('DOMContentLoaded', () => {
-            renderApp();
+            // Gérer le routage par hash
+            function handleHashChange() {
+                const page = getCurrentPageFromURL() || 'dashboard';
+                if (page !== AppState.currentPage) {
+                    AppState.currentPage = page;
+                    renderApp();
+                }
+            }
             
-            // Ajouter des styles de police
-            const style = document.createElement('style');
-            style.textContent = `
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-                body { font-family: 'Inter', sans-serif; }
-            `;
-            document.head.appendChild(style);
+            window.addEventListener('hashchange', handleHashChange);
+            
+            // Initial render
+            renderApp();
             
             // Exposer les fonctions globalement
             window.changePage = changePage;
@@ -1365,12 +2142,31 @@
             window.toggleColorPicker = toggleColorPicker;
             window.openNotebook = openNotebook;
             window.createNewNotebook = createNewNotebook;
-            window.saveCanvas = saveCanvas;
-            window.handleFileImport = handleFileImport;
-            window.playSurah = playSurah;
+            window.toggleFavorite = toggleFavorite;
+            window.shareNotebook = shareNotebook;
             window.openHistoryItem = openHistoryItem;
+            window.handleFileImport = handleFileImport;
+            window.togglePlay = togglePlay;
+            window.updateQuranTime = updateQuranTime;
+            window.updateVolume = updateVolume;
+            window.toggleRepeat = toggleRepeat;
+            window.toggleShuffle = toggleShuffle;
+            window.previousSurah = previousSurah;
+            window.nextSurah = nextSurah;
+            window.playSurah = playSurah;
+            window.toggleFavoriteSurah = toggleFavoriteSurah;
+            window.changeReciter = changeReciter;
+            window.toggleDarkMode = toggleDarkMode;
+            window.toggleSetting = toggleSetting;
+            window.changePaperType = changePaperType;
+            window.updateSmoothing = updateSmoothing;
+            window.changeFontSize = changeFontSize;
+            window.saveSettings = saveSettings;
+            window.exportAllData = exportAllData;
+            window.deleteAccount = deleteAccount;
+            window.saveCanvas = saveCanvas;
             
-            console.log('SmartNotes chargé avec succès ! 🚀');
+            console.log('SmartNotes chargé avec succès ! 🎉');
         });
         
     </script>
