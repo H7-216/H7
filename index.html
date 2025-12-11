@@ -1,470 +1,497 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartNotes</title>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- React & ReactDOM (UMD) -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  
-  <!-- Wouter pour le routing -->
-  <script src="https://unpkg.com/wouter@3.0.0/wouter.js"></script>
-  
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartNotes - Cahier Numérique</title>
     
-    .bg-seyes {
-      background-color: #ffffff;
-      background-image: 
-        linear-gradient(0deg, #d4d4d4 1px, transparent 1px),
-        linear-gradient(0deg, #e5e7eb 1px, transparent 1px),
-        linear-gradient(90deg, #fca5a5 1px, transparent 1px),
-        linear-gradient(90deg, #d4d4d4 1px, transparent 1px);
-      background-size: 100% 32px, 100% 8px, 100% 100%, 32px 100%;
-      background-position: 0 0, 0 0, 40px 0, 0 0;
-    }
+    <!-- Tailwind CSS simple -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    #root {
-      height: 100vh;
-      width: 100vw;
-    }
-    
-    .paper-shadow {
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-  </style>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        
+        .bg-seyes {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(0deg, #d4d4d4 1px, transparent 1px),
+                linear-gradient(0deg, #e5e7eb 1px, transparent 1px),
+                linear-gradient(90deg, #fca5a5 1px, transparent 1px),
+                linear-gradient(90deg, #d4d4d4 1px, transparent 1px);
+            background-size: 100% 32px, 100% 8px, 100% 100%, 32px 100%;
+            background-position: 0 0, 0 0, 40px 0, 0 0;
+        }
+        
+        .paper-shadow {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
+    <!-- Application Container -->
+    <div id="app" class="h-screen">
+        <!-- La navigation va s'afficher ici -->
+    </div>
 
-  <script>
-    // Accès aux librairies globales
-    const { useState, useEffect, useRef } = React;
-    const { createRoot } = ReactDOM;
-    const { Link, Route, Switch, useLocation } = wouter;
-
-    // Composant d'icône simplifié
-    const Icon = ({ name, className, ...props }) => {
-      const icons = {
-        Dashboard: '📊',
-        Book: '📕',
-        History: '🕐',
-        Folder: '📁',
-        Moon: '🌙',
-        Settings: '⚙️',
-        Plus: '+',
-        Search: '🔍',
-        Filter: '⏳',
-        Upload: '☁️',
-        Menu: '⋮',
-        Clock: '🕐',
-        Pen: '✏️',
-        Highlighter: '🖍️',
-        Eraser: '🗑️',
-        Back: '←',
-        File: '📄',
-        Save: '💾',
-        Check: '✓',
-        Play: '▶️',
-        Pause: '⏸️',
-        Music: '🎵',
-        Calendar: '📅'
-      };
-      
-      return React.createElement('span', {
-        className: `inline-flex items-center justify-center ${className || ''}`,
-        ...props
-      }, icons[name] || '□');
-    };
-
-    // Composant Button simplifié
-    const Button = ({ children, onClick, className = '', variant = 'default', ...props }) => {
-      const baseClasses = "px-4 py-2 rounded-lg font-medium transition-all active:scale-95";
-      const variants = {
-        default: "bg-blue-600 text-white hover:bg-blue-700",
-        outline: "border border-gray-300 hover:bg-gray-50",
-        ghost: "hover:bg-gray-100"
-      };
-      
-      return React.createElement('button', {
-        className: `${baseClasses} ${variants[variant]} ${className}`,
-        onClick,
-        ...props
-      }, children);
-    };
-
-    // Composant Input simplifié
-    const Input = ({ placeholder, className = '', ...props }) => {
-      return React.createElement('input', {
-        type: "text",
-        placeholder,
-        className: `px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`,
-        ...props
-      });
-    };
-
-    // --- PAGES ---
-
-    // Tableau de bord
-    function Dashboard() {
-      const [notebooks] = useState([
-        { id: "1", title: "Physique - Chapitre 4", subject: "Physique", color: "#E0F2FE", lastModified: "Il y a 2h", pageCount: 12 },
-        { id: "2", title: "Chimie - Acides/Bases", subject: "Chimie", color: "#DCFCE7", lastModified: "Hier", pageCount: 4 },
-        { id: "3", title: "Français - Molière", subject: "Français", color: "#FAE8FF", lastModified: "Il y a 2j", pageCount: 8 },
-      ]);
-
-      return React.createElement('div', { className: "h-screen flex bg-gray-50" },
-        // Sidebar
-        React.createElement('div', { className: "w-64 bg-white border-r hidden md:flex flex-col p-4" },
-          React.createElement('div', { className: "mb-8 flex items-center gap-2" },
-            React.createElement('div', { className: "w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center" },
-              React.createElement(Icon, { name: "Book", className: "text-white w-5 h-5" })
-            ),
-            React.createElement('span', { className: "text-xl font-bold" }, "SmartNotes")
-          ),
-          React.createElement(Button, { 
-            className: "w-full mb-6 justify-center gap-2",
-            variant: "default" 
-          },
-            React.createElement(Icon, { name: "Plus" }),
-            "Nouvelle Note"
-          ),
-          React.createElement('nav', { className: "space-y-1 flex-1" },
-            ['Tableau de bord', 'Mes Cahiers', 'Historique', 'Fichiers', 'Coran', 'Paramètres'].map((item, idx) =>
-              React.createElement(Link, { 
-                key: idx, 
-                href: idx === 0 ? "/" : `/${item.toLowerCase().replace(' ', '-')}` 
-              },
-                React.createElement('div', { 
-                  className: "px-3 py-2.5 rounded-lg text-sm hover:bg-gray-100 cursor-pointer flex items-center gap-3"
-                },
-                  React.createElement(Icon, { name: item.split(' ')[0] }),
-                  item
-                )
-              )
-            )
-          ),
-          React.createElement('div', { className: "mt-auto pt-4 border-t" },
-            React.createElement('div', { className: "flex items-center gap-3 px-2 py-2" },
-              React.createElement('div', { className: "w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500" }),
-              React.createElement('div', { className: "flex flex-col" },
-                React.createElement('span', { className: "text-sm font-medium" }, "Étudiant"),
-                React.createElement('span', { className: "text-xs text-gray-500" }, "Premium Plan")
-              )
-            )
-          )
-        ),
+    <script>
+        // APPLICATION SMARTNOTES - Version ULTRA SIMPLE
+        // ==============================================
         
-        // Contenu principal
-        React.createElement('main', { className: "flex-1 overflow-auto p-8" },
-          React.createElement('div', { className: "max-w-7xl mx-auto space-y-8" },
-            // En-tête
-            React.createElement('div', { className: "flex flex-col md:flex-row justify-between gap-4" },
-              React.createElement('div', null,
-                React.createElement('h1', { className: "text-3xl font-bold" }, "Bonjour, Alex"),
-                React.createElement('p', { className: "text-gray-600 mt-1" }, "Prêt pour tes devoirs aujourd'hui ?")
-              ),
-              React.createElement('div', { className: "flex items-center gap-3" },
-                React.createElement('div', { className: "relative" },
-                  React.createElement(Icon, { name: "Search", className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" }),
-                  React.createElement(Input, { placeholder: "Rechercher une note...", className: "pl-10 w-64" })
-                ),
-                React.createElement(Button, { variant: "outline", className: "p-2" },
-                  React.createElement(Icon, { name: "Filter" })
-                )
-              )
-            ),
+        // Données de l'application
+        const notebooks = [
+            { id: 1, title: "Physique - Thermodynamique", subject: "Physique", color: "#E0F2FE", date: "Aujourd'hui", pages: 12 },
+            { id: 2, title: "Chimie - Acides/Bases", subject: "Chimie", color: "#DCFCE7", date: "Hier", pages: 8 },
+            { id: 3, title: "Français - Molière", subject: "Français", color: "#FAE8FF", date: "2 jours", pages: 15 }
+        ];
+        
+        const menuItems = [
+            { id: "dashboard", name: "Tableau de bord", icon: "📊" },
+            { id: "notebooks", name: "Mes Cahiers", icon: "📕" },
+            { id: "history", name: "Historique", icon: "🕐" },
+            { id: "quran", name: "Coran", icon: "🌙" },
+            { id: "settings", name: "Paramètres", icon: "⚙️" }
+        ];
+        
+        // État de l'application
+        let currentPage = 'dashboard';
+        let currentTool = 'pen';
+        let currentColor = '#000000';
+        
+        // Fonctions utilitaires
+        function renderPage() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
             
-            // Zone d'import
-            React.createElement('div', { 
-              className: "border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-colors cursor-pointer"
-            },
-              React.createElement('div', { className: "w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4" },
-                React.createElement(Icon, { name: "Upload", className: "w-6 h-6" })
-              ),
-              React.createElement('h3', { className: "text-lg font-medium" }, "Importer un exercice ou un PDF"),
-              React.createElement('p', { className: "text-gray-600 mt-1 max-w-md mx-auto" }, "Glissez-déposez votre fichier ici")
-            ),
+            switch(currentPage) {
+                case 'dashboard':
+                    app.appendChild(renderDashboard());
+                    break;
+                case 'editor':
+                    app.appendChild(renderEditor());
+                    break;
+                case 'quran':
+                    app.appendChild(renderQuran());
+                    break;
+                default:
+                    app.appendChild(renderDashboard());
+            }
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            renderPage();
+        }
+        
+        // Rendu du Dashboard
+        function renderDashboard() {
+            const container = document.createElement('div');
+            container.className = 'h-screen flex';
             
-            // Cahiers récents
-            React.createElement('div', { className: "space-y-4" },
-              React.createElement('div', { className: "flex justify-between items-center" },
-                React.createElement('h2', { className: "text-xl font-semibold" }, "Cahiers Récents"),
-                React.createElement(Button, { variant: "ghost" }, "Tout voir")
-              ),
-              React.createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" },
-                // Nouveau cahier
-                React.createElement('div', { 
-                  className: "aspect-[3/4] rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                },
-                  React.createElement('div', { className: "w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3" },
-                    React.createElement(Icon, { name: "Plus", className: "w-6 h-6 text-gray-500" })
-                  ),
-                  React.createElement('span', { className: "font-medium text-gray-600" }, "Nouveau Cahier")
-                ),
+            // Sidebar
+            const sidebar = document.createElement('div');
+            sidebar.className = 'w-64 bg-white border-r hidden md:flex flex-col p-4';
+            
+            sidebar.innerHTML = `
+                <div class="mb-8 flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-lg">📕</span>
+                    </div>
+                    <span class="text-xl font-bold">SmartNotes</span>
+                </div>
                 
-                // Cahiers existants
-                ...notebooks.map(notebook =>
-                  React.createElement(Link, { key: notebook.id, href: `/editor/${notebook.id}` },
-                    React.createElement('div', { 
-                      className: "aspect-[3/4] rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                    },
-                      React.createElement('div', { 
-                        className: "h-1/3 rounded-t-xl p-4",
-                        style: { backgroundColor: notebook.color }
-                      },
-                        React.createElement('div', { className: "flex justify-end" },
-                          React.createElement(Button, { variant: "ghost", className: "p-1" },
-                            React.createElement(Icon, { name: "Menu", className: "w-4 h-4" })
-                          )
-                        ),
-                        React.createElement('div', { className: "bg-white/90 self-start px-2 py-1 rounded text-xs font-semibold uppercase" },
-                          notebook.subject
-                        )
-                      ),
-                      React.createElement('div', { className: "p-5 flex flex-col h-2/3" },
-                        React.createElement('h3', { className: "text-lg font-medium mb-2 line-clamp-2" }, notebook.title),
-                        React.createElement('div', { className: "mt-auto space-y-3" },
-                          React.createElement('div', { className: "flex items-center gap-2 text-xs text-gray-500" },
-                            React.createElement(Icon, { name: "Clock", className: "w-3.5 h-3.5" }),
-                            notebook.lastModified
-                          ),
-                          React.createElement('div', { className: "flex justify-between items-center border-t pt-3" },
-                            React.createElement('span', { className: "text-xs font-medium text-gray-500" }, `${notebook.pageCount} pages`),
-                            React.createElement('div', { className: "w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700" }, "A")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          )
-        )
-      );
-    }
-
-    // Éditeur
-    function Editor() {
-      const [tool, setTool] = useState("pen");
-      const [color, setColor] = useState("#000000");
-      const canvasRef = useRef(null);
-      const [isDrawing, setIsDrawing] = useState(false);
-      const lastPoint = useRef(null);
-
-      const startDrawing = (e) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        
-        const rect = canvas.getBoundingClientRect();
-        lastPoint.current = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-        setIsDrawing(true);
-      };
-
-      const draw = (e) => {
-        if (!isDrawing || !lastPoint.current || !canvasRef.current) return;
-        
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        const rect = canvas.getBoundingClientRect();
-        const currentPoint = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        };
-
-        ctx.beginPath();
-        ctx.moveTo(lastPoint.current.x, lastPoint.current.y);
-        ctx.lineTo(currentPoint.x, currentPoint.y);
-        ctx.strokeStyle = tool === "eraser" ? "#FFFFFF" : color;
-        ctx.lineWidth = tool === "eraser" ? 20 : tool === "highlighter" ? 15 : 2;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        if (tool === "highlighter") ctx.globalAlpha = 0.4;
-        ctx.stroke();
-        
-        lastPoint.current = currentPoint;
-      };
-
-      const stopDrawing = () => {
-        setIsDrawing(false);
-        lastPoint.current = null;
-      };
-
-      return React.createElement('div', { className: "h-screen flex flex-col" },
-        // Barre d'outils
-        React.createElement('div', { className: "h-16 border-b bg-white flex items-center justify-between px-4" },
-          React.createElement('div', { className: "flex items-center gap-4" },
-            React.createElement(Link, { href: "/" },
-              React.createElement(Button, { variant: "ghost", className: "p-2" },
-                React.createElement(Icon, { name: "Back" })
-              )
-            ),
-            React.createElement('div', null,
-              React.createElement('h1', { className: "text-sm font-semibold" }, "Devoir de Physique"),
-              React.createElement('span', { className: "text-xs text-gray-500" }, "Enregistré")
-            )
-          ),
-          
-          React.createElement('div', { className: "flex items-center gap-2" },
-            React.createElement(Button, {
-              variant: tool === "pen" ? "default" : "outline",
-              onClick: () => setTool("pen"),
-              className: "flex items-center gap-2"
-            },
-              React.createElement(Icon, { name: "Pen" }),
-              "Stylo"
-            ),
-            React.createElement(Button, {
-              variant: tool === "highlighter" ? "default" : "outline",
-              onClick: () => setTool("highlighter"),
-              className: "flex items-center gap-2"
-            },
-              React.createElement(Icon, { name: "Highlighter" }),
-              "Surligneur"
-            ),
-            React.createElement(Button, {
-              variant: tool === "eraser" ? "default" : "outline",
-              onClick: () => setTool("eraser"),
-              className: "flex items-center gap-2"
-            },
-              React.createElement(Icon, { name: "Eraser" }),
-              "Gomme"
-            )
-          ),
-          
-          React.createElement('div', { className: "flex items-center gap-2" },
-            React.createElement('input', {
-              type: "color",
-              value: color,
-              onChange: (e) => setColor(e.target.value),
-              className: "w-8 h-8 cursor-pointer"
-            }),
-            React.createElement(Button, { 
-              className: "flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
-            },
-              React.createElement(Icon, { name: "Save" }),
-              "Enregistrer"
-            )
-          )
-        ),
-        
-        // Canvas
-        React.createElement('div', { className: "flex-1 flex justify-center items-center p-8 bg-gray-100" },
-          React.createElement('div', { className: "bg-white paper-shadow" },
-            React.createElement('canvas', {
-              ref: canvasRef,
-              className: "bg-seyes",
-              width: "800",
-              height: "1131",
-              onMouseDown: startDrawing,
-              onMouseMove: draw,
-              onMouseUp: stopDrawing,
-              onMouseLeave: stopDrawing,
-              style: { cursor: "crosshair" }
-            })
-          )
-        )
-      );
-    }
-
-    // Page Coran
-    function Quran() {
-      return React.createElement('div', { className: "h-screen flex bg-gray-50" },
-        React.createElement('div', { className: "w-64 bg-white border-r hidden md:flex flex-col p-4" },
-          React.createElement('div', { className: "mb-8 flex items-center gap-2" },
-            React.createElement(Icon, { name: "Book", className: "text-blue-600 w-8 h-8" }),
-            React.createElement('span', { className: "text-xl font-bold" }, "SmartNotes")
-          )
-        ),
-        
-        React.createElement('main', { className: "flex-1 p-8" },
-          React.createElement('div', { className: "max-w-4xl mx-auto" },
-            React.createElement('h1', { className: "text-3xl font-bold mb-2" }, "Saint Coran"),
-            React.createElement('p', { className: "text-gray-600 mb-8" }, "Écoutez les récitations"),
+                <button onclick="changePage('editor')" 
+                        class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium mb-6 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                    <span>+</span>
+                    Nouvelle Note
+                </button>
+                
+                <nav class="space-y-1 flex-1">
+                    ${menuItems.map(item => `
+                        <div onclick="changePage('${item.id}')" 
+                             class="px-3 py-2.5 rounded-lg text-sm cursor-pointer flex items-center gap-3 hover:bg-gray-100 ${currentPage === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}">
+                            <span class="text-lg">${item.icon}</span>
+                            ${item.name}
+                        </div>
+                    `).join('')}
+                </nav>
+                
+                <div class="mt-auto pt-4 border-t">
+                    <div class="flex items-center gap-3 px-2 py-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500"></div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-medium">Étudiant</span>
+                            <span class="text-xs text-gray-500">Premium Plan</span>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            React.createElement('div', { className: "bg-gradient-to-br from-blue-900 to-purple-900 text-white rounded-xl p-8 mb-8" },
-              React.createElement('div', { className: "mb-6" },
-                React.createElement('span', { className: "bg-white/20 px-3 py-1 rounded-full text-sm" }, "Lecture en cours"),
-                React.createElement('h2', { className: "text-2xl font-bold mt-2" }, "Al-Fatiha"),
-                React.createElement('p', { className: "text-white/70" }, "The Opening")
-              ),
-              
-              React.createElement('div', null,
-                React.createElement('input', {
-                  type: "range",
-                  className: "w-full h-2 bg-white/20 rounded-lg appearance-none",
-                  defaultValue: "30"
-                }),
-                React.createElement('div', { className: "flex justify-center gap-6 mt-6" },
-                  React.createElement(Button, { variant: "ghost", className: "text-white p-3" },
-                    React.createElement(Icon, { name: "Back", className: "w-6 h-6" })
-                  ),
-                  React.createElement(Button, { className: "bg-white text-blue-900 p-4 rounded-full w-14 h-14" },
-                    React.createElement(Icon, { name: "Play", className: "w-6 h-6" })
-                  ),
-                  React.createElement(Button, { variant: "ghost", className: "text-white p-3" },
-                    React.createElement(Icon, { name: "Back", className: "w-6 h-6 rotate-180" })
-                  )
-                )
-              )
-            ),
+            // Contenu principal
+            const main = document.createElement('main');
+            main.className = 'flex-1 overflow-auto p-4 md:p-8 bg-gray-50';
             
-            React.createElement('div', { className: "bg-white rounded-xl p-6" },
-              React.createElement('h3', { className: "font-semibold mb-4 flex items-center gap-2" },
-                React.createElement(Icon, { name: "Music" }),
-                "Sourates"
-              ),
-              React.createElement('div', { className: "space-y-3" },
-                [
-                  { number: 1, name: "Al-Fatiha", duration: "0:48" },
-                  { number: 2, name: "Al-Baqarah", duration: "2:45:12" },
-                  { number: 3, name: "Al-Imran", duration: "1:22:45" }
-                ].map(surah =>
-                  React.createElement('div', { 
-                    key: surah.number,
-                    className: "p-3 hover:bg-gray-50 rounded-lg cursor-pointer flex justify-between items-center"
-                  },
-                    React.createElement('div', { className: "font-medium" }, `${surah.number}. ${surah.name}`),
-                    React.createElement('span', { className: "text-sm text-gray-500" }, surah.duration)
-                  )
-                )
-              )
-            )
-          )
-        )
-      );
-    }
-
-    // Application principale
-    function App() {
-      return React.createElement(Switch, null,
-        React.createElement(Route, { path: "/", component: Dashboard }),
-        React.createElement(Route, { path: "/editor/:id", component: Editor }),
-        React.createElement(Route, { path: "/coran", component: Quran }),
-        React.createElement(Route, null,
-          React.createElement('div', { className: "h-screen flex items-center justify-center" },
-            "404 - Page non trouvée"
-          )
-        )
-      );
-    }
-
-    // Rendu de l'application
-    const root = createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
-  </script>
+            main.innerHTML = `
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- En-tête -->
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Bonjour, Alex</h1>
+                            <p class="text-gray-600 mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                <input type="text" 
+                                       placeholder="Rechercher une note..." 
+                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone d'import -->
+                    <div onclick="alert('Fonctionnalité d\'import en développement')" 
+                         class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-xl">☁️</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">Importer un exercice ou un PDF</h3>
+                        <p class="text-gray-600 mt-1 max-w-md mx-auto">Glissez-déposez votre fichier ici</p>
+                    </div>
+                    
+                    <!-- Cahiers récents -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-xl font-semibold text-gray-900">Cahiers Récents</h2>
+                            <button class="text-blue-600 hover:text-blue-800 font-medium">Tout voir</button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <!-- Nouveau cahier -->
+                            <div onclick="changePage('editor')" 
+                                 class="aspect-[3/4] rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                                <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                                    <span class="text-gray-500 text-xl">+</span>
+                                </div>
+                                <span class="font-medium text-gray-600">Nouveau Cahier</span>
+                            </div>
+                            
+                            <!-- Cahiers existants -->
+                            ${notebooks.map(notebook => `
+                                <div onclick="changePage('editor')" 
+                                     class="aspect-[3/4] rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                                    <div class="h-1/3 rounded-t-xl p-4" style="background-color: ${notebook.color}">
+                                        <div class="flex justify-end">
+                                            <button class="p-1 hover:bg-black/10 rounded-full">
+                                                <span>⋮</span>
+                                            </button>
+                                        </div>
+                                        <div class="bg-white/90 self-start px-2 py-1 rounded text-xs font-semibold uppercase">
+                                            ${notebook.subject}
+                                        </div>
+                                    </div>
+                                    <div class="p-5 flex flex-col h-2/3">
+                                        <h3 class="text-lg font-medium mb-2 line-clamp-2">${notebook.title}</h3>
+                                        <div class="mt-auto space-y-3">
+                                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                                <span>🕐</span>
+                                                <span>${notebook.date}</span>
+                                            </div>
+                                            <div class="flex justify-between items-center border-t pt-3">
+                                                <span class="text-xs font-medium text-gray-500">${notebook.pages} pages</span>
+                                                <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">A</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(sidebar);
+            container.appendChild(main);
+            return container;
+        }
+        
+        // Rendu de l'Éditeur
+        function renderEditor() {
+            const container = document.createElement('div');
+            container.className = 'h-screen flex flex-col';
+            
+            // Barre d'outils
+            const toolbar = document.createElement('div');
+            toolbar.className = 'h-16 bg-white border-b flex items-center justify-between px-4';
+            
+            toolbar.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <button onclick="changePage('dashboard')" 
+                            class="p-2 hover:bg-gray-100 rounded-lg">
+                        <span>←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-sm font-semibold">Devoir de Physique</h1>
+                        <span class="text-xs text-gray-500">Chapitre 4 - Enregistré</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <div class="flex bg-gray-100 p-1 rounded-lg">
+                        <button onclick="currentTool='pen'; updateEditor()" 
+                                class="px-4 py-2 rounded ${currentTool === 'pen' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
+                            ✏️ Stylo
+                        </button>
+                        <button onclick="currentTool='highlighter'; updateEditor()" 
+                                class="px-4 py-2 rounded ${currentTool === 'highlighter' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
+                            🖍️ Surligneur
+                        </button>
+                        <button onclick="currentTool='eraser'; updateEditor()" 
+                                class="px-4 py-2 rounded ${currentTool === 'eraser' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
+                            🗑️ Gomme
+                        </button>
+                    </div>
+                    
+                    <input type="color" 
+                           value="${currentColor}" 
+                           onchange="currentColor=this.value; updateEditor()"
+                           class="w-10 h-10 cursor-pointer">
+                           
+                    <button onclick="alert('Cahier enregistré !')" 
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
+                        <span>💾</span> Enregistrer
+                    </button>
+                </div>
+            `;
+            
+            // Zone de dessin
+            const drawingArea = document.createElement('div');
+            drawingArea.className = 'flex-1 flex justify-center items-center p-4 bg-gray-100';
+            
+            drawingArea.innerHTML = `
+                <div class="paper-shadow relative">
+                    <div class="absolute top-6 left-12 z-10 opacity-50 text-blue-800 font-mono text-sm">
+                        ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                    <canvas id="drawingCanvas" 
+                            class="bg-seyes"
+                            width="800" 
+                            height="1131"
+                            style="cursor: crosshair">
+                    </canvas>
+                </div>
+            `;
+            
+            container.appendChild(toolbar);
+            container.appendChild(drawingArea);
+            
+            // Initialiser le canvas
+            setTimeout(() => {
+                initCanvas();
+            }, 100);
+            
+            return container;
+        }
+        
+        // Rendu de la page Coran
+        function renderQuran() {
+            const container = document.createElement('div');
+            container.className = 'h-screen flex';
+            
+            // Sidebar
+            const sidebar = document.createElement('div');
+            sidebar.className = 'w-64 bg-white border-r hidden md:flex flex-col p-4';
+            
+            sidebar.innerHTML = `
+                <div class="mb-8 flex items-center gap-2">
+                    <span class="text-2xl">📕</span>
+                    <span class="text-xl font-bold">SmartNotes</span>
+                </div>
+                
+                <nav class="space-y-1 flex-1">
+                    ${menuItems.map(item => `
+                        <div onclick="changePage('${item.id}')" 
+                             class="px-3 py-2.5 rounded-lg text-sm cursor-pointer flex items-center gap-3 hover:bg-gray-100 ${currentPage === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}">
+                            <span class="text-lg">${item.icon}</span>
+                            ${item.name}
+                        </div>
+                    `).join('')}
+                </nav>
+            `;
+            
+            // Contenu Coran
+            const main = document.createElement('main');
+            main.className = 'flex-1 p-4 md:p-8 bg-gray-50 overflow-auto';
+            
+            main.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Saint Coran</h1>
+                    <p class="text-gray-600 mb-8">Écoutez les récitations et méditez</p>
+                    
+                    <!-- Lecteur audio -->
+                    <div class="bg-gradient-to-br from-blue-900 to-purple-900 text-white rounded-xl p-8 mb-8">
+                        <div class="mb-6">
+                            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Lecture en cours</span>
+                            <h2 class="text-2xl font-bold mt-2">Al-Fatiha</h2>
+                            <p class="text-white/70">The Opening - 7 versets</p>
+                        </div>
+                        
+                        <div>
+                            <input type="range" 
+                                   class="w-full h-2 bg-white/20 rounded-lg appearance-none"
+                                   value="30">
+                                   
+                            <div class="flex justify-center items-center gap-6 mt-6">
+                                <button class="p-3 text-white hover:bg-white/10 rounded-full">
+                                    <span class="text-xl">⏮️</span>
+                                </button>
+                                <button class="bg-white text-blue-900 p-4 rounded-full w-14 h-14 flex items-center justify-center">
+                                    <span class="text-xl">▶️</span>
+                                </button>
+                                <button class="p-3 text-white hover:bg-white/10 rounded-full">
+                                    <span class="text-xl">⏭️</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Liste des sourates -->
+                    <div class="bg-white rounded-xl p-6">
+                        <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
+                            <span>🎵</span> Sourates
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            ${[
+                                { number: 1, name: "Al-Fatiha", verses: 7, duration: "0:48" },
+                                { number: 2, name: "Al-Baqarah", verses: 286, duration: "2:45:12" },
+                                { number: 3, name: "Al-Imran", verses: 200, duration: "1:22:45" },
+                                { number: 36, name: "Ya Sin", verses: 83, duration: "12:30" },
+                                { number: 55, name: "Ar-Rahman", verses: 78, duration: "9:45" }
+                            ].map(surah => `
+                                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer flex justify-between items-center border border-gray-100">
+                                    <div>
+                                        <div class="font-medium">${surah.number}. ${surah.name}</div>
+                                        <div class="text-sm text-gray-500">${surah.verses} versets</div>
+                                    </div>
+                                    <div class="text-gray-600">${surah.duration}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(sidebar);
+            container.appendChild(main);
+            return container;
+        }
+        
+        // Fonction pour initialiser le canvas
+        function initCanvas() {
+            const canvas = document.getElementById('drawingCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                
+                if (currentTool === 'eraser') {
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 20;
+                } else if (currentTool === 'highlighter') {
+                    ctx.strokeStyle = currentColor;
+                    ctx.globalAlpha = 0.4;
+                    ctx.lineWidth = 15;
+                } else {
+                    ctx.strokeStyle = currentColor;
+                    ctx.globalAlpha = 1;
+                    ctx.lineWidth = 3;
+                }
+                
+                ctx.stroke();
+                
+                lastX = x;
+                lastY = y;
+            }
+            
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                lastX = e.clientX - rect.left;
+                lastY = e.clientY - rect.top;
+            });
+            
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseout', () => isDrawing = false);
+            
+            // Support tactile
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                lastX = e.touches[0].clientX - rect.left;
+                lastY = e.touches[0].clientY - rect.top;
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isDrawing) return;
+                
+                const rect = canvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const y = e.touches[0].clientY - rect.top;
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = currentTool === 'eraser' ? '#FFFFFF' : currentColor;
+                ctx.lineWidth = currentTool === 'eraser' ? 20 : currentTool === 'highlighter' ? 15 : 3;
+                if (currentTool === 'highlighter') ctx.globalAlpha = 0.4;
+                ctx.stroke();
+                
+                lastX = x;
+                lastY = y;
+            });
+            
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+        
+        // Mettre à jour l'éditeur
+        function updateEditor() {
+            if (currentPage === 'editor') {
+                renderPage();
+            }
+        }
+        
+        // Démarrer l'application
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPage();
+        });
+        
+        // Exposer les fonctions globalement
+        window.changePage = changePage;
+        window.currentTool = currentTool;
+        window.currentColor = currentColor;
+        window.updateEditor = updateEditor;
+        
+    </script>
 </body>
 </html>
