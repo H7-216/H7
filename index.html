@@ -2,15 +2,77 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartNotes - Cahier Numérique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmartNotes - Cahier Numérique Intelligent</title>
     
-    <!-- Tailwind CSS simple -->
+    <!-- Tailwind CSS complet -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(240 5.9% 90%)",
+                        input: "hsl(240 5.9% 90%)",
+                        ring: "hsl(240 5.9% 10%)",
+                        background: "hsl(0 0% 98%)",
+                        foreground: "hsl(240 10% 3.9%)",
+                        primary: {
+                            DEFAULT: "hsl(240 5.9% 10%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(240 4.8% 95.9%)",
+                            foreground: "hsl(240 5.9% 10%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84.2% 60.2%)",
+                            foreground: "hsl(0 0% 98%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(240 4.8% 95.9%)",
+                            foreground: "hsl(240 3.8% 46.1%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(240 4.8% 95.9%)",
+                            foreground: "hsl(240 5.9% 10%)",
+                        },
+                        popover: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(240 10% 3.9%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(0 0% 100%)",
+                            foreground: "hsl(240 10% 3.9%)",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "0.5rem",
+                        md: "calc(0.5rem - 2px)",
+                        sm: "calc(0.5rem - 4px)",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                        serif: ["Georgia", "serif"],
+                        hand: ["'Comic Sans MS'", "cursive"],
+                    },
+                },
+            },
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior-y: none;
+            background: hsl(0 0% 98%);
+        }
         
         .bg-seyes {
             background-color: #ffffff;
@@ -23,184 +85,502 @@
             background-position: 0 0, 0 0, 40px 0, 0 0;
         }
         
-        .paper-shadow {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        .bg-grid-paper {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(#e5e7eb 1px, transparent 1px),
+                linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
         }
+
+        .paper-shadow {
+            box-shadow: 
+                0 1px 1px hsl(0deg 0% 0% / 0.075),
+                0 2px 2px hsl(0deg 0% 0% / 0.075),
+                0 4px 4px hsl(0deg 0% 0% / 0.075),
+                0 8px 8px hsl(0deg 0% 0% / 0.075),
+                0 16px 16px hsl(0deg 0% 0% / 0.075);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: hsl(240 3.8% 46.1% / 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: hsl(240 3.8% 46.1% / 0.5); }
+        
+        /* Animations */
+        .animate-in { animation: animateIn 0.3s ease-out; }
+        .zoom-in-95 { animation: zoomIn95 0.3s ease-out; }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        @keyframes animateIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoomIn95 { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Icônes Lucide simulées */
+        .icon { display: inline-flex; align-items: center; justify-content: center; }
+        
+        /* Classes utilitaires */
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .backdrop-blur-md { backdrop-filter: blur(12px); }
+        
+        /* Effets hover */
+        .hover-lift:hover { transform: translateY(-4px); transition: transform 0.2s ease; }
+        .hover-scale:hover { transform: scale(1.02); transition: transform 0.2s ease; }
     </style>
 </head>
 <body>
     <!-- Application Container -->
-    <div id="app" class="h-screen">
-        <!-- La navigation va s'afficher ici -->
-    </div>
+    <div id="app" class="h-screen"></div>
+    
+    <!-- Zone des toasts (notifications) -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
 
     <script>
-        // APPLICATION SMARTNOTES - Version ULTRA SIMPLE
+        // ==============================================
+        // SMARTNOTES - VERSION COMPLÈTE
+        // Toutes les fonctionnalités du code original
         // ==============================================
         
-        // Données de l'application
-        const notebooks = [
-            { id: 1, title: "Physique - Thermodynamique", subject: "Physique", color: "#E0F2FE", date: "Aujourd'hui", pages: 12 },
-            { id: 2, title: "Chimie - Acides/Bases", subject: "Chimie", color: "#DCFCE7", date: "Hier", pages: 8 },
-            { id: 3, title: "Français - Molière", subject: "Français", color: "#FAE8FF", date: "2 jours", pages: 15 }
-        ];
-        
-        const menuItems = [
-            { id: "dashboard", name: "Tableau de bord", icon: "📊" },
-            { id: "notebooks", name: "Mes Cahiers", icon: "📕" },
-            { id: "history", name: "Historique", icon: "🕐" },
-            { id: "quran", name: "Coran", icon: "🌙" },
-            { id: "settings", name: "Paramètres", icon: "⚙️" }
-        ];
-        
-        // État de l'application
-        let currentPage = 'dashboard';
-        let currentTool = 'pen';
-        let currentColor = '#000000';
-        
-        // Fonctions utilitaires
-        function renderPage() {
-            const app = document.getElementById('app');
-            app.innerHTML = '';
+        // ========== DONNÉES DE L'APPLICATION ==========
+        const appData = {
+            currentPage: 'dashboard',
+            currentTool: 'pen',
+            currentColor: '#1F2937',
+            strokeWidth: 2,
+            activeNotebookId: null,
+            canvasState: null,
+            toasts: [],
+            user: {
+                name: "Alex",
+                plan: "Premium",
+                avatarColor: "from-indigo-500 to-purple-500"
+            },
             
-            switch(currentPage) {
-                case 'dashboard':
-                    app.appendChild(renderDashboard());
-                    break;
-                case 'editor':
-                    app.appendChild(renderEditor());
-                    break;
-                case 'quran':
-                    app.appendChild(renderQuran());
-                    break;
-                default:
-                    app.appendChild(renderDashboard());
+            notebooks: [
+                { 
+                    id: "1", 
+                    title: "Exercices de Thermodynamique", 
+                    subject: "Physique", 
+                    color: "#E0F2FE", 
+                    lastModified: "Il y a 2h", 
+                    pageCount: 12,
+                    tags: ["Chaleur", "Énergie"],
+                    shared: true
+                },
+                { 
+                    id: "2", 
+                    title: "Formules Acides/Bases", 
+                    subject: "Chimie", 
+                    color: "#DCFCE7", 
+                    lastModified: "Hier", 
+                    pageCount: 4,
+                    tags: ["pH", "Réactions"],
+                    shared: false
+                },
+                { 
+                    id: "3", 
+                    title: "Analyse de texte: Molière", 
+                    subject: "Français", 
+                    color: "#FAE8FF", 
+                    lastModified: "Il y a 2j", 
+                    pageCount: 8,
+                    tags: ["Théâtre", "XVIIe"],
+                    shared: true
+                },
+                { 
+                    id: "4", 
+                    title: "Géométrie dans l'espace", 
+                    subject: "Maths", 
+                    color: "#F1F5F9", 
+                    lastModified: "La semaine dernière", 
+                    pageCount: 24,
+                    tags: ["Vecteurs", "3D"],
+                    shared: false
+                },
+                { 
+                    id: "5", 
+                    title: "Histoire de la Guerre Froide", 
+                    subject: "Histoire", 
+                    color: "#FEF3C7", 
+                    lastModified: "12 Nov", 
+                    pageCount: 15,
+                    tags: ["XXe siècle", "Politique"],
+                    shared: true
+                },
+            ],
+            
+            historyItems: [
+                { id: 1, title: "Devoir de Physique - Chapitre 4", subject: "Physique", date: "Aujourd'hui, 14:30", preview: "Thermodynamique : transfert de chaleur..." },
+                { id: 2, title: "Dissertation - Molière", subject: "Français", date: "Hier, 10:15", preview: "Plan détaillé : l'hypocrisie sociale..." },
+                { id: 3, title: "Exercices de Géométrie", subject: "Maths", date: "Lun 6 Déc, 16:45", preview: "Théorème de Pythagore applications..." },
+                { id: 4, title: "Résumé Biologie Cellulaire", subject: "SVT", date: "Ven 3 Déc, 09:20", preview: "Mitose et méiose comparées..." },
+            ],
+            
+            surahs: [
+                { number: 1, name: "Al-Fatiha", englishName: "The Opening", verses: 7, duration: "0:48" },
+                { number: 2, name: "Al-Baqarah", englishName: "The Cow", verses: 286, duration: "2:45:12" },
+                { number: 3, name: "Al-Imran", englishName: "The Family of Imran", verses: 200, duration: "1:22:45" },
+                { number: 36, name: "Ya Sin", englishName: "Ya Sin", verses: 83, duration: "12:30" },
+                { number: 55, name: "Ar-Rahman", englishName: "The Beneficent", verses: 78, duration: "9:45" },
+                { number: 67, name: "Al-Mulk", englishName: "The Sovereignty", verses: 30, duration: "8:15" },
+            ],
+            
+            colors: [
+                { value: "#1F2937", label: "Noir Classique" },
+                { value: "#2563EB", label: "Bleu Roi" },
+                { value: "#DC2626", label: "Rouge Vif" },
+                { value: "#16A34A", label: "Vert Correction" },
+                { value: "#9333EA", label: "Violet" },
+                { value: "#EA580C", label: "Orange" },
+                { value: "#0891B2", label: "Cyan" },
+                { value: "#DB2777", label: "Rose" },
+            ],
+            
+            menuItems: [
+                { id: "dashboard", name: "Tableau de bord", icon: "📊", description: "Vue d'ensemble" },
+                { id: "notebooks", name: "Mes Cahiers", icon: "📕", description: "Tous vos cahiers" },
+                { id: "history", name: "Historique", icon: "🕐", description: "Modifications récentes" },
+                { id: "files", name: "Fichiers", icon: "📁", description: "Documents importés" },
+                { id: "quran", name: "Coran", icon: "🌙", description: "Récitations" },
+                { id: "settings", name: "Paramètres", icon: "⚙️", description: "Configuration" },
+            ],
+            
+            tools: [
+                { id: "pen", name: "Stylo", icon: "✏️", defaultWidth: 2 },
+                { id: "highlighter", name: "Surligneur", icon: "🖍️", defaultWidth: 15 },
+                { id: "eraser", name: "Gomme", icon: "🗑️", defaultWidth: 20 },
+            ]
+        };
+        
+        // ========== FONCTIONS UTILITAIRES ==========
+        function cn(...classes) {
+            return classes.filter(Boolean).join(' ');
+        }
+        
+        function showToast(title, description = "", type = "info") {
+            const toastId = 'toast-' + Date.now();
+            const toastContainer = document.getElementById('toast-container');
+            
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.className = cn(
+                "bg-white border border-gray-200 shadow-lg rounded-lg p-4 w-80 animate-in slide-in",
+                type === "success" ? "border-l-4 border-l-green-500" : "",
+                type === "error" ? "border-l-4 border-l-red-500" : "",
+                type === "warning" ? "border-l-4 border-l-yellow-500" : ""
+            );
+            
+            toast.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-semibold text-sm text-gray-900">${title}</h4>
+                        ${description ? `<p class="text-sm text-gray-600 mt-1">${description}</p>` : ''}
+                    </div>
+                    <button onclick="document.getElementById('${toastId}').remove()" 
+                            class="text-gray-400 hover:text-gray-600 ml-4">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Supprimer après 3 secondes
+            setTimeout(() => {
+                const toastEl = document.getElementById(toastId);
+                if (toastEl) {
+                    toastEl.style.opacity = '0';
+                    toastEl.style.transform = 'translateY(10px)';
+                    setTimeout(() => toastEl.remove(), 300);
+                }
+            }, 3000);
+        }
+        
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('fr-FR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // ========== COMPOSANTS UI ==========
+        function createButton({ 
+            text = "", 
+            onClick = () => {}, 
+            className = "", 
+            variant = "default",
+            size = "default",
+            icon = null,
+            disabled = false
+        }) {
+            const button = document.createElement('button');
+            
+            const baseClasses = "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50";
+            
+            const variants = {
+                default: "bg-primary text-primary-foreground hover:bg-primary/90",
+                destructive: "bg-red-600 text-white hover:bg-red-700",
+                outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+                ghost: "hover:bg-accent hover:text-accent-foreground",
+                link: "text-primary underline-offset-4 hover:underline",
+            };
+            
+            const sizes = {
+                default: "h-10 px-4 py-2",
+                sm: "h-9 rounded-md px-3",
+                lg: "h-11 rounded-md px-8",
+                icon: "h-10 w-10",
+            };
+            
+            button.className = cn(
+                baseClasses,
+                variants[variant],
+                sizes[size],
+                className
+            );
+            
+            button.onclick = onClick;
+            button.disabled = disabled;
+            
+            if (icon) {
+                const iconSpan = document.createElement('span');
+                iconSpan.className = "mr-2";
+                iconSpan.textContent = icon;
+                button.appendChild(iconSpan);
             }
-        }
-        
-        function changePage(page) {
-            currentPage = page;
-            renderPage();
-        }
-        
-        // Rendu du Dashboard
-        function renderDashboard() {
-            const container = document.createElement('div');
-            container.className = 'h-screen flex';
             
-            // Sidebar
+            if (text) {
+                button.appendChild(document.createTextNode(text));
+            }
+            
+            return button;
+        }
+        
+        function createInput({ 
+            placeholder = "", 
+            value = "", 
+            onChange = () => {},
+            className = "",
+            type = "text"
+        }) {
+            const input = document.createElement('input');
+            input.type = type;
+            input.placeholder = placeholder;
+            input.value = value;
+            input.className = cn(
+                "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                className
+            );
+            
+            input.oninput = (e) => onChange(e.target.value);
+            return input;
+        }
+        
+        function createCard({ children, className = "" }) {
+            const card = document.createElement('div');
+            card.className = cn("rounded-lg border bg-card text-card-foreground shadow-sm", className);
+            
+            if (typeof children === 'string') {
+                card.innerHTML = children;
+            } else if (Array.isArray(children)) {
+                children.forEach(child => {
+                    if (child instanceof Node) {
+                        card.appendChild(child);
+                    } else {
+                        card.appendChild(document.createTextNode(child));
+                    }
+                });
+            } else if (children instanceof Node) {
+                card.appendChild(children);
+            }
+            
+            return card;
+        }
+        
+        function createBadge({ text, className = "", variant = "default" }) {
+            const badge = document.createElement('div');
+            badge.className = cn(
+                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors",
+                variant === "default" ? "bg-primary text-primary-foreground hover:bg-primary/80 border-transparent" : "",
+                variant === "secondary" ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" : "",
+                variant === "outline" ? "text-foreground" : "",
+                className
+            );
+            badge.textContent = text;
+            return badge;
+        }
+        
+        // ========== SIDEBAR ==========
+        function renderSidebar() {
             const sidebar = document.createElement('div');
-            sidebar.className = 'w-64 bg-white border-r hidden md:flex flex-col p-4';
+            sidebar.className = "h-screen w-64 bg-card border-r border-border flex flex-col p-4 hidden md:flex sticky top-0";
             
             sidebar.innerHTML = `
-                <div class="mb-8 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span class="text-white text-lg">📕</span>
+                <div class="mb-8 px-2 flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <span class="text-primary-foreground text-lg">📕</span>
                     </div>
-                    <span class="text-xl font-bold">SmartNotes</span>
+                    <span class="font-serif text-xl font-bold tracking-tight">SmartNotes</span>
                 </div>
                 
-                <button onclick="changePage('editor')" 
-                        class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium mb-6 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                    <span>+</span>
-                    Nouvelle Note
-                </button>
+                <div class="mb-6">
+                    ${createButton({
+                        text: "Nouvelle Note",
+                        icon: "+",
+                        className: "w-full justify-start gap-2 shadow-sm",
+                        size: "lg",
+                        onClick: () => changePage('editor')
+                    }).outerHTML}
+                </div>
                 
                 <nav class="space-y-1 flex-1">
-                    ${menuItems.map(item => `
+                    ${appData.menuItems.map(item => `
                         <div onclick="changePage('${item.id}')" 
-                             class="px-3 py-2.5 rounded-lg text-sm cursor-pointer flex items-center gap-3 hover:bg-gray-100 ${currentPage === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}">
+                             class="${cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer",
+                                appData.currentPage === item.id 
+                                    ? "bg-primary/5 text-primary" 
+                                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                             )}">
                             <span class="text-lg">${item.icon}</span>
-                            ${item.name}
+                            <div class="flex-1">
+                                <div>${item.name}</div>
+                                <div class="text-xs text-muted-foreground">${item.description}</div>
+                            </div>
                         </div>
                     `).join('')}
                 </nav>
                 
-                <div class="mt-auto pt-4 border-t">
+                <div class="mt-auto pt-4 border-t border-border">
                     <div class="flex items-center gap-3 px-2 py-2">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500"></div>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${appData.user.avatarColor}"></div>
                         <div class="flex flex-col">
-                            <span class="text-sm font-medium">Étudiant</span>
-                            <span class="text-xs text-gray-500">Premium Plan</span>
+                            <span class="text-sm font-medium">${appData.user.name}</span>
+                            <span class="text-xs text-muted-foreground">${appData.user.plan} Plan</span>
                         </div>
                     </div>
                 </div>
             `;
             
+            return sidebar;
+        }
+        
+        // ========== DASHBOARD ==========
+        function renderDashboard() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            // Sidebar
+            container.appendChild(renderSidebar());
+            
             // Contenu principal
             const main = document.createElement('main');
-            main.className = 'flex-1 overflow-auto p-4 md:p-8 bg-gray-50';
+            main.className = 'flex-1 overflow-auto';
             
             main.innerHTML = `
-                <div class="max-w-7xl mx-auto space-y-8">
+                <div class="p-8 max-w-7xl mx-auto space-y-8">
                     <!-- En-tête -->
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Bonjour, Alex</h1>
-                            <p class="text-gray-600 mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Bonjour, ${appData.user.name}</h1>
+                            <p class="text-muted-foreground mt-1">Prêt pour tes devoirs aujourd'hui ?</p>
                         </div>
-                        
                         <div class="flex items-center gap-3">
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
-                                <input type="text" 
-                                       placeholder="Rechercher une note..." 
-                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                                <input placeholder="Rechercher une note..." 
+                                       class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                             </div>
+                            <button class="p-2 border border-input rounded-md hover:bg-muted">
+                                <span>⏳</span>
+                            </button>
                         </div>
                     </div>
                     
                     <!-- Zone d'import -->
-                    <div onclick="alert('Fonctionnalité d\'import en développement')" 
-                         class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
-                        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div onclick="handleFileImport()" 
+                         class="border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer border-border hover:border-primary/50 hover:bg-muted/30 group">
+                        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span class="text-xl">☁️</span>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900">Importer un exercice ou un PDF</h3>
-                        <p class="text-gray-600 mt-1 max-w-md mx-auto">Glissez-déposez votre fichier ici</p>
+                        <h3 class="text-lg font-medium">Importer un exercice ou un PDF</h3>
+                        <p class="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                            Glissez-déposez votre fichier ici. L'IA le classera automatiquement.
+                        </p>
                     </div>
                     
                     <!-- Cahiers récents -->
                     <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold text-gray-900">Cahiers Récents</h2>
-                            <button class="text-blue-600 hover:text-blue-800 font-medium">Tout voir</button>
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-semibold">Cahiers Récents</h2>
+                            <button onclick="changePage('notebooks')" 
+                                    class="text-primary hover:text-primary/80 font-medium">
+                                Tout voir
+                            </button>
                         </div>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             <!-- Nouveau cahier -->
-                            <div onclick="changePage('editor')" 
-                                 class="aspect-[3/4] rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
-                                <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                                    <span class="text-gray-500 text-xl">+</span>
+                            <div onclick="createNewNotebook()" 
+                                 class="aspect-[3/4] rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group hover-lift">
+                                <div class="w-12 h-12 rounded-full bg-muted group-hover:bg-background flex items-center justify-center mb-3 transition-colors">
+                                    <span class="text-muted-foreground group-hover:text-primary text-xl">+</span>
                                 </div>
-                                <span class="font-medium text-gray-600">Nouveau Cahier</span>
+                                <span class="font-medium text-muted-foreground group-hover:text-primary">Nouveau Cahier</span>
                             </div>
                             
                             <!-- Cahiers existants -->
-                            ${notebooks.map(notebook => `
-                                <div onclick="changePage('editor')" 
-                                     class="aspect-[3/4] rounded-xl bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                                    <div class="h-1/3 rounded-t-xl p-4" style="background-color: ${notebook.color}">
-                                        <div class="flex justify-end">
-                                            <button class="p-1 hover:bg-black/10 rounded-full">
-                                                <span>⋮</span>
-                                            </button>
-                                        </div>
-                                        <div class="bg-white/90 self-start px-2 py-1 rounded text-xs font-semibold uppercase">
-                                            ${notebook.subject}
-                                        </div>
+                            ${appData.notebooks.slice(0, 4).map(notebook => `
+                                <div onclick="openNotebook('${notebook.id}')" 
+                                     class="group relative cursor-pointer hover-lift">
+                                    <!-- Spiral -->
+                                    <div class="absolute left-4 top-0 bottom-0 w-2 z-20 flex flex-col justify-between py-2">
+                                        ${Array.from({ length: 8 }).map((_, i) => `
+                                            <div class="w-4 h-4 -ml-2 rounded-full bg-neutral-200 shadow-inner border border-neutral-300"></div>
+                                        `).join('')}
                                     </div>
-                                    <div class="p-5 flex flex-col h-2/3">
-                                        <h3 class="text-lg font-medium mb-2 line-clamp-2">${notebook.title}</h3>
-                                        <div class="mt-auto space-y-3">
-                                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                                <span>🕐</span>
-                                                <span>${notebook.date}</span>
+                                    
+                                    <!-- Cover -->
+                                    <div class="relative aspect-[3/4] rounded-r-xl rounded-l-sm overflow-hidden shadow-md transition-shadow group-hover:shadow-xl group-hover:shadow-primary/10 bg-card border border-border/50">
+                                        <div class="h-1/3 w-full p-4 flex flex-col justify-between" style="background-color: ${notebook.color}">
+                                            <div class="self-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button class="p-1 hover:bg-black/10 rounded-full text-black/60">
+                                                    <span>⋮</span>
+                                                </button>
                                             </div>
-                                            <div class="flex justify-between items-center border-t pt-3">
-                                                <span class="text-xs font-medium text-gray-500">${notebook.pages} pages</span>
-                                                <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">A</div>
+                                            <div class="bg-white/90 backdrop-blur-sm self-start px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider text-black/70 shadow-sm">
+                                                ${notebook.subject}
+                                            </div>
+                                        </div>
+                                        <div class="p-5 flex flex-col h-2/3 bg-gradient-to-b from-white to-neutral-50">
+                                            <h3 class="font-serif text-xl font-medium text-foreground leading-tight mb-2 line-clamp-2">
+                                                ${notebook.title}
+                                            </h3>
+                                            <div class="flex flex-wrap gap-1 mb-3">
+                                                ${notebook.tags.map(tag => `
+                                                    <span class="text-xs px-2 py-0.5 bg-muted rounded-full">${tag}</span>
+                                                `).join('')}
+                                            </div>
+                                            <div class="mt-auto space-y-3">
+                                                <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span>🕐</span>
+                                                    <span>${notebook.lastModified}</span>
+                                                    ${notebook.shared ? '<span class="text-blue-600">👥</span>' : ''}
+                                                </div>
+                                                <div class="flex items-center justify-between border-t border-border pt-3">
+                                                    <span class="text-xs font-medium text-muted-foreground">${notebook.pageCount} pages</span>
+                                                    <div class="flex -space-x-2">
+                                                        <div class="w-6 h-6 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-[10px] text-indigo-700 font-bold">A</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -208,189 +588,501 @@
                             `).join('')}
                         </div>
                     </div>
+                    
+                    <!-- Statistiques -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Cahiers actifs</p>
+                                    <p class="text-2xl font-bold mt-1">${appData.notebooks.length}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-blue-600 text-xl">📕</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Pages écrites</p>
+                                    <p class="text-2xl font-bold mt-1">${appData.notebooks.reduce((sum, n) => sum + n.pageCount, 0)}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-green-600 text-xl">📝</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">Temps d'étude</p>
+                                    <p class="text-2xl font-bold mt-1">24h</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <span class="text-purple-600 text-xl">🕐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
-            container.appendChild(sidebar);
             container.appendChild(main);
             return container;
         }
         
-        // Rendu de l'Éditeur
+        // ========== ÉDITEUR AVANCÉ ==========
         function renderEditor() {
             const container = document.createElement('div');
-            container.className = 'h-screen flex flex-col';
+            container.className = 'h-screen flex flex-col bg-neutral-100 overflow-hidden';
             
-            // Barre d'outils
+            // Toolbar avancée
             const toolbar = document.createElement('div');
-            toolbar.className = 'h-16 bg-white border-b flex items-center justify-between px-4';
+            toolbar.className = 'h-16 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 px-4 flex items-center justify-between';
             
             toolbar.innerHTML = `
                 <div class="flex items-center gap-4">
                     <button onclick="changePage('dashboard')" 
-                            class="p-2 hover:bg-gray-100 rounded-lg">
+                            class="p-2 hover:bg-muted rounded-lg">
                         <span>←</span>
                     </button>
-                    <div>
-                        <h1 class="text-sm font-semibold">Devoir de Physique</h1>
-                        <span class="text-xs text-gray-500">Chapitre 4 - Enregistré</span>
+                    <div class="flex flex-col">
+                        <h1 class="text-sm font-semibold flex items-center gap-2">
+                            Devoir de Physique 
+                            <span class="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                Chapitre 4
+                            </span>
+                        </h1>
+                        <span class="text-xs text-muted-foreground flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            Enregistré
+                        </span>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2">
-                    <div class="flex bg-gray-100 p-1 rounded-lg">
-                        <button onclick="currentTool='pen'; updateEditor()" 
-                                class="px-4 py-2 rounded ${currentTool === 'pen' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
-                            ✏️ Stylo
-                        </button>
-                        <button onclick="currentTool='highlighter'; updateEditor()" 
-                                class="px-4 py-2 rounded ${currentTool === 'highlighter' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
-                            🖍️ Surligneur
-                        </button>
-                        <button onclick="currentTool='eraser'; updateEditor()" 
-                                class="px-4 py-2 rounded ${currentTool === 'eraser' ? 'bg-white shadow' : 'hover:bg-gray-200'}">
-                            🗑️ Gomme
-                        </button>
+                <div class="flex items-center gap-2 bg-muted/50 p-1.5 rounded-xl border border-border/50 shadow-sm">
+                    <div class="flex items-center gap-1 pr-2 border-r border-border/50">
+                        ${appData.tools.map(tool => `
+                            <button onclick="setTool('${tool.id}')" 
+                                    class="${cn(
+                                        "px-3 py-1.5 rounded text-sm font-medium flex items-center gap-2",
+                                        appData.currentTool === tool.id 
+                                            ? "bg-white text-primary shadow-sm" 
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}">
+                                <span>${tool.icon}</span>
+                                ${tool.name}
+                            </button>
+                        `).join('')}
                     </div>
                     
-                    <input type="color" 
-                           value="${currentColor}" 
-                           onchange="currentColor=this.value; updateEditor()"
-                           class="w-10 h-10 cursor-pointer">
-                           
-                    <button onclick="alert('Cahier enregistré !')" 
-                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2">
-                        <span>💾</span> Enregistrer
+                    <button onclick="toggleColorPicker()" 
+                            class="px-3 py-1.5 border rounded-lg flex items-center gap-2 hover:bg-white">
+                        <div class="w-4 h-4 rounded-full border" style="background-color: ${appData.currentTool === 'eraser' ? '#ffffff' : appData.currentColor}"></div>
+                        <span>Couleur & Taille</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button class="p-2 hover:bg-muted rounded-lg">
+                        <span>📄</span>
+                    </button>
+                    <button onclick="saveCanvas()" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 shadow-md">
+                        <span>💾</span>
+                        Enregistrer
                     </button>
                 </div>
             `;
             
-            // Zone de dessin
-            const drawingArea = document.createElement('div');
-            drawingArea.className = 'flex-1 flex justify-center items-center p-4 bg-gray-100';
+            // Canvas avec papier Seyès
+            const canvasArea = document.createElement('div');
+            canvasArea.className = 'flex-1 flex justify-center p-4 sm:p-8 overflow-auto';
             
-            drawingArea.innerHTML = `
-                <div class="paper-shadow relative">
-                    <div class="absolute top-6 left-12 z-10 opacity-50 text-blue-800 font-mono text-sm">
-                        ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            canvasArea.innerHTML = `
+                <div class="w-full max-w-[800px] aspect-[1/1.4142] bg-white shadow-2xl rounded-sm overflow-hidden relative paper-shadow animate-in zoom-in-95">
+                    <div class="absolute top-6 left-12 z-10 pointer-events-none opacity-50 font-hand text-lg text-blue-800">
+                        ${formatDate(new Date())}
                     </div>
-                    <canvas id="drawingCanvas" 
-                            class="bg-seyes"
-                            width="800" 
-                            height="1131"
-                            style="cursor: crosshair">
+                    <canvas id="mainCanvas" 
+                            class="w-full h-full bg-seyes touch-none"
+                            width="800"
+                            height="1131">
                     </canvas>
+                </div>
+                
+                <!-- Sélecteur de couleur (caché par défaut) -->
+                <div id="colorPicker" class="hidden absolute top-20 right-4 w-64 p-4 bg-popover rounded-md border shadow-md z-50">
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Couleurs</label>
+                            <div class="grid grid-cols-4 gap-2">
+                                ${appData.colors.map(color => `
+                                    <button onclick="setColor('${color.value}')"
+                                            class="w-8 h-8 rounded-full border border-border transition-all hover:scale-110 relative"
+                                            style="background-color: ${color.value}">
+                                        ${appData.currentColor === color.value ? '<span class="absolute inset-0 flex items-center justify-center text-white">✓</span>' : ''}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <label class="text-xs text-muted-foreground uppercase font-bold tracking-wider">Épaisseur</label>
+                                <span class="text-xs font-mono">${appData.strokeWidth}px</span>
+                            </div>
+                            <input type="range" 
+                                   min="1" 
+                                   max="20" 
+                                   value="${appData.strokeWidth}"
+                                   oninput="setStrokeWidth(this.value)"
+                                   class="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary">
+                            
+                            <div class="h-8 flex items-center justify-center bg-muted/30 rounded-lg mt-2">
+                                <div class="rounded-full transition-all" 
+                                     style="width: ${appData.strokeWidth}px; height: ${appData.strokeWidth}px; background-color: ${appData.currentTool === 'eraser' ? '#9ca3af' : appData.currentColor}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
             container.appendChild(toolbar);
-            container.appendChild(drawingArea);
+            container.appendChild(canvasArea);
             
             // Initialiser le canvas
             setTimeout(() => {
-                initCanvas();
+                initAdvancedCanvas();
             }, 100);
             
             return container;
         }
         
-        // Rendu de la page Coran
-        function renderQuran() {
+        // ========== PAGE HISTORIQUE ==========
+        function renderHistory() {
             const container = document.createElement('div');
-            container.className = 'h-screen flex';
+            container.className = 'flex h-screen bg-background';
             
-            // Sidebar
-            const sidebar = document.createElement('div');
-            sidebar.className = 'w-64 bg-white border-r hidden md:flex flex-col p-4';
+            container.appendChild(renderSidebar());
             
-            sidebar.innerHTML = `
-                <div class="mb-8 flex items-center gap-2">
-                    <span class="text-2xl">📕</span>
-                    <span class="text-xl font-bold">SmartNotes</span>
-                </div>
-                
-                <nav class="space-y-1 flex-1">
-                    ${menuItems.map(item => `
-                        <div onclick="changePage('${item.id}')" 
-                             class="px-3 py-2.5 rounded-lg text-sm cursor-pointer flex items-center gap-3 hover:bg-gray-100 ${currentPage === item.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'}">
-                            <span class="text-lg">${item.icon}</span>
-                            ${item.name}
-                        </div>
-                    `).join('')}
-                </nav>
-            `;
-            
-            // Contenu Coran
             const main = document.createElement('main');
-            main.className = 'flex-1 p-4 md:p-8 bg-gray-50 overflow-auto';
+            main.className = 'flex-1 overflow-auto';
             
             main.innerHTML = `
-                <div class="max-w-4xl mx-auto">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Saint Coran</h1>
-                    <p class="text-gray-600 mb-8">Écoutez les récitations et méditez</p>
-                    
-                    <!-- Lecteur audio -->
-                    <div class="bg-gradient-to-br from-blue-900 to-purple-900 text-white rounded-xl p-8 mb-8">
-                        <div class="mb-6">
-                            <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Lecture en cours</span>
-                            <h2 class="text-2xl font-bold mt-2">Al-Fatiha</h2>
-                            <p class="text-white/70">The Opening - 7 versets</p>
-                        </div>
-                        
+                <div class="p-8 max-w-5xl mx-auto space-y-8">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <input type="range" 
-                                   class="w-full h-2 bg-white/20 rounded-lg appearance-none"
-                                   value="30">
-                                   
-                            <div class="flex justify-center items-center gap-6 mt-6">
-                                <button class="p-3 text-white hover:bg-white/10 rounded-full">
-                                    <span class="text-xl">⏮️</span>
-                                </button>
-                                <button class="bg-white text-blue-900 p-4 rounded-full w-14 h-14 flex items-center justify-center">
-                                    <span class="text-xl">▶️</span>
-                                </button>
-                                <button class="p-3 text-white hover:bg-white/10 rounded-full">
-                                    <span class="text-xl">⏭️</span>
-                                </button>
-                            </div>
+                            <h1 class="font-serif text-3xl font-bold text-foreground">Historique & Sauvegardes</h1>
+                            <p class="text-muted-foreground mt-1">Retrouvez tous vos travaux.</p>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                            <input placeholder="Rechercher..." 
+                                   class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
                         </div>
                     </div>
                     
-                    <!-- Liste des sourates -->
-                    <div class="bg-white rounded-xl p-6">
-                        <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
-                            <span>🎵</span> Sourates
-                        </h3>
+                    <div class="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-border">
+                            <h2 class="font-semibold flex items-center gap-2">
+                                <span class="text-primary">🕐</span>
+                                Dernières modifications
+                            </h2>
+                        </div>
                         
-                        <div class="space-y-3">
-                            ${[
-                                { number: 1, name: "Al-Fatiha", verses: 7, duration: "0:48" },
-                                { number: 2, name: "Al-Baqarah", verses: 286, duration: "2:45:12" },
-                                { number: 3, name: "Al-Imran", verses: 200, duration: "1:22:45" },
-                                { number: 36, name: "Ya Sin", verses: 83, duration: "12:30" },
-                                { number: 55, name: "Ar-Rahman", verses: 78, duration: "9:45" }
-                            ].map(surah => `
-                                <div class="p-4 hover:bg-gray-50 rounded-lg cursor-pointer flex justify-between items-center border border-gray-100">
-                                    <div>
-                                        <div class="font-medium">${surah.number}. ${surah.name}</div>
-                                        <div class="text-sm text-gray-500">${surah.verses} versets</div>
+                        <div class="divide-y divide-border">
+                            ${appData.historyItems.map((item, index) => `
+                                <div class="p-4 hover:bg-muted/50 transition-colors flex items-center justify-between group cursor-pointer animate-in fade-in"
+                                     style="animation-delay: ${index * 100}ms">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center ${
+                                            item.subject === 'Physique' ? 'bg-blue-100 text-blue-600' :
+                                            item.subject === 'Français' ? 'bg-purple-100 text-purple-600' :
+                                            item.subject === 'Maths' ? 'bg-green-100 text-green-600' :
+                                            'bg-gray-100 text-gray-600'
+                                        }">
+                                            <span>📄</span>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-medium text-foreground group-hover:text-primary transition-colors">
+                                                ${item.title}
+                                            </h3>
+                                            <p class="text-sm text-muted-foreground">
+                                                ${item.subject} • ${item.preview}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div class="text-gray-600">${surah.duration}</div>
+                                    <div class="flex items-center gap-6">
+                                        <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <span>📅</span>
+                                            ${item.date}
+                                        </div>
+                                        <button onclick="openHistoryItem('${item.id}')"
+                                                class="opacity-0 group-hover:opacity-100 transition-opacity px-3 py-1 text-sm border rounded-lg hover:bg-muted">
+                                            Ouvrir
+                                        </button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
                     </div>
+                    
+                    <!-- Stats de révision -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <h3 class="font-semibold mb-4">Activité cette semaine</h3>
+                            <div class="space-y-3">
+                                ${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((day, i) => `
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm">${day}</span>
+                                        <div class="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                                            <div class="h-full bg-primary rounded-full" style="width: ${20 + (i * 10)}%"></div>
+                                        </div>
+                                        <span class="text-sm text-muted-foreground">${20 + (i * 10)}min</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-card rounded-xl border border-border p-6">
+                            <h3 class="font-semibold mb-4">Matières révisées</h3>
+                            <div class="space-y-3">
+                                ${['Physique', 'Maths', 'Français', 'Chimie', 'Histoire'].map((subject, i) => `
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm">${subject}</span>
+                                        <div class="flex-1 mx-4">
+                                            <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                                <div class="h-full ${
+                                                    i === 0 ? 'bg-blue-500' :
+                                                    i === 1 ? 'bg-green-500' :
+                                                    i === 2 ? 'bg-purple-500' :
+                                                    i === 3 ? 'bg-red-500' : 'bg-yellow-500'
+                                                } rounded-full" style="width: ${30 + (i * 15)}%"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-muted-foreground">${30 + (i * 15)}%</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             
-            container.appendChild(sidebar);
             container.appendChild(main);
             return container;
         }
         
-        // Fonction pour initialiser le canvas
-        function initCanvas() {
-            const canvas = document.getElementById('drawingCanvas');
+        // ========== PAGE CORAN AVANCÉE ==========
+        function renderQuran() {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background font-sans';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 flex flex-col overflow-hidden';
+            
+            main.innerHTML = `
+                <div class="flex-1 overflow-auto p-8 space-y-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h1 class="font-serif text-3xl font-bold">Saint Coran</h1>
+                            <p class="text-muted-foreground">Écoutez les récitations.</p>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">🔍</span>
+                            <input placeholder="Rechercher une sourate..." 
+                                   class="pl-9 w-64 bg-card border border-input rounded-md px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Lecteur principal -->
+                        <div class="col-span-1 lg:col-span-2">
+                            <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-8 border-none overflow-hidden relative">
+                                <div class="relative z-10 flex flex-col h-full justify-between gap-8">
+                                    <div>
+                                        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Lecture en cours</span>
+                                        <h2 class="text-3xl font-serif font-bold mt-2">Al-Fatiha</h2>
+                                        <p class="text-white/70">The Opening - 7 versets</p>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-sm">
+                                                <span>0:24</span>
+                                                <span>0:48</span>
+                                            </div>
+                                            <input type="range" value="50" 
+                                                   class="w-full h-2 bg-white/20 rounded-lg appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white">
+                                        </div>
+                                        <div class="flex justify-center items-center gap-6">
+                                            <button class="p-3 text-white hover:bg-white/10 rounded-full">
+                                                <span class="text-xl">⏮️</span>
+                                            </button>
+                                            <button class="w-14 h-14 rounded-full bg-white text-indigo-900 hover:bg-indigo-50 flex items-center justify-center">
+                                                <span class="text-xl ml-1">▶️</span>
+                                            </button>
+                                            <button class="p-3 text-white hover:bg-white/10 rounded-full">
+                                                <span class="text-xl">⏭️</span>
+                                            </button>
+                                        </div>
+                                        <div class="flex justify-center gap-4">
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span>🔁</span>
+                                            </button>
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span>🔀</span>
+                                            </button>
+                                            <button class="p-2 text-white/70 hover:text-white">
+                                                <span>🔊</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Liste des sourates -->
+                        <div class="col-span-1">
+                            <div class="bg-card rounded-xl border border-border p-6">
+                                <h3 class="font-semibold mb-4 flex items-center gap-2">
+                                    <span>🎵</span>
+                                    Sourates
+                                </h3>
+                                <div class="space-y-2 max-h-[500px] overflow-auto">
+                                    ${appData.surahs.map(surah => `
+                                        <div class="p-3 hover:bg-muted rounded-lg cursor-pointer flex justify-between items-center group"
+                                             onclick="playSurah(${surah.number})">
+                                            <div>
+                                                <div class="font-medium group-hover:text-primary">${surah.number}. ${surah.name}</div>
+                                                <div class="text-xs text-muted-foreground">${surah.englishName} • ${surah.verses} versets</div>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-xs text-muted-foreground">${surah.duration}</span>
+                                                <span class="text-lg opacity-0 group-hover:opacity-100">▶️</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <!-- Contrôles rapides -->
+                            <div class="mt-6 bg-card rounded-xl border border-border p-6">
+                                <h3 class="font-semibold mb-4">Contrôles rapides</h3>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
+                                        <span class="text-xl mb-1">📖</span>
+                                        <span class="text-sm">Lire</span>
+                                    </button>
+                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
+                                        <span class="text-xl mb-1">🎧</span>
+                                        <span class="text-sm">Écouter</span>
+                                    </button>
+                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
+                                        <span class="text-xl mb-1">⭐</span>
+                                        <span class="text-sm">Favoris</span>
+                                    </button>
+                                    <button class="p-3 border rounded-lg hover:bg-muted flex flex-col items-center">
+                                        <span class="text-xl mb-1">⏱️</span>
+                                        <span class="text-sm">Timer</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progression -->
+                    <div class="bg-card rounded-xl border border-border p-6">
+                        <h3 class="font-semibold mb-4">Votre progression</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">Sourates mémorisées</span>
+                                    <span class="text-sm font-medium">3/114</span>
+                                </div>
+                                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full bg-green-500 rounded-full" style="width: 8%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">Jours consécutifs</span>
+                                    <span class="text-sm font-medium">7</span>
+                                </div>
+                                <div class="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== AUTRES PAGES ==========
+        function renderPageByType() {
+            switch(appData.currentPage) {
+                case 'dashboard':
+                    return renderDashboard();
+                case 'editor':
+                    return renderEditor();
+                case 'history':
+                    return renderHistory();
+                case 'quran':
+                    return renderQuran();
+                case 'notebooks':
+                    return renderGenericPage('Mes Cahiers', 'Gérez tous vos cahiers de notes');
+                case 'files':
+                    return renderGenericPage('Fichiers', 'Importez et organisez vos documents');
+                case 'settings':
+                    return renderGenericPage('Paramètres', 'Personnalisez votre expérience');
+                default:
+                    return renderDashboard();
+            }
+        }
+        
+        function renderGenericPage(title, description) {
+            const container = document.createElement('div');
+            container.className = 'flex h-screen bg-background';
+            
+            container.appendChild(renderSidebar());
+            
+            const main = document.createElement('main');
+            main.className = 'flex-1 flex items-center justify-center p-8';
+            
+            main.innerHTML = `
+                <div class="text-center max-w-md">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-primary text-2xl">🚧</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-foreground mb-2">${title}</h1>
+                    <p class="text-muted-foreground mb-6">${description}</p>
+                    <p class="text-sm text-muted-foreground mb-8">
+                        Cette fonctionnalité est en cours de développement. Elle sera disponible prochainement.
+                    </p>
+                    <button onclick="changePage('dashboard')" 
+                            class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                        Retour au tableau de bord
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(main);
+            return container;
+        }
+        
+        // ========== FONCTIONS CANVAS AVANCÉES ==========
+        function initAdvancedCanvas() {
+            const canvas = document.getElementById('mainCanvas');
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
@@ -400,6 +1092,22 @@
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
+            
+            // Restaurer l'état précédent si existant
+            if (appData.canvasState) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = appData.canvasState;
+            }
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                lastX = e.clientX - rect.left;
+                lastY = e.clientY - rect.top;
+            }
             
             function draw(e) {
                 if (!isDrawing) return;
@@ -412,17 +1120,21 @@
                 ctx.moveTo(lastX, lastY);
                 ctx.lineTo(x, y);
                 
-                if (currentTool === 'eraser') {
+                // Appliquer les paramètres actuels
+                if (appData.currentTool === 'eraser') {
                     ctx.strokeStyle = '#FFFFFF';
-                    ctx.lineWidth = 20;
-                } else if (currentTool === 'highlighter') {
-                    ctx.strokeStyle = currentColor;
-                    ctx.globalAlpha = 0.4;
-                    ctx.lineWidth = 15;
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.lineWidth = appData.strokeWidth * 2;
                 } else {
-                    ctx.strokeStyle = currentColor;
-                    ctx.globalAlpha = 1;
-                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = appData.currentColor;
+                    ctx.globalCompositeOperation = 'source-over';
+                    if (appData.currentTool === 'highlighter') {
+                        ctx.globalAlpha = 0.4;
+                        ctx.lineWidth = appData.strokeWidth * 3;
+                    } else {
+                        ctx.globalAlpha = 1;
+                        ctx.lineWidth = appData.strokeWidth;
+                    }
                 }
                 
                 ctx.stroke();
@@ -431,66 +1143,235 @@
                 lastY = y;
             }
             
-            canvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                lastX = e.clientX - rect.left;
-                lastY = e.clientY - rect.top;
-            });
+            function stopDrawing() {
+                isDrawing = false;
+                // Sauvegarder l'état
+                appData.canvasState = canvas.toDataURL();
+            }
             
+            // Événements souris
+            canvas.addEventListener('mousedown', startDrawing);
             canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', () => isDrawing = false);
-            canvas.addEventListener('mouseout', () => isDrawing = false);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
             
-            // Support tactile
+            // Événements tactiles
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                lastX = e.touches[0].clientX - rect.left;
-                lastY = e.touches[0].clientY - rect.top;
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    lastX = touch.clientX - rect.left;
+                    lastY = touch.clientY - rect.top;
+                    isDrawing = true;
+                }
             });
             
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
-                if (!isDrawing) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const x = e.touches[0].clientX - rect.left;
-                const y = e.touches[0].clientY - rect.top;
-                
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-                ctx.lineTo(x, y);
-                ctx.strokeStyle = currentTool === 'eraser' ? '#FFFFFF' : currentColor;
-                ctx.lineWidth = currentTool === 'eraser' ? 20 : currentTool === 'highlighter' ? 15 : 3;
-                if (currentTool === 'highlighter') ctx.globalAlpha = 0.4;
-                ctx.stroke();
-                
-                lastX = x;
-                lastY = y;
+                if (isDrawing && e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    
+                    if (appData.currentTool === 'eraser') {
+                        ctx.strokeStyle = '#FFFFFF';
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.lineWidth = appData.strokeWidth * 2;
+                    } else {
+                        ctx.strokeStyle = appData.currentColor;
+                        ctx.globalCompositeOperation = 'source-over';
+                        if (appData.currentTool === 'highlighter') {
+                            ctx.globalAlpha = 0.4;
+                            ctx.lineWidth = appData.strokeWidth * 3;
+                        } else {
+                            ctx.globalAlpha = 1;
+                            ctx.lineWidth = appData.strokeWidth;
+                        }
+                    }
+                    
+                    ctx.stroke();
+                    
+                    lastX = x;
+                    lastY = y;
+                }
             });
             
-            canvas.addEventListener('touchend', () => isDrawing = false);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
         }
         
-        // Mettre à jour l'éditeur
-        function updateEditor() {
-            if (currentPage === 'editor') {
-                renderPage();
+        // ========== FONCTIONS DE L'APPLICATION ==========
+        function changePage(page) {
+            appData.currentPage = page;
+            renderApp();
+            
+            // Ajouter une animation
+            const app = document.getElementById('app');
+            app.classList.add('animate-in');
+            setTimeout(() => app.classList.remove('animate-in'), 300);
+        }
+        
+        function setTool(toolId) {
+            appData.currentTool = toolId;
+            const tool = appData.tools.find(t => t.id === toolId);
+            if (tool) {
+                appData.strokeWidth = tool.defaultWidth;
+            }
+            
+            if (appData.currentPage === 'editor') {
+                renderApp();
             }
         }
         
-        // Démarrer l'application
-        window.addEventListener('DOMContentLoaded', () => {
-            renderPage();
-        });
+        function setColor(color) {
+            appData.currentColor = color;
+            if (appData.currentTool === 'eraser') {
+                appData.currentTool = 'pen';
+            }
+            
+            // Fermer le color picker
+            const picker = document.getElementById('colorPicker');
+            if (picker) {
+                picker.classList.add('hidden');
+            }
+            
+            if (appData.currentPage === 'editor') {
+                renderApp();
+            }
+        }
         
-        // Exposer les fonctions globalement
-        window.changePage = changePage;
-        window.currentTool = currentTool;
-        window.currentColor = currentColor;
-        window.updateEditor = updateEditor;
+        function setStrokeWidth(width) {
+            appData.strokeWidth = parseInt(width);
+            
+            if (appData.currentPage === 'editor') {
+                renderApp();
+            }
+        }
+        
+        function toggleColorPicker() {
+            const picker = document.getElementById('colorPicker');
+            if (picker) {
+                picker.classList.toggle('hidden');
+            }
+        }
+        
+        function openNotebook(id) {
+            appData.activeNotebookId = id;
+            changePage('editor');
+            showToast('Cahier ouvert', 'Vous pouvez maintenant prendre des notes', 'success');
+        }
+        
+        function createNewNotebook() {
+            const newId = (appData.notebooks.length + 1).toString();
+            const subjects = ['Physique', 'Chimie', 'Maths', 'Français', 'Histoire', 'SVT'];
+            const colors = ['#E0F2FE', '#DCFCE7', '#FAE8FF', '#FEF3C7', '#FCE7F3', '#E0E7FF'];
+            
+            const newNotebook = {
+                id: newId,
+                title: "Nouveau Cahier",
+                subject: subjects[Math.floor(Math.random() * subjects.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
+                lastModified: "À l'instant",
+                pageCount: 1,
+                tags: ["Nouveau"],
+                shared: false
+            };
+            
+            appData.notebooks.unshift(newNotebook);
+            openNotebook(newId);
+        }
+        
+        function saveCanvas() {
+            const canvas = document.getElementById('mainCanvas');
+            if (canvas) {
+                appData.canvasState = canvas.toDataURL();
+                showToast('Sauvegarde réussie', 'Vos modifications ont été enregistrées', 'success');
+                
+                // Simuler un enregistrement dans l'historique
+                const newHistoryItem = {
+                    id: appData.historyItems.length + 1,
+                    title: "Devoir de Physique - Chapitre 4",
+                    subject: "Physique",
+                    date: "À l'instant",
+                    preview: "Dernière modification sauvegardée"
+                };
+                appData.historyItems.unshift(newHistoryItem);
+            }
+        }
+        
+        function handleFileImport() {
+            showToast('Importation', 'Sélectionnez un fichier à importer', 'info');
+            // Simuler un input file
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.png,.doc,.txt';
+            input.onchange = (e) => {
+                if (e.target.files[0]) {
+                    showToast('Fichier importé', `${e.target.files[0].name} a été importé avec succès`, 'success');
+                    
+                    // Créer un nouveau cahier pour le fichier
+                    createNewNotebook();
+                }
+            };
+            input.click();
+        }
+        
+        function playSurah(number) {
+            const surah = appData.surahs.find(s => s.number === number);
+            if (surah) {
+                showToast(`Sourate ${surah.name}`, `Lecture de ${surah.englishName} démarrée`, 'info');
+            }
+        }
+        
+        function openHistoryItem(id) {
+            showToast('Ouverture', 'Chargement de la version historique...', 'info');
+            setTimeout(() => {
+                changePage('editor');
+            }, 500);
+        }
+        
+        // ========== RENDU PRINCIPAL ==========
+        function renderApp() {
+            const app = document.getElementById('app');
+            app.innerHTML = '';
+            
+            const page = renderPageByType();
+            app.appendChild(page);
+        }
+        
+        // ========== INITIALISATION ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            renderApp();
+            
+            // Ajouter des styles de police
+            const style = document.createElement('style');
+            style.textContent = `
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                body { font-family: 'Inter', sans-serif; }
+            `;
+            document.head.appendChild(style);
+            
+            // Exposer les fonctions globalement
+            window.changePage = changePage;
+            window.setTool = setTool;
+            window.setColor = setColor;
+            window.setStrokeWidth = setStrokeWidth;
+            window.toggleColorPicker = toggleColorPicker;
+            window.openNotebook = openNotebook;
+            window.createNewNotebook = createNewNotebook;
+            window.saveCanvas = saveCanvas;
+            window.handleFileImport = handleFileImport;
+            window.playSurah = playSurah;
+            window.openHistoryItem = openHistoryItem;
+            
+            console.log('SmartNotes chargé avec succès ! 🚀');
+        });
         
     </script>
 </body>
