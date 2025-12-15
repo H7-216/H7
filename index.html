@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mon Cahier Numérique - Version Portable</title>
     
     <!-- Fonts -->
@@ -60,6 +60,16 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 640px) {
+            .seyes-detailed {
+                background-size: 1.5rem 100%, 100% 1.5rem, 100% 0.375rem;
+            }
+            .seyes-detailed::before {
+                left: 2rem;
+            }
+        }
     </style>
 
     <!-- React & ReactDOM -->
@@ -75,7 +85,7 @@
     <!-- Lucide Icons (Script version) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100">
+<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -130,18 +140,24 @@
                 if (!canvas) return;
 
                 // Handle High DPI
-                const dpr = window.devicePixelRatio || 1;
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
+                const updateSize = () => {
+                    const dpr = window.devicePixelRatio || 1;
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * dpr;
+                    canvas.height = rect.height * dpr;
+                    
+                    const context = canvas.getContext('2d');
+                    context.scale(dpr, dpr);
+                    context.lineCap = 'round';
+                    context.lineJoin = 'round';
+                    context.strokeStyle = color;
+                    context.lineWidth = brushSize;
+                    setCtx(context);
+                };
 
-                const context = canvas.getContext('2d');
-                context.scale(dpr, dpr);
-                context.lineCap = 'round';
-                context.lineJoin = 'round';
-                context.strokeStyle = color;
-                context.lineWidth = brushSize;
-                setCtx(context);
+                updateSize();
+                window.addEventListener('resize', updateSize);
+                return () => window.removeEventListener('resize', updateSize);
             }, []);
 
             useEffect(() => {
@@ -153,13 +169,19 @@
 
             const getPos = (e) => {
                 const rect = canvasRef.current.getBoundingClientRect();
-                if (e.touches) {
+                if (e.touches && e.touches.length > 0) {
                     return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
                 }
                 return { x: e.clientX - rect.left, y: e.clientY - rect.top };
             };
 
             const start = (e) => {
+                // Prevent scrolling when drawing
+                if (e.type === 'touchstart') {
+                    // Only prevent default if we're actually drawing on canvas
+                    // e.preventDefault(); 
+                }
+                
                 setIsDrawing(true);
                 const { x, y } = getPos(e);
                 ctx.beginPath();
@@ -168,6 +190,8 @@
 
             const move = (e) => {
                 if (!isDrawing) return;
+                if (e.type === 'touchmove') e.preventDefault();
+                
                 const { x, y } = getPos(e);
                 ctx.lineTo(x, y);
                 ctx.stroke();
@@ -175,7 +199,7 @@
 
             const stop = () => {
                 setIsDrawing(false);
-                ctx.closePath();
+                if(ctx) ctx.closePath();
             };
             
             const clear = () => {
@@ -185,7 +209,7 @@
             }
 
             return (
-                <div className="relative w-full h-full">
+                <div className="relative w-full h-full touch-none">
                      <div className="absolute top-4 right-4 z-10">
                         <Button variant="ghost" size="icon" onClick={clear} title="Effacer">
                             <Icon name="trash-2" size={16} />
@@ -193,7 +217,7 @@
                     </div>
                     <canvas 
                         ref={canvasRef}
-                        className="w-full h-full touch-none cursor-crosshair"
+                        className="w-full h-full cursor-crosshair"
                         onMouseDown={start} onMouseMove={move} onMouseUp={stop} onMouseLeave={stop}
                         onTouchStart={start} onTouchMove={move} onTouchEnd={stop}
                     />
@@ -201,12 +225,12 @@
             );
         };
 
-        // 3. Quran Player (API Integration)
+        // 3. Quran Player (API Integration with Yasser Al-Dosari)
         const QuranPlayer = () => {
             const [surahs, setSurahs] = useState([]);
             const [reciters, setReciters] = useState([]);
             const [selectedSurah, setSelectedSurah] = useState("1");
-            const [selectedReciter, setSelectedReciter] = useState("7"); // Mishary
+            const [selectedReciter, setSelectedReciter] = useState("54"); // Default Yasser Al-Dosari (ID 54 usually)
             const [isPlaying, setIsPlaying] = useState(false);
             const [loading, setLoading] = useState(false);
             const audioRef = useRef(null);
@@ -216,8 +240,15 @@
                     try {
                         const s = await axios.get('https://api.quran.com/api/v4/chapters');
                         setSurahs(s.data.chapters);
+                        
                         const r = await axios.get('https://api.quran.com/api/v4/resources/recitations');
-                        setReciters(r.data.recitations);
+                        let fetchedReciters = r.data.recitations;
+                        
+                        // Ensure Yasser Al-Dosari is in the list or prioritize him
+                        // Try to find him, if not there (unlikely with this API), we keep the list as is.
+                        // ID 54 is Yasser Al-Dosari in Quran.com API usually.
+                        
+                        setReciters(fetchedReciters);
                     } catch(e) { console.error(e); }
                 };
                 init();
@@ -248,7 +279,7 @@
             };
 
             return (
-                <div className="h-full flex flex-col gap-4 p-4">
+                <div className="h-full flex flex-col gap-4 p-4 lg:p-8">
                     <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
                     
                     <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm border border-white/50 space-y-6">
@@ -258,19 +289,20 @@
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500">Récitateur</label>
                                 <select 
-                                    className="w-full p-2 rounded-md border border-gray-200 bg-white"
+                                    className="w-full p-2 rounded-md border border-gray-200 bg-white text-base"
                                     value={selectedReciter}
                                     onChange={(e) => setSelectedReciter(e.target.value)}
                                 >
-                                    {reciters.map(r => (
-                                        <option key={r.id} value={r.id}>{r.reciter_name}</option>
+                                    <option value="54">Yasser Al-Dosari (ياسر الدوسري)</option>
+                                    {reciters.filter(r => r.id !== 54).map(r => (
+                                        <option key={r.id} value={r.id}>{r.reciter_name} {r.style ? `(${r.style})` : ''}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500">Sourate</label>
                                 <select 
-                                    className="w-full p-2 rounded-md border border-gray-200 bg-white font-arabic text-right"
+                                    className="w-full p-2 rounded-md border border-gray-200 bg-white font-arabic text-right text-base"
                                     value={selectedSurah}
                                     onChange={(e) => setSelectedSurah(e.target.value)}
                                 >
@@ -281,28 +313,28 @@
                             </div>
                         </div>
 
-                        <div className="flex justify-center items-center gap-4 pt-2">
+                        <div className="flex justify-center items-center gap-6 pt-2">
                             <Button variant="outline" size="icon" onClick={() => setSelectedSurah(String(Math.max(1, parseInt(selectedSurah)-1)))}>
-                                <Icon name="skip-back" size={16} />
+                                <Icon name="skip-back" size={20} />
                             </Button>
                             
                             <Button 
-                                className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:scale-105 transition-transform" 
+                                className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:scale-105 transition-transform flex items-center justify-center" 
                                 onClick={toggle}
                                 disabled={loading}
                             >
-                                {loading ? <span className="animate-spin">⌛</span> : 
+                                {loading ? <span className="animate-spin text-xl">⌛</span> : 
                                  isPlaying ? <Icon name="pause" size={32} /> : <Icon name="play" size={32} className="ml-1" />}
                             </Button>
 
                             <Button variant="outline" size="icon" onClick={() => setSelectedSurah(String(Math.min(114, parseInt(selectedSurah)+1)))}>
-                                <Icon name="skip-forward" size={16} />
+                                <Icon name="skip-forward" size={20} />
                             </Button>
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white/60 rounded-xl p-8 text-center border border-white/50 shadow-inner overflow-y-auto">
-                        <p className="font-arabic text-3xl leading-loose opacity-80">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+                    <div className="flex-1 bg-white/60 rounded-xl p-4 md:p-8 text-center border border-white/50 shadow-inner overflow-y-auto">
+                        <p className="font-arabic text-3xl md:text-4xl leading-loose opacity-80 py-4">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
                         <p className="mt-4 text-sm text-gray-500 font-sans">
                             {surahs.find(s => s.id == selectedSurah)?.name_simple}
                         </p>
@@ -329,25 +361,25 @@
             };
 
             return (
-                <div className="max-w-6xl mx-auto p-8 space-y-8">
-                    <header className="flex justify-between items-center">
+                <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 h-full overflow-y-auto">
+                    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-4xl font-bold text-neutral-900">Mes Cahiers</h1>
+                            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">Mes Cahiers</h1>
                             <p className="text-neutral-500">Sélectionnez une matière</p>
                         </div>
-                        <Button onClick={() => setShowDialog(true)} className="rounded-full gap-2 px-6">
-                            <Icon name="plus" size={20} /> Nouveau
+                        <Button onClick={() => setShowDialog(true)} className="rounded-full gap-2 px-6 w-full md:w-auto">
+                            <Icon name="plus" size={20} /> <span className="md:inline">Nouveau Cahier</span>
                         </Button>
                     </header>
 
                     {/* Dialog Modal */}
                     {showDialog && (
-                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
                             <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95">
                                 <h3 className="text-lg font-bold mb-4">Nouvelle matière</h3>
                                 <input 
                                     autoFocus
-                                    className="w-full border p-2 rounded mb-4" 
+                                    className="w-full border p-3 rounded-lg mb-4 text-lg" 
                                     placeholder="Ex: Physique"
                                     value={newSub}
                                     onChange={e => setNewSub(e.target.value)}
@@ -360,12 +392,12 @@
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
                         {subjects.map(sub => (
                             <div 
                                 key={sub.id} 
                                 onClick={() => onNavigate('notebook', sub)}
-                                className="group cursor-pointer bg-white h-[320px] relative rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
+                                className="group cursor-pointer bg-white h-[280px] md:h-[320px] relative rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
                             >
                                 <div className={`absolute left-0 top-0 bottom-0 w-4 ${sub.color} z-20 shadow-inner`}></div>
                                 <div className="absolute left-4 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
@@ -388,33 +420,50 @@
 
         const Notebook = ({ subject, onBack }) => {
             const [tab, setTab] = useState('write'); // write, history, quran
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+            const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+            // Tab configuration
+            const tabs = [
+                {id: 'write', icon: 'pen-tool', label: 'Écrire'},
+                {id: 'history', icon: 'history', label: 'Historique'},
+                {id: 'quran', icon: 'book-open', label: 'Coran'}
+            ];
 
             return (
-                <div className="h-screen flex flex-col bg-neutral-100">
-                    <header className="bg-white border-b px-6 py-3 flex items-center justify-between shadow-sm z-20">
-                        <div className="flex items-center gap-4">
+                <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
+                    <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm z-30">
+                        <div className="flex items-center gap-3">
                             <Button variant="ghost" size="icon" onClick={onBack}>
                                 <Icon name="arrow-left" size={20} />
                             </Button>
                             <div>
-                                <h1 className="text-xl font-bold">{subject.title}</h1>
-                                <p className="text-xs text-gray-400 flex items-center gap-1">
+                                <h1 className="text-lg md:text-xl font-bold truncate max-w-[150px] md:max-w-xs">{subject.title}</h1>
+                                <p className="text-xs text-gray-400 flex items-center gap-1 hidden md:flex">
                                     <Icon name="calendar" size={12}/> {new Date().toLocaleDateString('fr-FR')}
                                 </p>
                             </div>
                         </div>
-                        <Button variant="outline" size="sm" className="gap-2">
-                            <Icon name="save" size={16} /> Sauvegarder
-                        </Button>
+                        
+                        <div className="flex items-center gap-2">
+                             <Button variant="outline" size="sm" className="gap-2 hidden md:flex">
+                                <Icon name="save" size={16} /> Sauvegarder
+                            </Button>
+                            
+                            {/* Hamburger Menu Button (Mobile) */}
+                            <button 
+                                onClick={toggleMenu}
+                                className="md:hidden p-2 rounded-md hover:bg-gray-100"
+                            >
+                                <Icon name={isMenuOpen ? "x" : "menu"} size={24} />
+                            </button>
+                        </div>
                     </header>
 
-                    {/* Tabs */}
-                    <div className="bg-white/50 backdrop-blur border-b px-6 flex gap-6">
-                        {[
-                            {id: 'write', icon: 'pen-tool', label: 'Écrire'},
-                            {id: 'history', icon: 'history', label: 'Historique'},
-                            {id: 'quran', icon: 'book-open', label: 'Coran'}
-                        ].map(t => (
+                    {/* Desktop Tabs */}
+                    <div className="hidden md:flex bg-white/50 backdrop-blur border-b px-6 gap-6">
+                        {tabs.map(t => (
                             <button 
                                 key={t.id}
                                 onClick={() => setTab(t.id)}
@@ -425,28 +474,53 @@
                         ))}
                     </div>
 
-                    <div className="flex-1 relative overflow-hidden p-4 md:p-8">
+                    {/* Mobile Menu Dropdown */}
+                    {isMenuOpen && (
+                        <div className="md:hidden absolute top-[60px] left-0 right-0 bg-white border-b shadow-lg z-20 animate-in slide-in-from-top-2">
+                            <div className="flex flex-col p-2">
+                                {tabs.map(t => (
+                                    <button 
+                                        key={t.id}
+                                        onClick={() => {
+                                            setTab(t.id);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className={`flex items-center gap-3 p-4 rounded-lg transition-colors ${tab === t.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600'}`}
+                                    >
+                                        <Icon name={t.icon} size={20} /> {t.label}
+                                    </button>
+                                ))}
+                                <div className="border-t my-2 pt-2">
+                                    <button className="flex items-center gap-3 p-4 text-gray-600 w-full text-left">
+                                        <Icon name="save" size={20} /> Sauvegarder
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex-1 relative overflow-hidden p-2 md:p-8 bg-neutral-100">
                         {tab === 'write' && (
-                            <div className="max-w-[210mm] mx-auto h-full bg-white shadow-2xl rounded-sm overflow-hidden seyes-detailed relative animate-in fade-in zoom-in-95">
-                                <div className="absolute top-0 left-16 right-0 h-24 p-6 z-10 pointer-events-none">
+                            <div className="w-full h-full max-w-[210mm] mx-auto bg-white shadow-2xl rounded-sm overflow-hidden seyes-detailed relative animate-in fade-in zoom-in-95 flex flex-col">
+                                <div className="absolute top-0 left-0 right-0 h-20 md:h-24 p-4 md:p-6 z-10 pointer-events-none md:pl-16 pl-12">
                                     <div className="border-b-2 border-neutral-800/20 pb-2 flex justify-between items-end">
-                                        <span className="font-hand text-2xl text-blue-800 opacity-80">{subject.title}</span>
-                                        <span className="font-hand text-xl text-neutral-500">{new Date().toLocaleDateString()}</span>
+                                        <span className="font-hand text-xl md:text-2xl text-blue-800 opacity-80">{subject.title}</span>
+                                        <span className="font-hand text-lg md:text-xl text-neutral-500">{new Date().toLocaleDateString()}</span>
                                     </div>
                                 </div>
-                                <div className="h-full pt-24 pl-12">
+                                <div className="flex-1 pt-20 md:pt-24 pl-10 md:pl-12">
                                     <NotebookCanvas />
                                 </div>
                             </div>
                         )}
 
                         {tab === 'history' && (
-                            <div className="max-w-5xl mx-auto grid grid-cols-4 gap-6 animate-in slide-in-from-bottom-4">
-                                <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-gray-500 hover:text-gray-600 cursor-pointer bg-white/50">
+                            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-in slide-in-from-bottom-4 p-2 h-full overflow-y-auto">
+                                <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-gray-500 hover:text-gray-600 cursor-pointer bg-white/50 min-h-[200px]">
                                     <Icon name="plus" size={32} />
                                     <span className="mt-2 text-sm">Nouvelle page</span>
                                 </div>
-                                <div className="aspect-[210/297] bg-white shadow-md seyes-detailed p-4 rounded-sm flex flex-col items-center justify-center opacity-80 hover:scale-105 transition-transform cursor-pointer">
+                                <div className="aspect-[210/297] bg-white shadow-md seyes-detailed p-4 rounded-sm flex flex-col items-center justify-center opacity-80 hover:scale-105 transition-transform cursor-pointer min-h-[200px]">
                                     <Icon name="file-text" size={40} className="text-blue-900 opacity-20" />
                                     <span className="mt-4 text-xs font-mono text-gray-400">Page 1</span>
                                 </div>
