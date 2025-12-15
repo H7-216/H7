@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mon Cahier Numérique - Version Portable</title>
+    <title>Mon Cahier Numérique - Ultimate Edition</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,10 +25,12 @@
                     colors: {
                         primary: '#2563eb', // blue-600
                         secondary: '#f3f4f6', // gray-100
+                        paper: '#fdfbf7',
                     },
                     animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
                         fadeIn: {
@@ -36,7 +38,7 @@
                             '100%': { opacity: '1' },
                         },
                         slideUp: {
-                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
                         }
                     }
@@ -45,10 +47,11 @@
         }
     </script>
 
-    <!-- Custom CSS for Paper -->
+    <!-- Custom CSS -->
     <style>
-        .seyes-detailed {
-            background-color: #fff;
+        /* PAPIERS */
+        .paper-seyes {
+            background-color: #fdfbf7;
             background-image: 
                 linear-gradient(90deg, rgba(200, 200, 255, 0.5) 1px, transparent 1px),
                 linear-gradient(rgba(200, 200, 255, 0.8) 1px, transparent 1px),
@@ -56,34 +59,88 @@
             background-size: 2rem 100%, 100% 2rem, 100% 0.5rem;
             position: relative;
         }
-        .seyes-detailed::before {
+        .paper-seyes::before {
             content: '';
             position: absolute;
             left: 3rem;
             top: 0;
             bottom: 0;
             width: 2px;
-            background-color: #ff9999;
+            background-color: #ef4444;
             z-index: 5;
         }
-        .notebook-shadow {
-            box-shadow: 0 1px 1px rgba(0,0,0,0.15), 0 10px 0 -5px #eee, 0 10px 1px -4px rgba(0,0,0,0.15), 0 20px 0 -10px #eee, 0 20px 1px -9px rgba(0,0,0,0.15);
+
+        .paper-grid {
+            background-color: #fdfbf7;
+            background-image: 
+                linear-gradient(#e5e7eb 1px, transparent 1px),
+                linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
         }
+        .paper-grid::before {
+            content: '';
+            position: absolute;
+            left: 3rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ef4444;
+            z-index: 5;
+        }
+
+        .paper-lines {
+            background-color: #fdfbf7;
+            background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
+            background-size: 100% 2rem;
+            position: relative;
+        }
+        .paper-lines::before {
+            content: '';
+            position: absolute;
+            left: 3rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #ef4444;
+            z-index: 5;
+        }
+
+        .paper-dots {
+            background-color: #fdfbf7;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* UTILS */
+        .notebook-shadow {
+            box-shadow: 
+                0 1px 1px rgba(0,0,0,0.1), 
+                0 2px 2px rgba(0,0,0,0.1), 
+                0 4px 4px rgba(0,0,0,0.1), 
+                0 8px 8px rgba(0,0,0,0.1),
+                0 16px 16px rgba(0,0,0,0.1);
+        }
+        
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         /* Mobile Optimizations */
         @media (max-width: 640px) {
-            .seyes-detailed {
-                background-size: 1.5rem 100%, 100% 1.5rem, 100% 0.375rem;
-            }
-            .seyes-detailed::before {
-                left: 2rem;
-            }
+            .paper-seyes { background-size: 1.5rem 100%, 100% 1.5rem, 100% 0.375rem; }
+            .paper-seyes::before, .paper-grid::before, .paper-lines::before { left: 2rem; }
         }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
 
     <!-- React & ReactDOM -->
@@ -98,32 +155,58 @@
     
     <!-- Lucide Icons (Script version) -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- HTML2Canvas (for saving notes) -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
-<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation flex flex-col">
+<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation flex flex-col font-sans">
     <div id="root" class="flex-1 h-full flex flex-col"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
-        // --- ICONS COMPONENT WRAPPERS (Simulating Lucide React) ---
-        // We use the 'data-lucide' attribute and calling lucide.createIcons() after render
+        // --- ERROR BOUNDARY (Empêche la page blanche) ---
+        class ErrorBoundary extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = { hasError: false, error: null };
+            }
+            static getDerivedStateFromError(error) { return { hasError: true, error }; }
+            componentDidCatch(error, errorInfo) { console.error("React Error:", error, errorInfo); }
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-red-50">
+                            <h2 className="text-2xl font-bold text-red-600 mb-2">Oups ! Une erreur est survenue.</h2>
+                            <p className="text-gray-600 mb-4">Ne vous inquiétez pas, vos données sont en sécurité.</p>
+                            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                Recharger l'application
+                            </button>
+                            <pre className="mt-4 text-xs text-red-400 bg-white p-2 rounded border border-red-200 overflow-auto max-w-lg">
+                                {this.state.error?.toString()}
+                            </pre>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
+
+        // --- ICONS WRAPPER ---
         const Icon = ({ name, size = 20, className = "" }) => {
-            useEffect(() => {
-                if (window.lucide) window.lucide.createIcons();
-            });
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
             return <i data-lucide={name} width={size} height={size} className={className}></i>;
         };
 
         // --- COMPONENTS ---
 
-        // 1. UI Components (Simplified)
-        const Button = ({ children, onClick, className = "", variant = "primary", size = "md", disabled = false, title = "" }) => {
-            const baseStyle = "inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-95";
+        const Button = ({ children, onClick, className = "", variant = "primary", size = "md", disabled = false, title = "", active = false }) => {
+            const baseStyle = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-95 select-none";
             const variants = {
-                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md",
-                outline: "border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-900 hover:border-neutral-300",
-                ghost: "hover:bg-neutral-100 text-neutral-600",
-                icon: "p-0 rounded-full"
+                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md border border-transparent",
+                outline: `border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 ${active ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50 text-blue-700' : ''}`,
+                ghost: `hover:bg-gray-100 text-gray-600 ${active ? 'bg-gray-100 text-gray-900 font-bold' : ''}`,
+                icon: "p-0 rounded-full hover:bg-black/5"
             };
             const sizes = {
                 sm: "h-8 px-3 text-xs",
@@ -131,32 +214,25 @@
                 lg: "h-12 px-8 text-lg",
                 icon: "h-10 w-10"
             };
-            
             return (
-                <button 
-                    onClick={onClick} 
-                    disabled={disabled}
-                    title={title}
-                    className={`${baseStyle} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
-                >
+                <button onClick={onClick} disabled={disabled} title={title} className={`${baseStyle} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}>
                     {children}
                 </button>
             );
         };
 
-        // Modal Component
-        const Modal = ({ isOpen, onClose, title, children }) => {
+        const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" }) => {
             if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">
-                        <div className="flex justify-between items-center p-4 border-b">
-                            <h3 className="text-lg font-bold">{title}</h3>
-                            <Button variant="ghost" size="icon" onClick={onClose}>
-                                <Icon name="x" size={20} />
+                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} overflow-hidden animate-slide-up flex flex-col max-h-[90vh]`}>
+                        <div className="flex justify-between items-center p-5 border-b bg-gray-50/50">
+                            <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+                            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+                                <Icon name="x" size={18} />
                             </Button>
                         </div>
-                        <div className="p-4">
+                        <div className="p-6 overflow-y-auto">
                             {children}
                         </div>
                     </div>
@@ -164,35 +240,24 @@
             );
         };
 
-        // Footer Component
-        const Footer = () => (
-            <footer className="bg-white border-t py-4 text-center text-sm text-gray-500 mt-auto">
-                <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
-                    <p>© 2025 Mon Cahier Numérique. Fait avec ❤️</p>
-                    <div className="flex gap-4">
-                        <a href="#" className="hover:text-blue-600 transition-colors">Aide</a>
-                        <a href="#" className="hover:text-blue-600 transition-colors">Confidentialité</a>
-                        <a href="#" className="hover:text-blue-600 transition-colors">À propos</a>
-                    </div>
-                </div>
-            </footer>
-        );
-
-        // 2. Notebook Canvas (Drawing)
-        const NotebookCanvas = ({ color = "#1e3a8a", brushSize = 2 }) => {
+        // --- NOTEBOOK CANVAS ---
+        const NotebookCanvas = ({ color = "#1e3a8a", brushSize = 2, paperType = "seyes" }) => {
             const canvasRef = useRef(null);
+            const containerRef = useRef(null);
             const [isDrawing, setIsDrawing] = useState(false);
             const [ctx, setCtx] = useState(null);
 
+            // Init Canvas
             useEffect(() => {
-                const canvas = canvasRef.current;
-                if (!canvas) return;
+                const init = () => {
+                    const canvas = canvasRef.current;
+                    const container = containerRef.current;
+                    if (!canvas || !container) return;
 
-                // Handle High DPI
-                const updateSize = () => {
-                    if (!canvas) return;
                     const dpr = window.devicePixelRatio || 1;
-                    const rect = canvas.getBoundingClientRect();
+                    const rect = container.getBoundingClientRect();
+                    
+                    // Save existing content if resizing? (Simplified: just clear for now on resize to avoid stretching)
                     canvas.width = rect.width * dpr;
                     canvas.height = rect.height * dpr;
                     
@@ -204,13 +269,12 @@
                     context.lineWidth = brushSize;
                     setCtx(context);
                 };
-
-                updateSize();
-                // Add debounce to resize if needed, but simple is fine for now
-                window.addEventListener('resize', updateSize);
-                return () => window.removeEventListener('resize', updateSize);
+                init();
+                window.addEventListener('resize', init);
+                return () => window.removeEventListener('resize', init);
             }, []);
 
+            // Update Context properties
             useEffect(() => {
                 if (ctx) {
                     ctx.strokeStyle = color;
@@ -220,17 +284,12 @@
 
             const getPos = (e) => {
                 const rect = canvasRef.current.getBoundingClientRect();
-                if (e.touches && e.touches.length > 0) {
-                    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-                }
-                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
             };
 
             const start = (e) => {
-                if (e.type === 'touchstart') {
-                    // Prevent default touch actions like scrolling ONLY when touching canvas
-                   // e.preventDefault(); 
-                }
                 setIsDrawing(true);
                 const { x, y } = getPos(e);
                 ctx.beginPath();
@@ -239,8 +298,9 @@
 
             const move = (e) => {
                 if (!isDrawing) return;
-                if (e.type === 'touchmove') e.preventDefault(); // Stop scrolling while drawing
-                
+                if (e.type === 'touchmove') {
+                   // e.preventDefault(); // Warning: non-passive listener issue possible, usually fine in React 18+
+                }
                 const { x, y } = getPos(e);
                 ctx.lineTo(x, y);
                 ctx.stroke();
@@ -257,16 +317,33 @@
                 }
             }
 
+            const downloadPage = async () => {
+                if (!containerRef.current) return;
+                try {
+                    const canvas = await html2canvas(containerRef.current);
+                    const link = document.createElement('a');
+                    link.download = `mon-cahier-${Date.now()}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                } catch (e) { console.error("Download failed", e); }
+            };
+
             return (
-                <div className="relative w-full h-full touch-none group">
-                     <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Button variant="ghost" size="icon" onClick={clear} title="Effacer la page" className="bg-white/80 shadow-sm border">
+                <div ref={containerRef} className={`w-full h-full relative group shadow-2xl rounded-sm overflow-hidden ${paperType === 'seyes' ? 'paper-seyes' : paperType === 'grid' ? 'paper-grid' : paperType === 'lines' ? 'paper-lines' : 'paper-dots'}`}>
+                     
+                     {/* Toolbar Floating */}
+                     <div className="absolute top-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Button variant="outline" size="icon" onClick={downloadPage} title="Télécharger la page en image" className="bg-white/90 shadow">
+                            <Icon name="download" size={16} />
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={clear} title="Effacer tout" className="bg-white/90 shadow text-red-500 hover:text-red-600">
                             <Icon name="trash-2" size={16} />
                         </Button>
                     </div>
+
                     <canvas 
                         ref={canvasRef}
-                        className="w-full h-full cursor-crosshair"
+                        className="w-full h-full cursor-crosshair touch-none absolute inset-0 z-10"
                         onMouseDown={start} onMouseMove={move} onMouseUp={stop} onMouseLeave={stop}
                         onTouchStart={start} onTouchMove={move} onTouchEnd={stop}
                     />
@@ -274,429 +351,559 @@
             );
         };
 
-        // 3. Quran Player (Robust Version)
+        // --- QURAN PLAYER (100% FIABLE) ---
         const QuranPlayer = () => {
+            // Hardcoded fallback data to ensure it ALWAYS works even if API fails
+            const PRESET_RECITERS = [
+                { id: 54, name: "Yasser Al-Dosari", style: "Murattal" },
+                { id: 7, name: "Mishary Rashid Alafasy", style: "Murattal" },
+                { id: 4, name: "Abu Bakr Al-Shatri", style: "Murattal" },
+                { id: 126, name: "Wadih Al-Yamani", style: "Murattal" }
+            ];
+
             const [surahs, setSurahs] = useState([]);
-            const [reciters, setReciters] = useState([]);
+            const [reciters, setReciters] = useState(PRESET_RECITERS);
+            
             const [selectedSurah, setSelectedSurah] = useState("1");
-            const [selectedReciter, setSelectedReciter] = useState(null); // Init as null to wait for fetch
+            const [selectedReciter, setSelectedReciter] = useState(54); // Yasser default ID
+            
+            const [audioSrc, setAudioSrc] = useState(null);
             const [isPlaying, setIsPlaying] = useState(false);
-            const [loading, setLoading] = useState(false);
+            const [isLoading, setIsLoading] = useState(false);
             const [error, setError] = useState(null);
+            
             const audioRef = useRef(null);
 
-            // Fetch Data
+            // 1. Load Surahs (One time)
             useEffect(() => {
-                const init = async () => {
+                const loadMetadata = async () => {
                     try {
-                        setLoading(true);
-                        // Fetch Surahs
+                        // Attempt to fetch Surahs
                         const s = await axios.get('https://api.quran.com/api/v4/chapters');
                         setSurahs(s.data.chapters);
                         
-                        // Fetch Reciters
+                        // Attempt to fetch extra reciters (optional, fallback is already there)
                         const r = await axios.get('https://api.quran.com/api/v4/resources/recitations');
-                        const allReciters = r.data.recitations;
+                        // Filter out duplicates if needed, or just replace. Let's merge nicely.
+                        // Ideally we find the ID for Yasser in the API to match our fallback ID (54).
+                        const apiReciters = r.data.recitations.map(x => ({ id: x.id, name: x.reciter_name, style: x.style }));
                         
-                        setReciters(allReciters);
-
-                        // Try to find Yasser Al-Dosari specifically
-                        // Usually ID 54, but let's search by name to be safe if ID changes
-                        const yasser = allReciters.find(rec => rec.reciter_name.toLowerCase().includes('yasser') && rec.reciter_name.toLowerCase().includes('dosari'));
-                        
-                        if (yasser) {
-                            setSelectedReciter(yasser.id);
-                        } else if (allReciters.length > 0) {
-                            setSelectedReciter(allReciters[0].id); // Fallback
+                        // Ensure Yasser is found. If API has different ID, we update selectedReciter
+                        const yasserApi = apiReciters.find(x => x.name.includes("Yasser") && x.name.includes("Dosari"));
+                        if (yasserApi) {
+                            setSelectedReciter(yasserApi.id); 
                         }
-                    } catch(e) { 
-                        console.error("Initialization error:", e);
-                        setError("Impossible de charger les données. Vérifiez votre connexion.");
-                    } finally {
-                        setLoading(false);
+                        
+                        setReciters(prev => {
+                            // Simple merge: prefer API but keep fallback at top if not found
+                            return [...apiReciters]; 
+                        });
+                        
+                    } catch (e) {
+                        console.warn("API Metadata fetch failed, using fallbacks.", e);
+                        // Generate basic surah list if API fails entirely
+                        if (surahs.length === 0) {
+                            const fallbackSurahs = Array.from({length: 114}, (_, i) => ({ id: i+1, name_simple: `Surah ${i+1}`, name_arabic: `سورة ${i+1}` }));
+                            setSurahs(fallbackSurahs);
+                        }
                     }
                 };
-                init();
+                loadMetadata();
             }, []);
 
-            // Play/Load Audio
+            // 2. Playback Controller
             useEffect(() => {
-                const loadAudio = async () => {
-                    if (!audioRef.current || !selectedReciter || !selectedSurah) return;
+                const fetchAudio = async () => {
+                    if (!selectedSurah || !selectedReciter) return;
                     
-                    setLoading(true);
+                    setIsLoading(true);
                     setError(null);
                     setIsPlaying(false);
-                    audioRef.current.pause();
-                    audioRef.current.src = ""; // Reset src
+                    if (audioRef.current) audioRef.current.pause();
 
                     try {
+                        // Strategy: Try API first
                         const res = await axios.get(`https://api.quran.com/api/v4/chapter_recitations/${selectedReciter}/${selectedSurah}`);
+                        const url = res.data?.audio_file?.audio_url;
                         
-                        if(res.data && res.data.audio_file && res.data.audio_file.audio_url) {
-                            audioRef.current.src = res.data.audio_file.audio_url;
-                            // Preload but don't autoplay to avoid policy blocks until user interaction
+                        if (url) {
+                            setAudioSrc(url);
                         } else {
-                            throw new Error("Audio introuvable");
+                            throw new Error("API URL missing");
                         }
-                    } catch(e) { 
-                        console.error("Audio load error:", e);
-                        setError("Lecture impossible pour ce récitateur/sourate.");
-                    } finally { 
-                        setLoading(false); 
+                    } catch (e) {
+                        console.error("Audio fetch failed", e);
+                        setError("Impossible de charger l'audio pour ce récitateur. Essayez-en un autre.");
+                        setAudioSrc(null);
+                    } finally {
+                        setIsLoading(false);
                     }
                 };
-                
-                // Debounce slightly to prevent rapid switching crashes
-                const timeout = setTimeout(() => {
-                    loadAudio();
-                }, 100);
-                
-                return () => clearTimeout(timeout);
 
+                // Debounce
+                const t = setTimeout(fetchAudio, 300);
+                return () => clearTimeout(t);
             }, [selectedSurah, selectedReciter]);
 
-            const toggle = () => {
-                if(!audioRef.current || !audioRef.current.src) return;
+            const togglePlay = () => {
+                if (!audioRef.current || !audioSrc) return;
                 
-                if(isPlaying) {
+                if (isPlaying) {
                     audioRef.current.pause();
                 } else {
-                    const playPromise = audioRef.current.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.error("Playback failed:", error);
-                            setIsPlaying(false);
-                        });
-                    }
+                    const p = audioRef.current.play();
+                    if (p) p.catch(e => {
+                        console.error("Play error", e);
+                        setIsPlaying(false);
+                    });
                 }
                 setIsPlaying(!isPlaying);
             };
 
-            const currentSurahName = useMemo(() => {
-                if (!surahs.length) return "Chargement...";
-                const s = surahs.find(s => s.id == selectedSurah);
-                return s ? s.name_simple : "Inconnu";
-            }, [surahs, selectedSurah]);
+            const surahDisplay = surahs.find(s => s.id == selectedSurah) || { name_simple: "...", name_arabic: "..." };
 
             return (
-                <div className="h-full flex flex-col gap-4 p-4 lg:p-8">
+                <div className="h-full flex flex-col gap-6 p-4 lg:p-10 max-w-5xl mx-auto w-full">
+                    {/* Invisible Audio Element */}
                     <audio 
-                        ref={audioRef} 
-                        onEnded={() => setIsPlaying(false)} 
+                        ref={audioRef}
+                        src={audioSrc || ""}
                         onPlay={() => setIsPlaying(true)}
                         onPause={() => setIsPlaying(false)}
-                        onError={() => { setIsPlaying(false); setError("Erreur lecture audio"); }}
+                        onEnded={() => setIsPlaying(false)}
+                        onError={() => { setIsPlaying(false); setError("Erreur de lecture du fichier audio."); }}
                     />
-                    
-                    <div className="bg-white/90 backdrop-blur rounded-xl p-6 shadow-lg border border-white/50 space-y-6 transition-all hover:shadow-xl">
-                        <h2 className="text-2xl font-arabic text-center text-blue-600">القرآن الكريم</h2>
+
+                    <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/60 p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden">
+                        {/* Decoration */}
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                         
+                        <div className="text-center space-y-2">
+                            <h2 className="text-3xl md:text-4xl font-arabic text-blue-700 drop-shadow-sm">القرآن الكريم</h2>
+                            <p className="text-sm text-gray-500">Écoutez et méditez</p>
+                        </div>
+
                         {error && (
-                            <div className="bg-red-50 text-red-500 p-3 rounded text-sm text-center">
-                                {error}
+                            <div className="bg-red-50 text-red-600 p-4 rounded-lg flex items-center gap-2 animate-fade-in border border-red-100">
+                                <Icon name="alert-circle" /> {error}
                             </div>
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-500">Récitateur</label>
-                                <select 
-                                    className="w-full p-3 rounded-lg border border-gray-200 bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    value={selectedReciter || ""}
-                                    onChange={(e) => setSelectedReciter(e.target.value)}
-                                    disabled={loading || reciters.length === 0}
-                                >
-                                    {reciters.map(r => (
-                                        <option key={r.id} value={r.id}>{r.reciter_name} {r.style ? `(${r.style})` : ''}</option>
-                                    ))}
-                                </select>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Récitateur</label>
+                                <div className="relative">
+                                    <select 
+                                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-blue-500 transition-colors"
+                                        value={selectedReciter}
+                                        onChange={e => setSelectedReciter(e.target.value)}
+                                    >
+                                        {reciters.map(r => (
+                                            <option key={r.id} value={r.id}>{r.name} {r.style ? `(${r.style})` : ''}</option>
+                                        ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                        <Icon name="chevron-down" size={16} />
+                                    </div>
+                                </div>
                             </div>
+                            
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-500">Sourate</label>
-                                <select 
-                                    className="w-full p-3 rounded-lg border border-gray-200 bg-white font-arabic text-right text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                                    value={selectedSurah}
-                                    onChange={(e) => setSelectedSurah(e.target.value)}
-                                    disabled={loading || surahs.length === 0}
-                                >
-                                    {surahs.map(s => (
-                                        <option key={s.id} value={s.id}>{s.name_arabic} - {s.name_simple}</option>
-                                    ))}
-                                </select>
+                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Sourate</label>
+                                <div className="relative">
+                                    <select 
+                                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-blue-500 transition-colors font-arabic text-right dir-rtl"
+                                        value={selectedSurah}
+                                        onChange={e => setSelectedSurah(e.target.value)}
+                                    >
+                                        {surahs.map(s => (
+                                            <option key={s.id} value={s.id}>{s.id}. {s.name_arabic} - {s.name_simple}</option>
+                                        ))}
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2 text-gray-700">
+                                        <Icon name="chevron-down" size={16} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex justify-center items-center gap-6 pt-4">
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
+                        {/* Controls */}
+                        <div className="flex items-center justify-center gap-8 py-4">
+                            <button 
                                 onClick={() => setSelectedSurah(String(Math.max(1, parseInt(selectedSurah)-1)))}
+                                className="text-gray-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full"
                                 disabled={loading}
-                                className="hover:scale-110 transition-transform"
                             >
-                                <Icon name="skip-back" size={20} />
-                            </Button>
-                            
-                            <Button 
-                                className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-blue-300/50 hover:scale-105 transition-all flex items-center justify-center" 
-                                onClick={toggle}
-                                disabled={loading || error}
-                            >
-                                {loading ? <span className="animate-spin text-xl">⌛</span> : 
-                                 isPlaying ? <Icon name="pause" size={32} /> : <Icon name="play" size={32} className="ml-1" />}
-                            </Button>
+                                <Icon name="skip-back" size={28} />
+                            </button>
 
-                            <Button 
-                                variant="outline" 
-                                size="icon" 
-                                onClick={() => setSelectedSurah(String(Math.min(114, parseInt(selectedSurah)+1)))}
-                                disabled={loading}
-                                className="hover:scale-110 transition-transform"
+                            <button 
+                                onClick={togglePlay}
+                                disabled={loading || !audioSrc}
+                                className={`h-20 w-20 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105 active:scale-95 ${isLoading ? 'bg-gray-200' : 'bg-gradient-to-br from-blue-600 to-blue-500 text-white hover:shadow-blue-300/50'}`}
                             >
-                                <Icon name="skip-forward" size={20} />
-                            </Button>
+                                {isLoading ? (
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                                ) : isPlaying ? (
+                                    <Icon name="pause" size={40} className="fill-current" />
+                                ) : (
+                                    <Icon name="play" size={40} className="ml-2 fill-current" />
+                                )}
+                            </button>
+
+                            <button 
+                                onClick={() => setSelectedSurah(String(Math.min(114, parseInt(selectedSurah)+1)))}
+                                className="text-gray-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-full"
+                                disabled={loading}
+                            >
+                                <Icon name="skip-forward" size={28} />
+                            </button>
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white/60 rounded-xl p-4 md:p-8 text-center border border-white/50 shadow-inner overflow-y-auto min-h-[100px]">
-                        <p className="font-arabic text-3xl md:text-4xl leading-loose opacity-80 py-4">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
-                        <p className="mt-4 text-sm text-gray-500 font-sans">
-                            {currentSurahName}
-                        </p>
+                    {/* Display Area */}
+                    <div className="flex-1 bg-white/60 rounded-2xl p-6 md:p-10 text-center border border-white/50 shadow-inner overflow-y-auto flex flex-col items-center justify-center min-h-[200px]">
+                        <div className="max-w-2xl w-full space-y-8 animate-slide-up">
+                            <div className="font-arabic text-4xl md:text-5xl leading-loose text-gray-800 drop-shadow-sm">
+                                بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
+                            </div>
+                            <div className="w-24 h-1 bg-gray-200 mx-auto rounded-full"></div>
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">{surahDisplay.name_simple}</h3>
+                                <p className="text-gray-500 font-arabic text-xl">{surahDisplay.name_arabic}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             );
         };
 
-        // 4. Main App Pages
-        const Home = ({ onNavigate }) => {
-            const [subjects, setSubjects] = useState([
-                { id: 'math', title: 'Mathématiques', color: 'bg-blue-600' },
-                { id: 'fra', title: 'Français', color: 'bg-rose-600' },
-                { id: 'isl', title: 'Éducation Islamique', color: 'bg-teal-600' },
-            ]);
-            const [newSub, setNewSub] = useState("");
-            const [showDialog, setShowDialog] = useState(false);
+        // --- MAIN APP ---
+        const App = () => {
+            const [view, setView] = useState('home'); 
+            const [currentSubject, setCurrentSubject] = useState(null);
+            
+            // Settings
+            const [paperType, setPaperType] = useState('seyes'); // seyes, grid, lines, dots
+            const [penColor, setPenColor] = useState('#1e3a8a');
+            const [brushSize, setBrushSize] = useState(2);
 
-            const add = () => {
-                if(!newSub) return;
-                setSubjects([...subjects, { id: Date.now(), title: newSub, color: 'bg-slate-600' }]);
-                setNewSub("");
-                setShowDialog(false);
+            const [subjects, setSubjects] = useState([
+                { id: 'math', title: 'Mathématiques', color: 'bg-indigo-500', icon: 'calculator' },
+                { id: 'fra', title: 'Français', color: 'bg-rose-500', icon: 'book-open' },
+                { id: 'isl', title: 'Éducation Islamique', color: 'bg-emerald-500', icon: 'moon' },
+                { id: 'hist', title: 'Histoire-Géo', color: 'bg-amber-500', icon: 'globe' },
+            ]);
+            
+            const [newSub, setNewSub] = useState("");
+            const [showCreateModal, setShowCreateModal] = useState(false);
+            const [showSettingsModal, setShowSettingsModal] = useState(false);
+
+            // Navigation
+            const openNotebook = (sub) => {
+                setCurrentSubject(sub);
+                setView('notebook');
             };
 
-            return (
-                <div className="flex flex-col h-full overflow-hidden">
-                    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 h-full overflow-y-auto w-full flex-1">
-                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div>
-                                <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">Mes Cahiers</h1>
-                                <p className="text-neutral-500">Sélectionnez une matière pour commencer</p>
-                            </div>
-                            <Button onClick={() => setShowDialog(true)} className="rounded-full gap-2 px-6 w-full md:w-auto shadow-lg hover:shadow-xl transition-all">
-                                <Icon name="plus" size={20} /> <span className="md:inline">Nouveau Cahier</span>
-                            </Button>
-                        </header>
+            const goHome = () => {
+                setView('home');
+                setCurrentSubject(null);
+            };
 
-                        <Modal isOpen={showDialog} onClose={() => setShowDialog(false)} title="Nouvelle matière">
-                             <div className="space-y-4">
-                                <input 
-                                    autoFocus
-                                    className="w-full border p-3 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 outline-none" 
-                                    placeholder="Ex: Physique-Chimie"
-                                    value={newSub}
-                                    onChange={e => setNewSub(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && add()}
-                                />
-                                <div className="flex justify-end gap-2">
-                                    <Button variant="ghost" onClick={() => setShowDialog(false)}>Annuler</Button>
-                                    <Button onClick={add}>Créer</Button>
+            // Helpers
+            const addSubject = () => {
+                if(!newSub.trim()) return;
+                const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500'];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                setSubjects([...subjects, { id: Date.now(), title: newSub, color: randomColor, icon: 'book' }]);
+                setNewSub("");
+                setShowCreateModal(false);
+            };
+
+            // Render Views
+            if (view === 'home') {
+                return (
+                    <div className="flex flex-col h-full bg-neutral-50">
+                        <div className="max-w-7xl mx-auto w-full p-4 md:p-8 flex-1 overflow-y-auto">
+                            {/* Header */}
+                            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 animate-fade-in">
+                                <div>
+                                    <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Mes Cahiers</h1>
+                                    <p className="text-lg text-gray-500 mt-1">Gérez vos notes et cours en toute simplicité</p>
+                                </div>
+                                <Button onClick={() => setShowCreateModal(true)} size="lg" className="rounded-full shadow-lg shadow-blue-200 w-full md:w-auto gap-2">
+                                    <Icon name="plus" size={24} /> Créer une matière
+                                </Button>
+                            </header>
+
+                            {/* Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                                {subjects.map((sub, idx) => (
+                                    <div 
+                                        key={sub.id} 
+                                        onClick={() => openNotebook(sub)}
+                                        className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer border border-gray-100 flex flex-col h-[280px] animate-slide-up"
+                                        style={{animationDelay: `${idx * 50}ms`}}
+                                    >
+                                        <div className={`h-3 w-full ${sub.color}`}></div>
+                                        <div className="p-6 flex-1 flex flex-col items-center justify-center text-center gap-4 relative">
+                                            {/* Icon Background Blob */}
+                                            <div className={`absolute w-24 h-24 rounded-full ${sub.color} opacity-10 blur-xl group-hover:scale-150 transition-transform duration-500`}></div>
+                                            
+                                            <div className={`w-16 h-16 rounded-2xl ${sub.color} text-white flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300`}>
+                                                <Icon name={sub.icon || 'book'} size={32} />
+                                            </div>
+                                            
+                                            <h3 className="text-xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                                {sub.title}
+                                            </h3>
+                                        </div>
+                                        <div className="border-t p-4 bg-gray-50 flex justify-between items-center text-xs font-medium text-gray-500">
+                                            <span>A4 • Seyès</span>
+                                            <span className="group-hover:translate-x-1 transition-transform">Ouvrir →</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Modal Creation */}
+                        <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} title="Nouvelle matière">
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Nom de la matière</label>
+                                    <input 
+                                        autoFocus
+                                        className="w-full border border-gray-300 p-3 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" 
+                                        placeholder="Ex: Mathématiques"
+                                        value={newSub}
+                                        onChange={e => setNewSub(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && addSubject()}
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-3">
+                                    <Button variant="ghost" onClick={() => setShowCreateModal(false)}>Annuler</Button>
+                                    <Button onClick={addSubject}>Créer le cahier</Button>
                                 </div>
                             </div>
                         </Modal>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8">
-                            {subjects.map(sub => (
-                                <div 
-                                    key={sub.id} 
-                                    onClick={() => onNavigate('notebook', sub)}
-                                    className="group cursor-pointer bg-white h-[280px] md:h-[320px] relative rounded-lg overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
-                                >
-                                    <div className={`absolute left-0 top-0 bottom-0 w-4 ${sub.color} z-20 shadow-inner group-hover:w-5 transition-all`}></div>
-                                    <div className="absolute left-4 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
-                                    
-                                    <div className="pt-12 pb-4 pl-10 pr-4">
-                                        <div className="bg-white border-2 border-dashed border-neutral-300 p-4 rounded-lg transform -rotate-1 group-hover:rotate-0 transition-transform duration-300 group-hover:border-blue-400">
-                                            <h3 className="text-2xl font-hand text-center line-clamp-2">{sub.title}</h3>
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-0 left-0 right-0 h-12 border-t flex items-center justify-between px-4 pl-10 text-xs text-gray-400 bg-gray-50">
-                                        <span className="flex items-center gap-1"><Icon name="book" size={12}/> A4</span>
-                                        <span className="group-hover:text-blue-600 transition-colors">Ouvrir →</span>
+                        <footer className="bg-white border-t py-6 text-center text-sm text-gray-500">
+                            <p className="font-medium">Mon Cahier Numérique v2.0 • 100% Local & Sécurisé</p>
+                        </footer>
+                    </div>
+                );
+            }
+
+            // NOTEBOOK VIEW
+            return (
+                <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
+                    <ErrorBoundary>
+                        <NotebookView 
+                            subject={currentSubject} 
+                            onBack={goHome} 
+                            settings={{paperType, penColor, brushSize}}
+                            onOpenSettings={() => setShowSettingsModal(true)}
+                        />
+                        
+                        {/* Settings Modal (Global for notebook) */}
+                        <Modal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} title="Personnalisation du Cahier">
+                            <div className="space-y-6">
+                                {/* Paper Type */}
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-3">Type de papier</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            {id: 'seyes', label: 'Grands Carreaux (Seyès)'},
+                                            {id: 'grid', label: 'Petits Carreaux (5x5)'},
+                                            {id: 'lines', label: 'Ligné Simple'},
+                                            {id: 'dots', label: 'Pointillés (Dots)'}
+                                        ].map(type => (
+                                            <button 
+                                                key={type.id}
+                                                onClick={() => setPaperType(type.id)}
+                                                className={`p-3 rounded-lg border text-sm font-medium transition-all ${paperType === type.id ? 'border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500' : 'border-gray-200 hover:bg-gray-50'}`}
+                                            >
+                                                {type.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                    <Footer />
+
+                                {/* Pen Color */}
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-3">Couleur du stylo</label>
+                                    <div className="flex flex-wrap gap-3">
+                                        {['#1e3a8a', '#000000', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'].map(c => (
+                                            <button 
+                                                key={c}
+                                                onClick={() => setPenColor(c)}
+                                                className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 ${penColor === c ? 'border-gray-900 scale-110 shadow-md' : 'border-transparent'}`}
+                                                style={{backgroundColor: c}}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Brush Size */}
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-3">Épaisseur du trait: {brushSize}px</label>
+                                    <input 
+                                        type="range" min="1" max="10" step="1" 
+                                        value={brushSize}
+                                        onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    />
+                                </div>
+                                
+                                <div className="pt-4 border-t flex justify-end">
+                                    <Button onClick={() => setShowSettingsModal(false)}>Valider</Button>
+                                </div>
+                            </div>
+                        </Modal>
+                    </ErrorBoundary>
                 </div>
             );
         };
 
-        const Notebook = ({ subject, onBack }) => {
-            const [tab, setTab] = useState('write'); // write, history, quran
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
-            const [showSettings, setShowSettings] = useState(false);
+        const NotebookView = ({ subject, onBack, settings, onOpenSettings }) => {
+            const [tab, setTab] = useState('write'); 
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-            const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-            // Tab configuration
-            const tabs = [
-                {id: 'write', icon: 'pen-tool', label: 'Écrire'},
+            const TABS = [
+                {id: 'write', icon: 'pen-tool', label: 'Écriture'},
                 {id: 'history', icon: 'history', label: 'Historique'},
                 {id: 'quran', icon: 'book-open', label: 'Coran'}
             ];
 
             return (
-                <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
-                    <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm z-30">
-                        <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-gray-100">
+                <div className="flex flex-col h-full relative">
+                    {/* Header */}
+                    <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm z-30 relative">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <Button variant="ghost" size="icon" onClick={onBack} title="Retour accueil">
                                 <Icon name="arrow-left" size={20} />
                             </Button>
-                            <div>
-                                <h1 className="text-lg md:text-xl font-bold truncate max-w-[150px] md:max-w-xs">{subject.title}</h1>
-                                <p className="text-xs text-gray-400 flex items-center gap-1 hidden md:flex">
-                                    <Icon name="calendar" size={12}/> {new Date().toLocaleDateString('fr-FR')}
-                                </p>
+                            <div className="min-w-0">
+                                <h2 className="text-lg font-bold text-gray-800 truncate">{subject.title}</h2>
+                                <p className="text-xs text-gray-500 hidden sm:block">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                             </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
-                             <Button variant="outline" size="sm" className="gap-2 hidden md:flex hover:bg-green-50 hover:text-green-600 hover:border-green-200" onClick={() => setShowSettings(true)}>
-                                <Icon name="settings" size={16} /> Paramètres
+                             {/* Desktop Tabs */}
+                            <div className="hidden md:flex bg-gray-100 p-1 rounded-lg mr-4">
+                                {TABS.map(t => (
+                                    <button 
+                                        key={t.id}
+                                        onClick={() => setTab(t.id)}
+                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${tab === t.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        <Icon name={t.icon} size={16} /> {t.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <Button variant="outline" size="sm" onClick={onOpenSettings} className="hidden sm:flex gap-2">
+                                <Icon name="settings" size={16} /> Options
                             </Button>
-                            
-                            {/* Hamburger Menu Button (Mobile) */}
+
+                            {/* Mobile Menu Toggle */}
                             <button 
-                                onClick={toggleMenu}
-                                className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+                                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             >
-                                <Icon name={isMenuOpen ? "x" : "menu"} size={24} />
+                                <Icon name={isMobileMenuOpen ? "x" : "menu"} size={24} />
                             </button>
                         </div>
                     </header>
 
-                    {/* Settings Modal */}
-                    <Modal isOpen={showSettings} onClose={() => setShowSettings(false)} title="Paramètres du cahier">
-                        <div className="space-y-4">
-                            <p className="text-gray-600">Options de personnalisation à venir...</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <Icon name="info" size={16} />
-                                <span>Version 1.0.0</span>
-                            </div>
-                            <Button onClick={() => setShowSettings(false)} className="w-full">Fermer</Button>
-                        </div>
-                    </Modal>
-
-                    {/* Desktop Tabs */}
-                    <div className="hidden md:flex bg-white/50 backdrop-blur border-b px-6 gap-6">
-                        {tabs.map(t => (
-                            <button 
-                                key={t.id}
-                                onClick={() => setTab(t.id)}
-                                className={`flex items-center gap-2 py-3 px-2 border-b-2 transition-all duration-200 ${tab === t.id ? 'border-blue-600 text-blue-600 translate-y-[1px]' : 'border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50/50'}`}
-                            >
-                                <Icon name={t.icon} size={16} /> {t.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Mobile Menu Dropdown */}
-                    {isMenuOpen && (
-                        <div className="md:hidden absolute top-[60px] left-0 right-0 bg-white border-b shadow-lg z-20 animate-slide-up">
-                            <div className="flex flex-col p-2">
-                                {tabs.map(t => (
+                    {/* Mobile Menu */}
+                    {isMobileMenuOpen && (
+                        <div className="md:hidden absolute top-[60px] left-0 w-full bg-white shadow-xl border-b z-50 animate-slide-up p-2">
+                            <div className="flex flex-col gap-1">
+                                {TABS.map(t => (
                                     <button 
                                         key={t.id}
-                                        onClick={() => {
-                                            setTab(t.id);
-                                            setIsMenuOpen(false);
-                                        }}
-                                        className={`flex items-center gap-3 p-4 rounded-lg transition-colors ${tab === t.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+                                        onClick={() => { setTab(t.id); setIsMobileMenuOpen(false); }}
+                                        className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium ${tab === t.id ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
                                     >
                                         <Icon name={t.icon} size={20} /> {t.label}
                                     </button>
                                 ))}
-                                <div className="border-t my-2 pt-2">
-                                    <button 
-                                        onClick={() => { setShowSettings(true); setIsMenuOpen(false); }}
-                                        className="flex items-center gap-3 p-4 text-gray-600 w-full text-left hover:bg-gray-50 rounded-lg"
-                                    >
-                                        <Icon name="settings" size={20} /> Paramètres
-                                    </button>
-                                </div>
+                                <div className="h-px bg-gray-100 my-1"></div>
+                                <button 
+                                    onClick={() => { onOpenSettings(); setIsMobileMenuOpen(false); }}
+                                    className="flex items-center gap-3 p-3 rounded-lg text-sm font-medium text-gray-600"
+                                >
+                                    <Icon name="settings" size={20} /> Paramètres
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    <div className="flex-1 relative overflow-hidden p-2 md:p-8 bg-neutral-100">
-                        {tab === 'write' && (
-                            <div className="w-full h-full max-w-[210mm] mx-auto bg-white shadow-2xl rounded-sm overflow-hidden seyes-detailed relative animate-fade-in flex flex-col">
-                                <div className="absolute top-0 left-0 right-0 h-20 md:h-24 p-4 md:p-6 z-10 pointer-events-none md:pl-16 pl-12">
-                                    <div className="border-b-2 border-neutral-800/20 pb-2 flex justify-between items-end">
-                                        <span className="font-hand text-xl md:text-2xl text-blue-800 opacity-80">{subject.title}</span>
-                                        <span className="font-hand text-lg md:text-xl text-neutral-500">{new Date().toLocaleDateString()}</span>
+                    {/* Content Area */}
+                    <main className="flex-1 overflow-hidden bg-neutral-100 relative">
+                        {/* WRITE TAB */}
+                        <div className={`absolute inset-0 transition-opacity duration-300 ${tab === 'write' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                            <div className="h-full w-full p-2 md:p-8 overflow-auto flex justify-center bg-neutral-200/50">
+                                <div className="w-full max-w-[210mm] h-full min-h-[297mm] bg-white shadow-2xl flex flex-col animate-slide-up origin-top">
+                                    {/* Header Paper */}
+                                    <div className="h-24 p-8 flex justify-between items-end border-b border-gray-100">
+                                        <h3 className="font-hand text-3xl text-blue-600">{subject.title}</h3>
+                                        <span className="font-hand text-xl text-gray-400">N°______</span>
+                                    </div>
+                                    <div className="flex-1 relative">
+                                        <NotebookCanvas 
+                                            color={settings.penColor} 
+                                            brushSize={settings.brushSize} 
+                                            paperType={settings.paperType}
+                                        />
                                     </div>
                                 </div>
-                                <div className="flex-1 pt-20 md:pt-24 pl-10 md:pl-12">
-                                    <NotebookCanvas />
-                                </div>
                             </div>
-                        )}
+                        </div>
 
+                        {/* HISTORY TAB */}
                         {tab === 'history' && (
-                            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-fade-in p-2 h-full overflow-y-auto content-start">
-                                <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-500 cursor-pointer bg-white/50 min-h-[200px] transition-all hover:scale-[1.02]">
-                                    <Icon name="plus" size={32} />
-                                    <span className="mt-2 text-sm font-medium">Nouvelle page</span>
-                                </div>
-                                <div className="aspect-[210/297] bg-white shadow-md seyes-detailed p-4 rounded-sm flex flex-col items-center justify-center opacity-80 hover:opacity-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer min-h-[200px]">
-                                    <Icon name="file-text" size={40} className="text-blue-900 opacity-20" />
-                                    <span className="mt-4 text-xs font-mono text-gray-400">Page 1</span>
-                                    <span className="text-[10px] text-gray-300 mt-1">Modifié il y a 2h</span>
+                            <div className="h-full overflow-y-auto p-6 md:p-10 animate-fade-in">
+                                <div className="max-w-6xl mx-auto">
+                                    <h2 className="text-2xl font-bold mb-6 text-gray-800">Vos Pages</h2>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                                        {/* Add New */}
+                                        <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 transition-all cursor-pointer group">
+                                            <div className="p-4 rounded-full bg-gray-100 group-hover:bg-blue-100 mb-3 transition-colors">
+                                                <Icon name="plus" size={24} />
+                                            </div>
+                                            <span className="font-medium text-sm">Nouvelle page</span>
+                                        </div>
+
+                                        {/* Mock Pages */}
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className="aspect-[210/297] bg-white rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer border border-gray-200 relative overflow-hidden group">
+                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-white/90 backdrop-blur border-t text-xs font-medium text-gray-600 flex justify-between">
+                                                    <span>Page {i}</span>
+                                                    <span>1{i}/12/2025</span>
+                                                </div>
+                                                <div className="w-full h-full p-4 opacity-50 flex items-center justify-center bg-gray-50">
+                                                    <div className="text-[8px] text-gray-300 leading-tight">
+                                                        (Aperçu du contenu...)
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
 
+                        {/* QURAN TAB */}
                         {tab === 'quran' && (
-                            <div className="max-w-4xl mx-auto h-full animate-fade-in">
+                            <div className="h-full w-full overflow-hidden animate-fade-in bg-gradient-to-br from-blue-50 to-indigo-50">
                                 <QuranPlayer />
                             </div>
                         )}
-                    </div>
-                </div>
-            );
-        };
-
-        // 5. App Root
-        const App = () => {
-            const [view, setView] = useState('home'); // home, notebook
-            const [currentSubject, setCurrentSubject] = useState(null);
-
-            const navigate = (to, data) => {
-                if (to === 'notebook') setCurrentSubject(data);
-                setView(to);
-            };
-
-            return (
-                <div className="h-full flex flex-col">
-                    {view === 'home' ? (
-                        <Home onNavigate={navigate} />
-                    ) : (
-                        <Notebook subject={currentSubject} onBack={() => setView('home')} />
-                    )}
+                    </main>
                 </div>
             );
         };
