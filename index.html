@@ -25,6 +25,20 @@
                     colors: {
                         primary: '#2563eb', // blue-600
                         secondary: '#f3f4f6', // gray-100
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
                     }
                 }
             }
@@ -85,11 +99,11 @@
     <!-- Lucide Icons (Script version) -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation">
-    <div id="root"></div>
+<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation flex flex-col">
+    <div id="root" class="flex-1 h-full flex flex-col"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
 
         // --- ICONS COMPONENT WRAPPERS (Simulating Lucide React) ---
         // We use the 'data-lucide' attribute and calling lucide.createIcons() after render
@@ -103,11 +117,11 @@
         // --- COMPONENTS ---
 
         // 1. UI Components (Simplified)
-        const Button = ({ children, onClick, className = "", variant = "primary", size = "md", disabled = false }) => {
-            const baseStyle = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none disabled:opacity-50 disabled:pointer-events-none";
+        const Button = ({ children, onClick, className = "", variant = "primary", size = "md", disabled = false, title = "" }) => {
+            const baseStyle = "inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-95";
             const variants = {
-                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm",
-                outline: "border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-900",
+                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md",
+                outline: "border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-900 hover:border-neutral-300",
                 ghost: "hover:bg-neutral-100 text-neutral-600",
                 icon: "p-0 rounded-full"
             };
@@ -122,12 +136,47 @@
                 <button 
                     onClick={onClick} 
                     disabled={disabled}
+                    title={title}
                     className={`${baseStyle} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}
                 >
                     {children}
                 </button>
             );
         };
+
+        // Modal Component
+        const Modal = ({ isOpen, onClose, title, children }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">
+                        <div className="flex justify-between items-center p-4 border-b">
+                            <h3 className="text-lg font-bold">{title}</h3>
+                            <Button variant="ghost" size="icon" onClick={onClose}>
+                                <Icon name="x" size={20} />
+                            </Button>
+                        </div>
+                        <div className="p-4">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Footer Component
+        const Footer = () => (
+            <footer className="bg-white border-t py-4 text-center text-sm text-gray-500 mt-auto">
+                <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
+                    <p>© 2025 Mon Cahier Numérique. Fait avec ❤️</p>
+                    <div className="flex gap-4">
+                        <a href="#" className="hover:text-blue-600 transition-colors">Aide</a>
+                        <a href="#" className="hover:text-blue-600 transition-colors">Confidentialité</a>
+                        <a href="#" className="hover:text-blue-600 transition-colors">À propos</a>
+                    </div>
+                </div>
+            </footer>
+        );
 
         // 2. Notebook Canvas (Drawing)
         const NotebookCanvas = ({ color = "#1e3a8a", brushSize = 2 }) => {
@@ -141,6 +190,7 @@
 
                 // Handle High DPI
                 const updateSize = () => {
+                    if (!canvas) return;
                     const dpr = window.devicePixelRatio || 1;
                     const rect = canvas.getBoundingClientRect();
                     canvas.width = rect.width * dpr;
@@ -156,6 +206,7 @@
                 };
 
                 updateSize();
+                // Add debounce to resize if needed, but simple is fine for now
                 window.addEventListener('resize', updateSize);
                 return () => window.removeEventListener('resize', updateSize);
             }, []);
@@ -176,12 +227,10 @@
             };
 
             const start = (e) => {
-                // Prevent scrolling when drawing
                 if (e.type === 'touchstart') {
-                    // Only prevent default if we're actually drawing on canvas
-                    // e.preventDefault(); 
+                    // Prevent default touch actions like scrolling ONLY when touching canvas
+                   // e.preventDefault(); 
                 }
-                
                 setIsDrawing(true);
                 const { x, y } = getPos(e);
                 ctx.beginPath();
@@ -190,7 +239,7 @@
 
             const move = (e) => {
                 if (!isDrawing) return;
-                if (e.type === 'touchmove') e.preventDefault();
+                if (e.type === 'touchmove') e.preventDefault(); // Stop scrolling while drawing
                 
                 const { x, y } = getPos(e);
                 ctx.lineTo(x, y);
@@ -209,9 +258,9 @@
             }
 
             return (
-                <div className="relative w-full h-full touch-none">
-                     <div className="absolute top-4 right-4 z-10">
-                        <Button variant="ghost" size="icon" onClick={clear} title="Effacer">
+                <div className="relative w-full h-full touch-none group">
+                     <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Button variant="ghost" size="icon" onClick={clear} title="Effacer la page" className="bg-white/80 shadow-sm border">
                             <Icon name="trash-2" size={16} />
                         </Button>
                     </div>
@@ -225,76 +274,140 @@
             );
         };
 
-        // 3. Quran Player (API Integration with Yasser Al-Dosari)
+        // 3. Quran Player (Robust Version)
         const QuranPlayer = () => {
             const [surahs, setSurahs] = useState([]);
             const [reciters, setReciters] = useState([]);
             const [selectedSurah, setSelectedSurah] = useState("1");
-            const [selectedReciter, setSelectedReciter] = useState("54"); // Default Yasser Al-Dosari (ID 54 usually)
+            const [selectedReciter, setSelectedReciter] = useState(null); // Init as null to wait for fetch
             const [isPlaying, setIsPlaying] = useState(false);
             const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
             const audioRef = useRef(null);
 
+            // Fetch Data
             useEffect(() => {
                 const init = async () => {
                     try {
+                        setLoading(true);
+                        // Fetch Surahs
                         const s = await axios.get('https://api.quran.com/api/v4/chapters');
                         setSurahs(s.data.chapters);
                         
+                        // Fetch Reciters
                         const r = await axios.get('https://api.quran.com/api/v4/resources/recitations');
-                        let fetchedReciters = r.data.recitations;
+                        const allReciters = r.data.recitations;
                         
-                        // Ensure Yasser Al-Dosari is in the list or prioritize him
-                        // Try to find him, if not there (unlikely with this API), we keep the list as is.
-                        // ID 54 is Yasser Al-Dosari in Quran.com API usually.
+                        setReciters(allReciters);
+
+                        // Try to find Yasser Al-Dosari specifically
+                        // Usually ID 54, but let's search by name to be safe if ID changes
+                        const yasser = allReciters.find(rec => rec.reciter_name.toLowerCase().includes('yasser') && rec.reciter_name.toLowerCase().includes('dosari'));
                         
-                        setReciters(fetchedReciters);
-                    } catch(e) { console.error(e); }
+                        if (yasser) {
+                            setSelectedReciter(yasser.id);
+                        } else if (allReciters.length > 0) {
+                            setSelectedReciter(allReciters[0].id); // Fallback
+                        }
+                    } catch(e) { 
+                        console.error("Initialization error:", e);
+                        setError("Impossible de charger les données. Vérifiez votre connexion.");
+                    } finally {
+                        setLoading(false);
+                    }
                 };
                 init();
             }, []);
 
+            // Play/Load Audio
             useEffect(() => {
                 const loadAudio = async () => {
-                    if (!audioRef.current) return;
+                    if (!audioRef.current || !selectedReciter || !selectedSurah) return;
+                    
                     setLoading(true);
+                    setError(null);
                     setIsPlaying(false);
                     audioRef.current.pause();
+                    audioRef.current.src = ""; // Reset src
+
                     try {
                         const res = await axios.get(`https://api.quran.com/api/v4/chapter_recitations/${selectedReciter}/${selectedSurah}`);
-                        if(res.data.audio_file.audio_url) {
+                        
+                        if(res.data && res.data.audio_file && res.data.audio_file.audio_url) {
                             audioRef.current.src = res.data.audio_file.audio_url;
+                            // Preload but don't autoplay to avoid policy blocks until user interaction
+                        } else {
+                            throw new Error("Audio introuvable");
                         }
-                    } catch(e) { console.error(e); }
-                    finally { setLoading(false); }
+                    } catch(e) { 
+                        console.error("Audio load error:", e);
+                        setError("Lecture impossible pour ce récitateur/sourate.");
+                    } finally { 
+                        setLoading(false); 
+                    }
                 };
-                loadAudio();
+                
+                // Debounce slightly to prevent rapid switching crashes
+                const timeout = setTimeout(() => {
+                    loadAudio();
+                }, 100);
+                
+                return () => clearTimeout(timeout);
+
             }, [selectedSurah, selectedReciter]);
 
             const toggle = () => {
-                if(!audioRef.current) return;
-                if(isPlaying) audioRef.current.pause();
-                else audioRef.current.play();
+                if(!audioRef.current || !audioRef.current.src) return;
+                
+                if(isPlaying) {
+                    audioRef.current.pause();
+                } else {
+                    const playPromise = audioRef.current.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.error("Playback failed:", error);
+                            setIsPlaying(false);
+                        });
+                    }
+                }
                 setIsPlaying(!isPlaying);
             };
 
+            const currentSurahName = useMemo(() => {
+                if (!surahs.length) return "Chargement...";
+                const s = surahs.find(s => s.id == selectedSurah);
+                return s ? s.name_simple : "Inconnu";
+            }, [surahs, selectedSurah]);
+
             return (
                 <div className="h-full flex flex-col gap-4 p-4 lg:p-8">
-                    <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
+                    <audio 
+                        ref={audioRef} 
+                        onEnded={() => setIsPlaying(false)} 
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        onError={() => { setIsPlaying(false); setError("Erreur lecture audio"); }}
+                    />
                     
-                    <div className="bg-white/80 backdrop-blur rounded-xl p-6 shadow-sm border border-white/50 space-y-6">
+                    <div className="bg-white/90 backdrop-blur rounded-xl p-6 shadow-lg border border-white/50 space-y-6 transition-all hover:shadow-xl">
                         <h2 className="text-2xl font-arabic text-center text-blue-600">القرآن الكريم</h2>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {error && (
+                            <div className="bg-red-50 text-red-500 p-3 rounded text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500">Récitateur</label>
                                 <select 
-                                    className="w-full p-2 rounded-md border border-gray-200 bg-white text-base"
-                                    value={selectedReciter}
+                                    className="w-full p-3 rounded-lg border border-gray-200 bg-white text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                    value={selectedReciter || ""}
                                     onChange={(e) => setSelectedReciter(e.target.value)}
+                                    disabled={loading || reciters.length === 0}
                                 >
-                                    <option value="54">Yasser Al-Dosari (ياسر الدوسري)</option>
-                                    {reciters.filter(r => r.id !== 54).map(r => (
+                                    {reciters.map(r => (
                                         <option key={r.id} value={r.id}>{r.reciter_name} {r.style ? `(${r.style})` : ''}</option>
                                     ))}
                                 </select>
@@ -302,9 +415,10 @@
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-500">Sourate</label>
                                 <select 
-                                    className="w-full p-2 rounded-md border border-gray-200 bg-white font-arabic text-right text-base"
+                                    className="w-full p-3 rounded-lg border border-gray-200 bg-white font-arabic text-right text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                     value={selectedSurah}
                                     onChange={(e) => setSelectedSurah(e.target.value)}
+                                    disabled={loading || surahs.length === 0}
                                 >
                                     {surahs.map(s => (
                                         <option key={s.id} value={s.id}>{s.name_arabic} - {s.name_simple}</option>
@@ -313,30 +427,42 @@
                             </div>
                         </div>
 
-                        <div className="flex justify-center items-center gap-6 pt-2">
-                            <Button variant="outline" size="icon" onClick={() => setSelectedSurah(String(Math.max(1, parseInt(selectedSurah)-1)))}>
+                        <div className="flex justify-center items-center gap-6 pt-4">
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                onClick={() => setSelectedSurah(String(Math.max(1, parseInt(selectedSurah)-1)))}
+                                disabled={loading}
+                                className="hover:scale-110 transition-transform"
+                            >
                                 <Icon name="skip-back" size={20} />
                             </Button>
                             
                             <Button 
-                                className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:scale-105 transition-transform flex items-center justify-center" 
+                                className="h-16 w-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-blue-300/50 hover:scale-105 transition-all flex items-center justify-center" 
                                 onClick={toggle}
-                                disabled={loading}
+                                disabled={loading || error}
                             >
                                 {loading ? <span className="animate-spin text-xl">⌛</span> : 
                                  isPlaying ? <Icon name="pause" size={32} /> : <Icon name="play" size={32} className="ml-1" />}
                             </Button>
 
-                            <Button variant="outline" size="icon" onClick={() => setSelectedSurah(String(Math.min(114, parseInt(selectedSurah)+1)))}>
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                onClick={() => setSelectedSurah(String(Math.min(114, parseInt(selectedSurah)+1)))}
+                                disabled={loading}
+                                className="hover:scale-110 transition-transform"
+                            >
                                 <Icon name="skip-forward" size={20} />
                             </Button>
                         </div>
                     </div>
 
-                    <div className="flex-1 bg-white/60 rounded-xl p-4 md:p-8 text-center border border-white/50 shadow-inner overflow-y-auto">
+                    <div className="flex-1 bg-white/60 rounded-xl p-4 md:p-8 text-center border border-white/50 shadow-inner overflow-y-auto min-h-[100px]">
                         <p className="font-arabic text-3xl md:text-4xl leading-loose opacity-80 py-4">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
                         <p className="mt-4 text-sm text-gray-500 font-sans">
-                            {surahs.find(s => s.id == selectedSurah)?.name_simple}
+                            {currentSurahName}
                         </p>
                     </div>
                 </div>
@@ -361,59 +487,59 @@
             };
 
             return (
-                <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 h-full overflow-y-auto">
-                    <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">Mes Cahiers</h1>
-                            <p className="text-neutral-500">Sélectionnez une matière</p>
-                        </div>
-                        <Button onClick={() => setShowDialog(true)} className="rounded-full gap-2 px-6 w-full md:w-auto">
-                            <Icon name="plus" size={20} /> <span className="md:inline">Nouveau Cahier</span>
-                        </Button>
-                    </header>
+                <div className="flex flex-col h-full overflow-hidden">
+                    <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 h-full overflow-y-auto w-full flex-1">
+                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div>
+                                <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">Mes Cahiers</h1>
+                                <p className="text-neutral-500">Sélectionnez une matière pour commencer</p>
+                            </div>
+                            <Button onClick={() => setShowDialog(true)} className="rounded-full gap-2 px-6 w-full md:w-auto shadow-lg hover:shadow-xl transition-all">
+                                <Icon name="plus" size={20} /> <span className="md:inline">Nouveau Cahier</span>
+                            </Button>
+                        </header>
 
-                    {/* Dialog Modal */}
-                    {showDialog && (
-                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                            <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95">
-                                <h3 className="text-lg font-bold mb-4">Nouvelle matière</h3>
+                        <Modal isOpen={showDialog} onClose={() => setShowDialog(false)} title="Nouvelle matière">
+                             <div className="space-y-4">
                                 <input 
                                     autoFocus
-                                    className="w-full border p-3 rounded-lg mb-4 text-lg" 
-                                    placeholder="Ex: Physique"
+                                    className="w-full border p-3 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                                    placeholder="Ex: Physique-Chimie"
                                     value={newSub}
                                     onChange={e => setNewSub(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && add()}
                                 />
                                 <div className="flex justify-end gap-2">
                                     <Button variant="ghost" onClick={() => setShowDialog(false)}>Annuler</Button>
                                     <Button onClick={add}>Créer</Button>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        </Modal>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-20">
-                        {subjects.map(sub => (
-                            <div 
-                                key={sub.id} 
-                                onClick={() => onNavigate('notebook', sub)}
-                                className="group cursor-pointer bg-white h-[280px] md:h-[320px] relative rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all hover:-translate-y-1"
-                            >
-                                <div className={`absolute left-0 top-0 bottom-0 w-4 ${sub.color} z-20 shadow-inner`}></div>
-                                <div className="absolute left-4 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
-                                
-                                <div className="pt-12 pb-4 pl-10 pr-4">
-                                    <div className="bg-white border-2 border-dashed border-neutral-300 p-4 rounded-lg transform -rotate-1 group-hover:rotate-0 transition-transform">
-                                        <h3 className="text-2xl font-hand text-center line-clamp-2">{sub.title}</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8">
+                            {subjects.map(sub => (
+                                <div 
+                                    key={sub.id} 
+                                    onClick={() => onNavigate('notebook', sub)}
+                                    className="group cursor-pointer bg-white h-[280px] md:h-[320px] relative rounded-lg overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+                                >
+                                    <div className={`absolute left-0 top-0 bottom-0 w-4 ${sub.color} z-20 shadow-inner group-hover:w-5 transition-all`}></div>
+                                    <div className="absolute left-4 top-0 bottom-0 w-[1px] bg-black/5 z-20"></div>
+                                    
+                                    <div className="pt-12 pb-4 pl-10 pr-4">
+                                        <div className="bg-white border-2 border-dashed border-neutral-300 p-4 rounded-lg transform -rotate-1 group-hover:rotate-0 transition-transform duration-300 group-hover:border-blue-400">
+                                            <h3 className="text-2xl font-hand text-center line-clamp-2">{sub.title}</h3>
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-0 left-0 right-0 h-12 border-t flex items-center justify-between px-4 pl-10 text-xs text-gray-400 bg-gray-50">
+                                        <span className="flex items-center gap-1"><Icon name="book" size={12}/> A4</span>
+                                        <span className="group-hover:text-blue-600 transition-colors">Ouvrir →</span>
                                     </div>
                                 </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-12 border-t flex items-center justify-between px-4 pl-10 text-xs text-gray-400 bg-gray-50">
-                                    <span className="flex items-center gap-1"><Icon name="book" size={12}/> A4</span>
-                                    <span>Grand Format</span>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+                    <Footer />
                 </div>
             );
         };
@@ -421,6 +547,7 @@
         const Notebook = ({ subject, onBack }) => {
             const [tab, setTab] = useState('write'); // write, history, quran
             const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [showSettings, setShowSettings] = useState(false);
 
             const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -435,7 +562,7 @@
                 <div className="h-screen flex flex-col bg-neutral-100 overflow-hidden">
                     <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm z-30">
                         <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="icon" onClick={onBack}>
+                            <Button variant="ghost" size="icon" onClick={onBack} className="hover:bg-gray-100">
                                 <Icon name="arrow-left" size={20} />
                             </Button>
                             <div>
@@ -447,19 +574,31 @@
                         </div>
                         
                         <div className="flex items-center gap-2">
-                             <Button variant="outline" size="sm" className="gap-2 hidden md:flex">
-                                <Icon name="save" size={16} /> Sauvegarder
+                             <Button variant="outline" size="sm" className="gap-2 hidden md:flex hover:bg-green-50 hover:text-green-600 hover:border-green-200" onClick={() => setShowSettings(true)}>
+                                <Icon name="settings" size={16} /> Paramètres
                             </Button>
                             
                             {/* Hamburger Menu Button (Mobile) */}
                             <button 
                                 onClick={toggleMenu}
-                                className="md:hidden p-2 rounded-md hover:bg-gray-100"
+                                className="md:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
                             >
                                 <Icon name={isMenuOpen ? "x" : "menu"} size={24} />
                             </button>
                         </div>
                     </header>
+
+                    {/* Settings Modal */}
+                    <Modal isOpen={showSettings} onClose={() => setShowSettings(false)} title="Paramètres du cahier">
+                        <div className="space-y-4">
+                            <p className="text-gray-600">Options de personnalisation à venir...</p>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <Icon name="info" size={16} />
+                                <span>Version 1.0.0</span>
+                            </div>
+                            <Button onClick={() => setShowSettings(false)} className="w-full">Fermer</Button>
+                        </div>
+                    </Modal>
 
                     {/* Desktop Tabs */}
                     <div className="hidden md:flex bg-white/50 backdrop-blur border-b px-6 gap-6">
@@ -467,7 +606,7 @@
                             <button 
                                 key={t.id}
                                 onClick={() => setTab(t.id)}
-                                className={`flex items-center gap-2 py-3 px-2 border-b-2 transition-colors ${tab === t.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+                                className={`flex items-center gap-2 py-3 px-2 border-b-2 transition-all duration-200 ${tab === t.id ? 'border-blue-600 text-blue-600 translate-y-[1px]' : 'border-transparent text-gray-500 hover:text-gray-800 hover:bg-gray-50/50'}`}
                             >
                                 <Icon name={t.icon} size={16} /> {t.label}
                             </button>
@@ -476,7 +615,7 @@
 
                     {/* Mobile Menu Dropdown */}
                     {isMenuOpen && (
-                        <div className="md:hidden absolute top-[60px] left-0 right-0 bg-white border-b shadow-lg z-20 animate-in slide-in-from-top-2">
+                        <div className="md:hidden absolute top-[60px] left-0 right-0 bg-white border-b shadow-lg z-20 animate-slide-up">
                             <div className="flex flex-col p-2">
                                 {tabs.map(t => (
                                     <button 
@@ -485,14 +624,17 @@
                                             setTab(t.id);
                                             setIsMenuOpen(false);
                                         }}
-                                        className={`flex items-center gap-3 p-4 rounded-lg transition-colors ${tab === t.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600'}`}
+                                        className={`flex items-center gap-3 p-4 rounded-lg transition-colors ${tab === t.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
                                     >
                                         <Icon name={t.icon} size={20} /> {t.label}
                                     </button>
                                 ))}
                                 <div className="border-t my-2 pt-2">
-                                    <button className="flex items-center gap-3 p-4 text-gray-600 w-full text-left">
-                                        <Icon name="save" size={20} /> Sauvegarder
+                                    <button 
+                                        onClick={() => { setShowSettings(true); setIsMenuOpen(false); }}
+                                        className="flex items-center gap-3 p-4 text-gray-600 w-full text-left hover:bg-gray-50 rounded-lg"
+                                    >
+                                        <Icon name="settings" size={20} /> Paramètres
                                     </button>
                                 </div>
                             </div>
@@ -501,7 +643,7 @@
 
                     <div className="flex-1 relative overflow-hidden p-2 md:p-8 bg-neutral-100">
                         {tab === 'write' && (
-                            <div className="w-full h-full max-w-[210mm] mx-auto bg-white shadow-2xl rounded-sm overflow-hidden seyes-detailed relative animate-in fade-in zoom-in-95 flex flex-col">
+                            <div className="w-full h-full max-w-[210mm] mx-auto bg-white shadow-2xl rounded-sm overflow-hidden seyes-detailed relative animate-fade-in flex flex-col">
                                 <div className="absolute top-0 left-0 right-0 h-20 md:h-24 p-4 md:p-6 z-10 pointer-events-none md:pl-16 pl-12">
                                     <div className="border-b-2 border-neutral-800/20 pb-2 flex justify-between items-end">
                                         <span className="font-hand text-xl md:text-2xl text-blue-800 opacity-80">{subject.title}</span>
@@ -515,20 +657,21 @@
                         )}
 
                         {tab === 'history' && (
-                            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-in slide-in-from-bottom-4 p-2 h-full overflow-y-auto">
-                                <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-gray-500 hover:text-gray-600 cursor-pointer bg-white/50 min-h-[200px]">
+                            <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-fade-in p-2 h-full overflow-y-auto content-start">
+                                <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-500 cursor-pointer bg-white/50 min-h-[200px] transition-all hover:scale-[1.02]">
                                     <Icon name="plus" size={32} />
-                                    <span className="mt-2 text-sm">Nouvelle page</span>
+                                    <span className="mt-2 text-sm font-medium">Nouvelle page</span>
                                 </div>
-                                <div className="aspect-[210/297] bg-white shadow-md seyes-detailed p-4 rounded-sm flex flex-col items-center justify-center opacity-80 hover:scale-105 transition-transform cursor-pointer min-h-[200px]">
+                                <div className="aspect-[210/297] bg-white shadow-md seyes-detailed p-4 rounded-sm flex flex-col items-center justify-center opacity-80 hover:opacity-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer min-h-[200px]">
                                     <Icon name="file-text" size={40} className="text-blue-900 opacity-20" />
                                     <span className="mt-4 text-xs font-mono text-gray-400">Page 1</span>
+                                    <span className="text-[10px] text-gray-300 mt-1">Modifié il y a 2h</span>
                                 </div>
                             </div>
                         )}
 
                         {tab === 'quran' && (
-                            <div className="max-w-4xl mx-auto h-full animate-in slide-in-from-right-4">
+                            <div className="max-w-4xl mx-auto h-full animate-fade-in">
                                 <QuranPlayer />
                             </div>
                         )}
@@ -548,7 +691,7 @@
             };
 
             return (
-                <div className="h-full">
+                <div className="h-full flex flex-col">
                     {view === 'home' ? (
                         <Home onNavigate={navigate} />
                     ) : (
