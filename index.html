@@ -1,535 +1,782 @@
 <!DOCTYPE html>
-<html lang="fr" class="antialiased">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mon Cahier Numérique - Ultimate Edition</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Caveat:wght@400..700&family=Inter:wght@100..900&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Outfit', 'Inter', 'sans-serif'],
-                        hand: ['Caveat', 'cursive'],
-                        arabic: ['Amiri', 'serif'],
-                    },
-                    colors: {
-                        primary: '#2563eb',
-                        secondary: '#f3f4f6',
-                        paper: '#fdfbf7',
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-out',
-                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Custom CSS -->
-    <style>
-        .paper-seyes {
-            background-color: #fdfbf7;
-            background-image: 
-                linear-gradient(90deg, rgba(200, 200, 255, 0.5) 1px, transparent 1px),
-                linear-gradient(rgba(200, 200, 255, 0.8) 1px, transparent 1px),
-                linear-gradient(rgba(200, 200, 255, 0.3) 1px, transparent 1px);
-            background-size: 2rem 100%, 100% 2rem, 100% 0.5rem;
-            position: relative;
-        }
-        .paper-seyes::before {
-            content: '';
-            position: absolute;
-            left: 3rem;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #ef4444;
-            z-index: 5;
-        }
-        .paper-grid {
-            background-color: #fdfbf7;
-            background-image: linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        .paper-lines {
-            background-color: #fdfbf7;
-            background-image: linear-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 100% 2rem;
-        }
-        .paper-dots {
-            background-color: #fdfbf7;
-            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        @media (max-width: 640px) {
-            .paper-seyes { background-size: 1.5rem 100%, 100% 1.5rem, 100% 0.375rem; }
-            .paper-seyes::before { left: 2rem; }
-        }
-    </style>
-
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retouche — Éditeur intelligent de textes sur image</title>
+<meta name="description" content="Remplacez un texte sur vos affiches avec une retouche ciblée qui respecte les couleurs, l’écriture et le fond original. 100 % local.">
+<meta name="theme-color" content="#1f6b52">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f6b52'/%3E%3Cpath d='M9 23 21 11M19 9l1-2 1 2 2 1-2 1-1 2-1-2-2-1zM11 9v3M9.5 10.5h3' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;700&family=Poppins:wght@400;500;700&family=Oswald:wght@400;500;700&family=Bebas+Neue&family=Anton&family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Roboto+Slab:wght@400;700&family=Lora:wght@400;700&family=Dancing+Script:wght@700&family=Pacifico&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--background:oklch(0.982 0.003 160);--foreground:oklch(0.25 0.016 160);--card:oklch(1 0 0);
+--primary:oklch(0.46 0.098 166);--primary-foreground:oklch(0.995 0 0);
+--secondary:oklch(0.968 0.007 247.896);--secondary-foreground:oklch(0.208 0.042 265.755);
+--muted-foreground:oklch(0.55 0.014 160);--accent:oklch(0.95 0.024 164);
+--destructive:oklch(0.577 0.245 27.325);--destructive-foreground:oklch(0.984 0.003 247.858);
+--border:oklch(0.916 0.008 160);--input:oklch(0.916 0.008 160);--ring:oklch(0.46 0.098 166);
+--workspace:oklch(0.95 0.006 160);--workspace-dot:oklch(0.85 0.008 160);
+--shadow-poster:0 8px 30px oklch(0.25 0.016 160 / 12%);
+--pop-shadow:0 2px 6px oklch(0.25 0.016 160 / 8%),0 16px 40px oklch(0.25 0.016 160 / 16%);
+}
+,::before,::after{box-sizing:border-box;border:0 solid var(--border);margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--background);color:var(--foreground);font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;cursor:pointer}
+img,svg{display:block}
+[hidden]{display:none!important}
+.ic{width:16px;height:16px;flex-shrink:0;pointer-events:none}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.text-primary{color:var(--primary)}.text-muted{color:var(--muted-foreground)}.ml-auto{margin-left:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;border-radius:6px;font-size:13px;font-weight:600;height:36px;padding:0 16px;transition:background .15s,color .15s,box-shadow .15s,opacity .15s;border:1px solid transparent;user-select:none}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 2px var(--ring)}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.btn-default{background:var(--primary);color:var(--primary-foreground);box-shadow:0 1px 2px oklch(0.46 0.098 166 / 30%)}
+.btn-default:hover{background:oklch(0.42 0.098 166)}
+.btn-outline{border-color:var(--input);background:var(--background);box-shadow:0 1px 2px oklch(0 0 0 / 4%)}
+.btn-outline:hover,.btn-ghost:hover{background:var(--accent)}
+.btn-secondary{background:var(--secondary);color:var(--secondary-foreground)}
+.btn-sm{height:32px;padding:0 12px;font-size:12px}
+.btn-icon{width:36px;height:36px;padding:0}
+.studio{min-height:100dvh;display:flex;flex-direction:column}
+.studio-header{height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 30px;border-bottom:1px solid var(--border);background:var(--card)}
+.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:800;letter-spacing:-.01em}
+.brand-icon{background:var(--primary);color:var(--primary-foreground);width:32px;height:32px;display:grid;place-items:center;border-radius:8px}
+.brand-icon .ic{width:19px;height:19px}
+.brand-dot{color:var(--primary)}
+.header-caption{font-size:12px;color:var(--muted-foreground);border-left:1px solid var(--border);padding-left:18px;margin-left:10px;font-weight:400}
+.header-actions{display:flex;align-items:center;gap:12px}
+.studio-subheader{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 30px}
+.studio-subheader h1{font-size:22px;font-weight:750;line-height:1.3}
+.studio-subheader p{font-size:12px;color:var(--muted-foreground);margin-top:4px}
+.sub-right{display:flex;align-items:center;gap:8px}
+.document-pill{font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:4px;color:var(--muted-foreground);background:var(--card);white-space:nowrap}
+.ai-pill{white-space:nowrap;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:600;padding:5px 10px;border:1px solid var(--border);border-radius:4px;background:var(--card);color:var(--foreground)}
+.ai-pill:hover{background:var(--accent)}
+.ai-pill .ic{width:13px;height:13px;color:var(--primary)}
+.dot{width:7px;height:7px;border-radius:50%;background:oklch(0.8 0.01 160);flex-shrink:0}
+.dot.ok{background:oklch(0.62 0.15 155)}.dot.load{background:oklch(0.75 0.14 75);animation:pulse 1.2s ease-in-out infinite}.dot.err{background:var(--destructive)}
+@keyframes pulse{50%{opacity:.35}}
+.studio-layout{display:grid;grid-template-columns:228px minmax(0,1fr) 302px;margin:0 24px 24px;border:1px solid var(--border);border-radius:8px;overflow:hidden;height:780px;background:var(--card)}
+.left-panel,.right-panel{min-width:0;background:var(--card);overflow-y:auto}
+.left-panel{border-right:1px solid var(--border)}
+.panel-heading{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;font-weight:700;font-size:13px}
+.panel-heading.border-t{border-top:1px solid var(--border);border-bottom:0}
+.panel-body{padding:20px}
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:1.3px;font-weight:700;color:var(--muted-foreground);margin-bottom:14px}
+.row-between{display:flex;align-items:center;justify-content:space-between}
+.row-between .section-label{margin-bottom:0}
+.upload-zone{width:100%;height:100px;border:1px dashed var(--input);background:var(--background);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-radius:6px;font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
+.upload-zone:hover,.upload-zone.over{background:var(--accent);border-color:var(--primary)}
+.upload-zone .ic{width:22px;height:22px}
+.upload-zone span{font-size:11px;color:var(--muted-foreground);font-weight:400}
+.asset-row{display:flex;align-items:center;gap:10px;margin-top:18px;font-size:11px}
+.asset-row img{width:36px;height:48px;object-fit:cover;border-radius:3px;background:var(--workspace)}
+.asset-row div{min-width:0;flex:1}
+.asset-row strong{display:block;max-width:128px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.asset-row p{margin-top:4px;color:var(--muted-foreground);font-size:10px}
+.asset-row .ic{width:13px;height:13px}
+.panel-divider{border-top:1px solid var(--border);margin:22px 0}
+.text-layer{width:100%;justify-content:flex-start;margin-bottom:5px;font-size:11px;height:auto;min-height:39px;padding:10px;white-space:normal;text-align:left;font-weight:500;border:1px solid transparent;line-height:1.35;word-break:break-word}
+.text-layer .ic{opacity:.5;width:15px;height:15px}
+.text-layer.active{background:var(--accent);color:var(--primary);border-color:color-mix(in oklch,var(--primary) 22%,transparent)}
+.layer-status{display:flex;gap:6px;align-items:center;margin:12px 0;color:var(--primary);font-size:10px}
+.layer-status i{width:6px;height:6px;border-radius:50%;background:var(--primary)}
+.history-row{display:flex;align-items:center;gap:10px;padding:10px 0;font-size:10px;line-height:1.3}
+.history-row p{color:var(--muted-foreground);margin-top:4px}
+.history-row.future{opacity:.45}
+.history-icon{width:28px;height:28px;display:grid;place-items:center;background:var(--accent);color:var(--primary);border-radius:50%;flex-shrink:0}
+.history-icon .ic{width:13px;height:13px}
+.canvas-panel{background:var(--workspace);background-image:radial-gradient(var(--workspace-dot) .7px,transparent .7px);background-size:12px 12px;min-width:0;display:flex;flex-direction:column;min-height:0}
+.canvas-toolbar{height:53px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px 15px;border-bottom:1px solid var(--border);background:var(--background);flex-shrink:0}
+.toolbar-group{display:flex;align-items:center;gap:3px}
+.toolbar-separator{height:20px;border-left:1px solid var(--border);margin:0 8px}
+.zoom-value{min-width:42px;text-align:center;font-size:11px}
+.canvas-stage{flex:1;display:flex;align-items:center;justify-content:center;padding:38px 28px 28px;min-height:560px;overflow:auto}
+.poster-wrap{position:relative;width:100%;max-width:400px;flex-shrink:0;box-shadow:var(--shadow-poster);line-height:0;user-select:none;-webkit-user-select:none;touch-action:none;margin:auto}
+.poster-wrap>img{width:100%;height:auto;display:block;transition:filter .3s}
+.poster-wrap.selecting{cursor:crosshair}
+.poster-wrap.selecting .selection-box{pointer-events:none}
+.partial-image{filter:blur(12px)}
+.selection-box{position:absolute;border:1.5px solid var(--primary);background:color-mix(in oklch,var(--primary) 5%,transparent);cursor:pointer;padding:0;opacity:0;transition:opacity .12s}
+.selection-box:hover{opacity:.55}
+.selection-box.selected{border-width:2px;opacity:1}
+.selection-box::before,.selection-box::after{content:"";position:absolute;width:6px;height:6px;background:var(--card);border:1.5px solid var(--primary)}
+.selection-box::before{top:-4px;left:-4px}.selection-box::after{right:-4px;bottom:-4px}
+.selection-box:disabled{cursor:default}
+.selection-box.draft{opacity:1;pointer-events:none}
+.selection-label{position:absolute;top:-23px;left:-2px;height:20px;line-height:20px;padding:0 7px;border-radius:3px 3px 0 0;font-size:9px;font-weight:600;background:var(--primary);color:var(--primary-foreground);white-space:nowrap;display:flex;align-items:center;gap:4px}
+.selection-label .ic{width:10px;height:10px}
+.canvas-bottom{display:flex;justify-content:center;align-items:center;gap:7px;padding:17px;font-size:10px;color:var(--muted-foreground);flex-shrink:0;flex-wrap:wrap;text-align:center;min-height:56px}
+.canvas-bottom .ic{width:12px;height:12px}
+.canvas-bottom .btn{font-size:10px;height:28px;padding:0 8px;gap:4px}
+.progress-mini{width:90px;height:4px;border-radius:4px;background:var(--border);overflow:hidden}
+.progress-mini i{display:block;height:100%;background:var(--primary);width:0;transition:width .2s}
+.right-panel{border-left:1px solid var(--border)}
+.edit-label{display:block;font-size:11px;font-weight:650;margin-bottom:9px}
+.original-text{padding:12px;border:1px solid var(--border);border-radius:5px;background:var(--background);font-size:12px;margin-bottom:20px;white-space:pre-wrap;word-break:break-word}
+.edit-input{width:100%;min-height:90px;resize:vertical;padding:12px;border:1px solid var(--input);border-radius:5px;font-size:13px;outline:none;background:var(--card);display:block}
+input.edit-input{min-height:0;height:46px;margin-bottom:20px}
+.edit-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px var(--accent)}
+.edit-input:disabled{opacity:.6}
+.input-count{text-align:right;font-size:9px;color:var(--muted-foreground);margin-top:5px}
+.style-card{margin-top:22px;border-top:1px solid var(--border);padding-top:20px}
+.style-title{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;margin-bottom:17px}
+.style-title .ic{width:14px;height:14px}
+.help-dot{display:inline-grid;margin-left:auto;color:var(--muted-foreground);cursor:help}
+.help-dot .ic{width:12px;height:12px}
+.detail-row{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin:14px 0;color:var(--muted-foreground)}
+.detail-row strong{text-align:right;color:var(--foreground);font-size:10px;font-weight:600}
+.color-value{display:flex;align-items:center;gap:6px}
+.color-swatch{height:13px;width:13px;border:1px solid var(--border);border-radius:3px;flex-shrink:0}
+.tune{margin-top:4px;border:1px solid var(--border);border-radius:6px;background:var(--background)}
+.tune>summary{list-style:none;display:flex;align-items:center;gap:7px;padding:10px 12px;font-size:11px;font-weight:700;cursor:pointer;user-select:none}
+.tune>summary::-webkit-details-marker{display:none}
+.tune>summary .ic{width:14px;height:14px}
+.tune>summary .chev{margin-left:auto;transition:transform .2s;color:var(--muted-foreground)}
+.tune[open]>summary .chev{transform:rotate(180deg)}
+.tune-body{padding:2px 12px 12px;display:grid;gap:10px}
+.tune-row{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px;font-size:11px;color:var(--muted-foreground)}
+.tune-row select,.tune-row input[type=number]{height:30px;border:1px solid var(--input);border-radius:5px;background:var(--card);padding:0 8px;font-size:11px;width:100%;min-width:0;outline:none}
+.tune-row select:focus,.tune-row input:focus{border-color:var(--primary)}
+.tune-row input[type=range]{width:100%;accent-color:var(--primary)}
+.tune-row input[type=color]{width:100%;height:30px;border:1px solid var(--input);border-radius:5px;padding:2px;background:var(--card);cursor:pointer}
+.tune-inline{display:flex;gap:6px;align-items:center}
+.tune-inline output{font-size:10px;min-width:42px;text-align:right;color:var(--foreground)}
+.seg{display:flex;background:var(--secondary);border-radius:6px;padding:2px;gap:2px}
+.seg button{flex:1;height:26px;border-radius:5px;font-size:10.5px;font-weight:600;color:var(--muted-foreground);display:flex;align-items:center;justify-content:center;gap:4px}
+.seg button .ic{width:14px;height:14px}
+.seg button.on{background:var(--card);color:var(--foreground);box-shadow:0 1px 2px oklch(0 0 0 / 10%)}
+.tune-reset{justify-self:end;font-size:10px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:4px}
+.tune-reset .ic{width:12px;height:12px}
+.preserve-box{margin-top:20px;background:var(--accent);color:var(--primary);padding:12px;border-radius:6px;display:flex;align-items:flex-start;gap:9px;font-size:10px;line-height:1.7}
+.preserve-box .ic{width:19px;height:19px;margin-top:2px}
+.preserve-box strong{display:block;font-size:11px}
+.apply-button{width:100%;margin-top:22px;height:42px}
+.ai-disclaimer{font-size:9px;line-height:1.6;color:var(--muted-foreground);text-align:center;margin-top:10px}
+.panel-heading .xs{font-size:12px;font-weight:500}
+.studio-footer{display:flex;justify-content:space-between;padding:0 30px 22px;font-size:10px;color:var(--muted-foreground)}
+.footer-left{display:flex;gap:7px;align-items:center}
+.footer-left .ic{width:12px;height:12px}
+.error-notice{background:var(--destructive);color:var(--destructive-foreground);padding:12px 14px;font-size:12px;margin:0 24px 14px;border-radius:5px;display:flex;align-items:center;gap:10px;animation:fade .2s}
+.error-notice span{flex:1}
+.error-notice button{color:inherit;opacity:.85;display:grid;place-items:center}
+.error-notice.info{background:var(--accent);color:var(--primary)}
+.mobile-text-count{display:none}
+@media(max-width:640px){.hide-sm{display:none}}
+.mobile-text-count .ic{width:14px;height:14px}
+.menu-wrap{position:relative}
+.pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:var(--card);border:1px solid var(--border);border-radius:8px;box-shadow:var(--pop-shadow);padding:6px;min-width:220px;animation:fade .14s}
+.pop-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:6px;font-size:12px;font-weight:600;text-align:left}
+.pop-item:hover{background:var(--accent)}
+.pop-item small{display:block;font-size:10.5px;color:var(--muted-foreground);font-weight:500}
+.ai-pop{width:330px;padding:14px;right:0;left:auto}
+.ai-pop h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.ai-pop>p{font-size:11px;color:var(--muted-foreground);margin:6px 0 12px;line-height:1.55}
+.eng-row{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:10px 0;border-top:1px solid var(--border);font-size:11px}
+.eng-row .dot{margin-top:5px}
+.eng-row b{font-size:12px}
+.eng-row small{color:var(--muted-foreground);display:block;line-height:1.5}
+.eng-row .progress-mini{width:100%;margin-top:6px}
+.eng-actions{grid-column:2;display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.check{display:flex;align-items:center;gap:8px;font-size:11px;margin-top:6px;grid-column:2;cursor:pointer}
+.check input{accent-color:var(--primary)}
+@media(min-width:1450px){.studio-layout{grid-template-columns:250px minmax(0,1fr) 330px;height:auto;min-height:calc(100dvh - 228px)}}
+@media(max-width:1050px){.studio-layout{grid-template-columns:180px minmax(0,1fr) 270px;margin:0 16px 20px}.panel-body{padding:14px}.canvas-stage{padding:30px 18px}.header-caption{display:none}.studio-header{padding:0 20px}.studio-subheader{padding:20px}.error-notice{margin:0 16px 14px}}
+@media(max-width:760px){
+.studio-header{height:65px;padding:0 16px}.brand{font-size:21px}.header-actions{gap:6px}.header-actions .import-label{display:none}.header-actions .btn-outline{width:36px;padding:0}
+.studio-subheader{padding:19px 16px;align-items:flex-start}.studio-subheader h1{font-size:19px}.sub-right{flex-direction:column;align-items:flex-end;gap:6px}
+.studio-layout{margin:0 12px 16px;grid-template-columns:1fr;height:auto}
+.left-panel{border-right:0}.left-panel .panel-heading,.left-panel .panel-body{display:none}
+.mobile-text-count{display:flex;padding:12px;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);font-size:11px}
+.mobile-text-count>span{display:flex;align-items:center;gap:8px}
+.mobile-layers{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;border-bottom:1px solid var(--border);scrollbar-width:none}
+.mobile-layers::-webkit-scrollbar{display:none}
+.mobile-layers .text-layer{width:auto;flex-shrink:0;margin:0;min-height:32px;padding:6px 10px;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.canvas-stage{min-height:0;padding:34px 30px 22px}.canvas-toolbar{padding:8px}
+.right-panel{border-left:0;border-top:1px solid var(--border)}.panel-body{padding:20px}
+.canvas-bottom{padding:12px}.studio-footer{padding:0 16px 20px}.studio-footer>span:last-child{display:none}
+.document-pill{font-size:9px}.error-notice{margin:0 12px 12px}
+.ai-pop{position:fixed;left:12px;right:12px;top:150px;width:auto}
+}
+@media(min-width:761px){.mobile-layers{display:none}}
+@media(prefers-reduced-motion:reduce){{transition:none!important;animation:none!important}}
+</style>
 </head>
-<body class="bg-neutral-100 text-neutral-900 h-screen overflow-hidden selection:bg-blue-100 touch-manipulation flex flex-col font-sans">
-    <div id="root" class="flex-1 h-full flex flex-col"></div>
+<body>
+<div class="studio">
+<header class="studio-header">
+<div class="brand"><span class="brand-icon"><i data-i="WandSparkles"></i></span><span>retouche<span class="brand-dot">.</span></span><span class="header-caption">Studio de retouche intelligente</span></div>
+<div class="header-actions">
+<button class="btn btn-outline" id="btn-import" title="Importer une image"><i data-i="Plus"></i><span class="import-label">Importer</span></button>
+<div class="menu-wrap">
+<button class="btn btn-default" id="btn-export"><i data-i="ArrowDownToLine"></i>Exporter<i data-i="ChevronDown" class="hide-sm"></i></button>
+<div class="pop" id="export-menu" hidden>
+<button class="pop-item" data-export="png"><i data-i="ArrowDownToLine"></i><span>PNG<small>Qualité maximale, sans perte</small></span></button>
+<button class="pop-item" data-export="jpeg"><i data-i="ArrowDownToLine"></i><span>JPEG<small>Fichier plus léger (qualité 95 %)</small></span></button>
+</div>
+</div>
+</div>
+</header>
+<div class="studio-subheader">
+<div><h1>Votre image, les bons mots.</h1><p id="sub-caption">Affiche de démonstration</p></div>
+<div class="sub-right">
+<div class="menu-wrap">
+<button class="ai-pill" id="btn-ai" title="Moteurs d’IA locale"><span class="dot" id="ai-dot"></span><i data-i="Cpu"></i>IA locale</button>
+<div class="pop ai-pop" id="ai-menu" hidden>
+<h3><i data-i="Cpu" class="text-primary"></i>IA 100 % locale</h3>
+<p>Tout s’exécute dans votre navigateur. Votre image n’est jamais envoyée sur un serveur. Les modèles sont téléchargés une seule fois puis gardés en cache.</p>
+<div class="eng-row">
+<span class="dot" id="ocr-dot"></span>
+<div><b>Lecture des textes</b><small>Tesseract (réseau LSTM), français et anglais · ≈ 8 Mo</small><small id="ocr-state">Se charge à la première analyse.</small><div class="progress-mini" id="ocr-prog" hidden><i></i></div></div>
+</div>
+<div class="eng-row">
+<span class="dot" id="inp-dot"></span>
+<div><b>Reconstruction du fond</b><small>MI-GAN (effacement par IA) · ≈ 28 Mo</small><small id="inp-state">Se charge à la première retouche.</small><div class="progress-mini" id="inp-prog" hidden><i></i></div>
+<div class="eng-actions"><button class="btn btn-outline btn-sm" id="btn-preload"><i data-i="ArrowDownToLine"></i>Précharger les modèles</button></div>
+<label class="check"><input type="checkbox" id="chk-fast">Reconstruction rapide sans IA (hors ligne)</label>
+</div>
+</div>
+</div>
+</div>
+<span class="document-pill" id="dims-pill">768 × 1024 px</span>
+</div>
+</div>
+<div class="error-notice" id="error" role="alert" hidden><span id="error-text"></span><button id="error-close" aria-label="Fermer"><i data-i="X"></i></button></div>
+<input type="file" id="file-input" accept="image/png,image/jpeg,image/webp" hidden>
+<main class="studio-layout">
+<aside class="left-panel">
+<div class="panel-heading"><i data-i="Layers"></i>Votre document</div>
+<div class="mobile-text-count"><span><i data-i="FileImage"></i><span id="m-count">4 textes · Image ouverte</span></span><button class="btn btn-ghost btn-sm" id="m-analyze"><i data-i="ScanText"></i>Analyser</button></div>
+<div class="mobile-layers" id="m-layers"></div>
+<div class="panel-body">
+<p class="section-label">Image source</p>
+<button class="upload-zone" id="upload-zone"><i data-i="ImagePlus"></i>Importer une image<span>JPG, PNG, WebP · 20 Mo max.</span></button>
+<div class="asset-row"><img id="thumb" alt="Miniature du document"><div><strong id="asset-name">atelier-ceramique.jpg</strong><p id="asset-dims">768 × 1024 px</p></div><i data-i="Check" class="text-primary"></i></div>
+<div class="panel-divider"></div>
+<div class="row-between"><p class="section-label" id="texts-label">Textes</p><button class="btn btn-ghost btn-icon" id="btn-analyze" title="Analyser les textes" aria-label="Analyser les textes"><i data-i="ScanText"></i></button></div>
+<div class="layer-status"><i></i><span id="layer-status">Zones d’exemple</span></div>
+<div id="layers"></div>
+<div class="panel-divider"></div>
+<p class="section-label">Historique</p>
+<div id="history"></div>
+</div>
+</aside>
+<section class="canvas-panel" aria-label="Aperçu de l’image">
+<div class="canvas-toolbar">
+<div class="toolbar-group">
+<button class="btn btn-secondary btn-icon" id="tool-select" title="Sélectionner un texte" aria-label="Sélectionner un texte"><i data-i="MousePointer2"></i></button>
+<button class="btn btn-ghost btn-icon" id="tool-draw" title="Tracer une zone manuelle" aria-label="Tracer une zone manuelle"><i data-i="SquareDashedMousePointer"></i></button>
+<span class="toolbar-separator"></span>
+<button class="btn btn-ghost btn-icon" id="btn-undo" title="Annuler (Ctrl+Z)" aria-label="Annuler"><i data-i="Undo2"></i></button>
+<button class="btn btn-ghost btn-icon" id="btn-redo" title="Rétablir (Ctrl+Maj+Z)" aria-label="Rétablir"><i data-i="Redo2"></i></button>
+</div>
+<div class="toolbar-group">
+<button class="btn btn-ghost btn-icon" id="zoom-out" title="Dézoomer" aria-label="Dézoomer"><i data-i="ZoomOut"></i></button>
+<span class="zoom-value" id="zoom-value">100%</span>
+<button class="btn btn-ghost btn-icon" id="zoom-in" title="Zoomer" aria-label="Zoomer"><i data-i="ZoomIn"></i></button>
+<button class="btn btn-ghost btn-icon" id="zoom-fit" title="Ajuster" aria-label="Ajuster"><i data-i="Maximize"></i></button>
+</div>
+</div>
+<div class="canvas-stage" id="stage">
+<div class="poster-wrap" id="poster"><img id="poster-img" alt="Affiche à retoucher" draggable="false"><div id="boxes"></div></div>
+</div>
+<div class="canvas-bottom" id="canvas-bottom"></div>
+</section>
+<aside class="right-panel">
+<div class="panel-heading"><i data-i="Type"></i>Modifier le texte<i data-i="Sparkles" class="ml-auto text-primary"></i></div>
+<div class="panel-body">
+<label class="edit-label" for="old-text">Texte original</label>
+<div id="old-text-box"></div>
+<label class="edit-label" for="replacement">Nouveau texte</label>
+<textarea id="replacement" class="edit-input" maxlength="1500" placeholder="Votre nouveau texte…"></textarea>
+<p class="input-count" id="count">0 caractères</p>
+<div class="style-card">
+<div class="style-title"><i data-i="Sparkles" class="text-primary"></i><span id="style-title">Style de référence</span><span class="help-dot" title="Les informations de police sont des estimations visuelles : une image aplatie ne contient pas la police d’origine."><i data-i="CircleHelp"></i></span></div>
+<div class="detail-row"><span>Écriture</span><strong id="st-font">—</strong></div>
+<div class="detail-row"><span>Taille estimée</span><strong id="st-size">—</strong></div>
+<div class="detail-row"><span>Couleur estimée</span><strong class="color-value"><span class="color-swatch" id="st-swatch"></span><span id="st-color">—</span></strong></div>
+<div class="detail-row"><span>Fond</span><strong id="st-bg">—</strong></div>
+<details class="tune" id="tune">
+<summary><i data-i="SlidersHorizontal" class="text-primary"></i>Ajuster le rendu<i data-i="ChevronDown" class="chev"></i></summary>
+<div class="tune-body">
+<label class="tune-row"><span>Police</span><select id="t-family"></select></label>
+<label class="tune-row"><span>Graisse</span><select id="t-weight"></select></label>
+<div class="tune-row"><span>Taille</span><div class="tune-inline"><input type="range" id="t-size" min="6" max="400" step="1"><output id="t-size-o"></output></div></div>
+<div class="tune-row"><span>Espacement</span><div class="tune-inline"><input type="range" id="t-ls" min="-10" max="80" step="1"><output id="t-ls-o"></output></div></div>
+<label class="tune-row"><span>Couleur</span><input type="color" id="t-color"></label>
+<div class="tune-row"><span>Alignement</span><div class="seg" id="t-align"><button data-v="left" title="Gauche"><i data-i="AlignLeft"></i></button><button data-v="center" title="Centré"><i data-i="AlignCenter"></i></button><button data-v="right" title="Droite"><i data-i="AlignRight"></i></button></div></div>
+<div class="tune-row"><span>Effacement</span><div class="seg" id="t-erase"><button data-v="glyphs">Lettres</button><button data-v="rect">Zone entière</button></div></div>
+<button class="tune-reset" id="t-reset"><i data-i="RotateCcw"></i>Revenir au style estimé</button>
+</div>
+</details>
+</div>
+<div class="preserve-box"><i data-i="ShieldCheck"></i><div><strong>Le reste de l’image est protégé</strong><span>Seule la zone sélectionnée sera remplacée.</span></div></div>
+<button class="btn btn-default apply-button" id="btn-apply"><i data-i="WandSparkles"></i>Appliquer la retouche</button>
+<p class="ai-disclaimer">Retouche IA locale · Vérifiez le résultat avant l’export.<br>Le fond de la zone modifiée est reconstruit.</p>
+</div>
+<div class="panel-heading border-t"><i data-i="ShieldCheck" class="text-primary"></i><span class="xs">Original toujours disponible</span></div>
+</aside>
+</main>
+<footer class="studio-footer"><span class="footer-left"><i data-i="ShieldCheck"></i>Votre création reste votre création.</span><span>Fait pour les détails qui comptent.</span></footer>
+</div>
+<script>
+'use strict';
+const ICONS = {"WandSparkles":"<path d=\"m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72\"/><path d=\"m14 7 3 3\"/><path d=\"M5 6v4\"/><path d=\"M19 14v4\"/><path d=\"M10 2v2\"/><path d=\"M7 8H3\"/><path d=\"M21 16h-4\"/><path d=\"M11 3H9\"/>","Plus":"<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>","ArrowDownToLine":"<path d=\"M12 17V3\"/><path d=\"m6 11 6 6 6-6\"/><path d=\"M19 21H5\"/>","ChevronDown":"<path d=\"m6 9 6 6 6-6\"/>","Layers":"<path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\"/><path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\"/><path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\"/>","FileImage":"<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/><path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><path d=\"m20 17-1.296-1.296a2.41 2.41 0 0 0-3.408 0L9 22\"/>","ScanText":"<path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/><path d=\"M7 8h8\"/><path d=\"M7 12h10\"/><path d=\"M7 16h6\"/>","ImagePlus":"<path d=\"M16 5h6\"/><path d=\"M19 2v6\"/><path d=\"M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5\"/><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/><circle cx=\"9\" cy=\"9\" r=\"2\"/>","Check":"<path d=\"M20 6 9 17l-5-5\"/>","LoaderCircle":"<path d=\"M21 12a9 9 0 1 1-6.219-8.56\"/>","Type":"<path d=\"M12 4v16\"/><path d=\"M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2\"/><path d=\"M9 20h6\"/>","Sparkles":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/><path d=\"M20 2v4\"/><path d=\"M22 4h-4\"/><circle cx=\"4\" cy=\"20\" r=\"2\"/>","MousePointer2":"<path d=\"M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z\"/>","SquareDashedMousePointer":"<path d=\"M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z\"/><path d=\"M5 3a2 2 0 0 0-2 2\"/><path d=\"M19 3a2 2 0 0 1 2 2\"/><path d=\"M5 21a2 2 0 0 1-2-2\"/><path d=\"M9 3h1\"/><path d=\"M9 21h2\"/><path d=\"M14 3h1\"/><path d=\"M3 9v1\"/><path d=\"M21 9v2\"/><path d=\"M3 14v1\"/>","Undo2":"<path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\"/>","Redo2":"<path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13\"/>","ZoomOut":"<circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"/><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"/>","ZoomIn":"<circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"/><line x1=\"11\" x2=\"11\" y1=\"8\" y2=\"14\"/><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"/>","Maximize":"<path d=\"M8 3H5a2 2 0 0 0-2 2v3\"/><path d=\"M21 8V5a2 2 0 0 0-2-2h-3\"/><path d=\"M3 16v3a2 2 0 0 0 2 2h3\"/><path d=\"M16 21h3a2 2 0 0 0 2-2v-3\"/>","LockKeyhole":"<circle cx=\"12\" cy=\"16\" r=\"1\"/><rect x=\"3\" y=\"10\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M7 10V7a5 5 0 0 1 10 0v3\"/>","ChevronLeft":"<path d=\"m15 18-6-6 6-6\"/>","ChevronRight":"<path d=\"m9 18 6-6-6-6\"/>","CircleHelp":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"/><path d=\"M12 17h.01\"/>","ShieldCheck":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>","Cpu":"<path d=\"M12 20v2\"/><path d=\"M12 2v2\"/><path d=\"M17 20v2\"/><path d=\"M17 2v2\"/><path d=\"M2 12h2\"/><path d=\"M2 17h2\"/><path d=\"M2 7h2\"/><path d=\"M20 12h2\"/><path d=\"M20 17h2\"/><path d=\"M20 7h2\"/><path d=\"M7 20v2\"/><path d=\"M7 2v2\"/><rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2\"/><rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"1\"/>","X":"<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>","SlidersHorizontal":"<path d=\"M10 5H3\"/><path d=\"M12 19H3\"/><path d=\"M14 3v4\"/><path d=\"M16 17v4\"/><path d=\"M21 12h-9\"/><path d=\"M21 19h-5\"/><path d=\"M21 5h-7\"/><path d=\"M8 10v4\"/><path d=\"M8 12H3\"/>","TriangleAlert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>","RotateCcw":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/>","Eraser":"<path d=\"M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21\"/><path d=\"m5.082 11.09 8.828 8.828\"/>","Trash2":"<path d=\"M10 11v6\"/><path d=\"M14 11v6\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/><path d=\"M3 6h18\"/><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","AlignLeft":"<path d=\"M21 5H3\"/><path d=\"M15 12H3\"/><path d=\"M17 19H3\"/>","AlignCenter":"<path d=\"M21 5H3\"/><path d=\"M17 12H7\"/><path d=\"M19 19H5\"/>","AlignRight":"<path d=\"M21 5H3\"/><path d=\"M21 12H9\"/><path d=\"M21 19H7\"/>","Eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>"};
+const DEMO_IMAGE = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/61xtSlACEQAAAAEAAFxjanVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAXD1qdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjJjY2JiYmM0LTc3NTgtNGUyOS1iNTM0LTViNzk4Yzg0YWNkYwAAAAx4anVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAJ0Wp1bWIAAAA7anVtZEDLDDK7ikidpwsq1vR/Q2kTYzJwYS5pY29uAAAAABhjMnNox2/whmy2QoxOhlM9+Zq2yAAAABdiZmRiAGltYWdlL3N2Zyt4bWwAAAAJd2JpZGI8c3ZnIHdpZHRoPSI3MTYiIGhlaWdodD0iNzE2IiB2aWV3Qm94PSIwIDAgNzE2IDcxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUwOC43NDkgMzE3LjM5OUM1MT6nNzc3IDI4Ny4zMTQgNTA4Ljk5MSAyNTMuODg0IDQ4NS4zODkgMjMwLjI4MkM0NjEuNzg4IDIwNi42ODEgNDI4LjM2IDE5OC44OTUgMzk4LjI3MyAyMD65M3MzQzM3Ni4yMzEgMTg0LjkyOCAzNDMyMzkgMTc0Ljk1NiAzMTEuMTQ4IDE4My41OTZDMjc4Lkw2IDE5Mi4yMzQgMjU1LjQ1IDIxNy4yOTIgMjQ3LjM2IDI0Ny4zNjFQzIxNy4yOTEgMjU1LjQ1MSAxOTIuMjMzIDI3OC45MSAxODMuNTk1IDMxMS4xNDlDMTc0Ljk1NyAzNDMuMzkxIDE4NC45MjcgMzc2LjIzMiAyMDYuOTI0IDM5OC4yNzRDMTk4Ljg5NiA0MjguMzU5IDIwNi42ODMgNDYxLjc4OSAyMzAuMjg0IDQ4NS4zOTFDMjUzLjg4NSA1MDguOTkyIDI4Ny4zMTMgNTE2Ljc3OSAzMTcuNDAxIDUwOC43NUMzMzkuNDQyIDUzMC43NDUgMzcyLjI4NiA1NDAuNzE3IDQwNC41MjUgNTMyLjA3OUM0MzYuNzY3IDUyMy40NDEgNDYwLjIyMyA0OTguMzg0IDQ2OC4zMTMgNDY4LjMxN0M0OTguMzgzIDQ2MC4yMjQgNTIzLjQ0IDQzNi43NjYgNTMyLjA3OCA0MDQuNTI2QzU0MC43MTYgMzcyLjI4NSA1MzAuNzQ3IDMzOS40NDMgNTA4Ljc0OSAzMTcuNDAyVjMxNy4zOTlaTTQ3MC44OTkgMjQ0Ljc3NkM0ODYuODkyIDI2MC43NyA0OTMuNDg4IDI4Mi42MDEgNDkwLjY4NyAzMDMuNDEyTDQxNS41NzcgMjYwLjA0NkM0MTIuNDExIDI1OC4yMTggNDA4LjUwOSAyNTguMjE4IDQwNS4zNDUgMjYwLjA0NkwzMTcuNDAxIDMxMC44MlYyNzcuNTI2QzMxNy40MDEgMjc1LjE5MSAzMTguNjUyIDI3My4wMDUgMzIwLjY3NiAyNzEuODM3TDM4Ny42NDQgMjMzLjE3NEM0MTQuMTc4IDIxOC4zNTMgNDQ4LjM0NiAyMjIuMjIzIDQ3MC45MDEgMjQ0Ljc3Nkg0NzAuODk5Wk0zNTcuODM3IDMxMS4xNDRMVzk4LjI3NSAzMzQuNDkxVjM4MS4xODVMMzU3Ljgz Charitiesg04uNTMyTDMxNy4zOTggMzgxL.vO1YzMzQuNDkxLDM1Ny44MzcgMzExLjE0NFpNMjY0Ljc3NiAyNjkuNjkzQzI2NS4yMDcgMjM5LjMwNSAyODUuNjQ0IDIxMS42NDkgMzE2LjQ1MyAyMDMuMzkzQzMzOC4zIDE5Ny41NCAzNjAuNTA1IDIwMi43NDQgMzc3LjEyNyAyMTUuNTczTDMwMi4wMTQgMjU4LjkzN0MyOTguODQ4IDI2MC43NjQgMjk2Ljg5OCAyNjQuMTQ0IDI5Ni44OTggMjY3Ljc5OFYzNjkuMzQ2TDI2OC4wNjUgMzUyLjY5OUMyNjYuMDQzIDM1MS41MzEgMjY0Ljc3NiAzNDkuMzUzIDI2NC43NzYgMzQ3LjAxN1VjNjkuNjkxVjI2OS42OTNaTTIwMy4zOTEgMzE2LjQ1NEMyMDkuMjQ0IDI5NC42MDggMjI0Ljg1NCAyNzcuOTc4IDI0NC4yNzYgMjY5Ljk5OVYzNTYuNzACMjQ0LjI3NiAzNjAuMzg0IDI0Ni4yMjYgMzYzLjc2MyAyNDkuMzkyIDM2NS41OTFMMzM3LjMzNyA0MTYuMzY1TDMwOC41MDMgNDMzLjAxM0MzMDYuN
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
-
-        // --- ERROR BOUNDARY ---
-        class ErrorBoundary extends React.Component {
-            constructor(props) { super(props); this.state = { hasError: false }; }
-            static getDerivedStateFromError(error) { return { hasError: true }; }
-            componentDidCatch(error, errorInfo) { console.error(error, errorInfo); }
-            render() {
-                if (this.state.hasError) return <div className="p-4 text-center text-red-500">Une erreur est survenue. <button onClick={()=>window.location.reload()} className="underline">Recharger</button></div>;
-                return this.props.children;
-            }
-        }
-
-        const Icon = ({ name, size = 20, className = "" }) => {
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
-            return <i data-lucide={name} width={size} height={size} className={className}></i>;
-        };
-
-        const Button = ({ children, onClick, className = "", variant = "primary", size = "md", disabled = false, title = "", active = false }) => {
-            const baseStyle = "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none active:scale-95 select-none";
-            const variants = {
-                primary: "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-md",
-                outline: `border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 ${active ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50 text-blue-700' : ''}`,
-                ghost: `hover:bg-gray-100 text-gray-600 ${active ? 'bg-gray-100 text-gray-900 font-bold' : ''}`,
-                icon: "p-0 rounded-full hover:bg-black/5"
-            };
-            const sizes = { sm: "h-8 px-3 text-xs", md: "h-10 px-4 py-2", lg: "h-12 px-8 text-lg", icon: "h-10 w-10" };
-            return (
-                <button onClick={onClick} disabled={disabled} title={title} className={`${baseStyle} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className}`}>
-                    {children}
-                </button>
-            );
-        };
-
-        const Modal = ({ isOpen, onClose, title, children }) => {
-            if (!isOpen) return null;
-            return (
-                <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up flex flex-col max-h-[90vh]">
-                        <div className="flex justify-between items-center p-5 border-b bg-gray-50/50">
-                            <h3 className="text-xl font-bold text-gray-800">{title}</h3>
-                            <Button variant="ghost" size="icon" onClick={onClose}><Icon name="x" size={18} /></Button>
-                        </div>
-                        <div className="p-6 overflow-y-auto">{children}</div>
-                    </div>
-                </div>
-            );
-        };
-
-        const NotebookCanvas = ({ color = "#1e3a8a", brushSize = 2, paperType = "seyes" }) => {
-            const canvasRef = useRef(null);
-            const containerRef = useRef(null);
-            const [isDrawing, setIsDrawing] = useState(false);
-            const [ctx, setCtx] = useState(null);
-
-            useEffect(() => {
-                const init = () => {
-                    const canvas = canvasRef.current;
-                    const container = containerRef.current;
-                    if (!canvas || !container) return;
-                    const dpr = window.devicePixelRatio || 1;
-                    const rect = container.getBoundingClientRect();
-                    canvas.width = rect.width * dpr;
-                    canvas.height = rect.height * dpr;
-                    const context = canvas.getContext('2d');
-                    context.scale(dpr, dpr);
-                    context.lineCap = 'round';
-                    context.lineJoin = 'round';
-                    context.strokeStyle = color;
-                    context.lineWidth = brushSize;
-                    setCtx(context);
-                };
-                init();
-                window.addEventListener('resize', init);
-                return () => window.removeEventListener('resize', init);
-            }, []);
-
-            useEffect(() => {
-                if (ctx) { ctx.strokeStyle = color; ctx.lineWidth = brushSize; }
-            }, [color, brushSize, ctx]);
-
-            const getPos = (e) => {
-                const rect = canvasRef.current.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - rect.left, y: clientY - rect.top };
-            };
-
-            const start = (e) => { setIsDrawing(true); const { x, y } = getPos(e); ctx.beginPath(); ctx.moveTo(x, y); };
-            const move = (e) => { if (!isDrawing) return; const { x, y } = getPos(e); ctx.lineTo(x, y); ctx.stroke(); };
-            const stop = () => { setIsDrawing(false); if(ctx) ctx.closePath(); };
-            const clear = () => { if(ctx && canvasRef.current) ctx.clearRect(0,0, canvasRef.current.width, canvasRef.current.height); };
-            const download = async () => {
-                if (!containerRef.current) return;
-                const canvas = await html2canvas(containerRef.current);
-                const link = document.createElement('a');
-                link.download = `page-${Date.now()}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-            };
-
-            return (
-                <div ref={containerRef} className={`w-full h-full relative group shadow-2xl rounded-sm overflow-hidden ${paperType === 'seyes' ? 'paper-seyes' : paperType === 'grid' ? 'paper-grid' : paperType === 'lines' ? 'paper-lines' : 'paper-dots'}`}>
-                     <div className="absolute top-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Button variant="outline" size="icon" onClick={download} title="Sauvegarder" className="bg-white/90 shadow"><Icon name="download" size={16} /></Button>
-                        <Button variant="outline" size="icon" onClick={clear} title="Effacer" className="bg-white/90 shadow text-red-500 hover:text-red-600"><Icon name="trash-2" size={16} /></Button>
-                    </div>
-                    <canvas ref={canvasRef} className="w-full h-full cursor-crosshair touch-none absolute inset-0 z-10"
-                        onMouseDown={start} onMouseMove={move} onMouseUp={stop} onMouseLeave={stop}
-                        onTouchStart={start} onTouchMove={move} onTouchEnd={stop} />
-                </div>
-            );
-        };
-
-        // --- QURAN PLAYER (DIRECT MP3 - NO API CALLS FOR AUDIO) ---
-        const QuranPlayer = () => {
-            // Static list of reliable MP3Quran servers
-            const RECITERS = [
-                { id: "yasser", name: "Yasser Al-Dosari", server: "https://server11.mp3quran.net/yasser" },
-                { id: "afs", name: "Mishary Rashid Alafasy", server: "https://server8.mp3quran.net/afs" },
-                { id: "shatri", name: "Abu Bakr Al-Shatri", server: "https://server11.mp3quran.net/shatri" },
-                { id: "sudais", name: "Abdul Rahman Al-Sudais", server: "https://server11.mp3quran.net/sds" },
-                { id: "maher", name: "Maher Al-Muaiqly", server: "https://server12.mp3quran.net/maher" },
-                { id: "ajm", name: "Ahmed Al-Ajmy", server: "https://server10.mp3quran.net/ajm" }
-            ];
-
-            // Generate Surah list locally (no API call needed for list)
-            // This guarantees no "white page" from API failure
-            const SURAHS = Array.from({length: 114}, (_, i) => {
-                const id = i + 1;
-                return { id: id, name: `Sourate ${id}`, value: String(id).padStart(3, '0') };
-            });
-
-            const [selectedReciter, setSelectedReciter] = useState(RECITERS[0]); // Default Yasser
-            const [selectedSurah, setSelectedSurah] = useState(SURAHS[0]); // Default Al-Fatihah
-            const [isPlaying, setIsPlaying] = useState(false);
-            const [loading, setLoading] = useState(false);
-            const audioRef = useRef(null);
-
-            const play = () => {
-                if(!audioRef.current) return;
-                const url = `${selectedReciter.server}/${selectedSurah.value}.mp3`;
-                
-                // Only change src if it's different to avoid reload
-                if (!audioRef.current.src.includes(url)) {
-                    setLoading(true);
-                    audioRef.current.src = url;
-                }
-                
-                audioRef.current.play()
-                    .then(() => { setIsPlaying(true); setLoading(false); })
-                    .catch(e => { console.error(e); setIsPlaying(false); setLoading(false); });
-            };
-
-            const pause = () => {
-                if(audioRef.current) {
-                    audioRef.current.pause();
-                    setIsPlaying(false);
-                }
-            };
-
-            const toggle = () => isPlaying ? pause() : play();
-
-            const nextSurah = () => {
-                const idx = SURAHS.findIndex(s => s.id === selectedSurah.id);
-                if (idx < SURAHS.length - 1) setSelectedSurah(SURAHS[idx + 1]);
-            };
-
-            const prevSurah = () => {
-                const idx = SURAHS.findIndex(s => s.id === selectedSurah.id);
-                if (idx > 0) setSelectedSurah(SURAHS[idx - 1]);
-            };
-
-            // Auto-play when selection changes if was already playing
-            useEffect(() => {
-                if(isPlaying) play(); 
-                else {
-                    // Preload only
-                    if(audioRef.current) audioRef.current.src = `${selectedReciter.server}/${selectedSurah.value}.mp3`;
-                }
-            }, [selectedReciter, selectedSurah]);
-
-            return (
-                <div className="h-full flex flex-col items-center justify-center p-4 lg:p-10 w-full">
-                    <audio ref={audioRef} onEnded={() => setIsPlaying(false)} onError={() => {setLoading(false); setIsPlaying(false); alert("Erreur de lecture audio");}} />
-                    
-                    <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/60 p-8 md:p-12 w-full max-w-4xl flex flex-col gap-8 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
-                        
-                        <div className="text-center space-y-2 z-10">
-                            <h2 className="text-4xl font-arabic text-gray-800 drop-shadow-sm">القرآن الكريم</h2>
-                            <p className="text-gray-500 font-medium tracking-wide">ÉCOUTEZ ET MÉDITEZ</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 z-10">
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Récitateur</label>
-                                <div className="relative group">
-                                    <select 
-                                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-4 px-5 pr-10 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer hover:bg-white hover:shadow-sm"
-                                        value={selectedReciter.id}
-                                        onChange={e => setSelectedReciter(RECITERS.find(r => r.id === e.target.value))}
-                                    >
-                                        {RECITERS.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 group-hover:text-blue-500 transition-colors">
-                                        <Icon name="chevron-down" size={20} />
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Sourate</label>
-                                <div className="relative group">
-                                    <select 
-                                        className="w-full appearance-none bg-gray-50 border border-gray-200 text-gray-700 py-4 px-5 pr-10 rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer hover:bg-white hover:shadow-sm"
-                                        value={selectedSurah.id}
-                                        onChange={e => setSelectedSurah(SURAHS.find(s => s.id == e.target.value))}
-                                    >
-                                        {SURAHS.map(s => <option key={s.id} value={s.id}>{s.id}. {s.name}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 group-hover:text-blue-500 transition-colors">
-                                        <Icon name="chevron-down" size={20} />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-center gap-8 py-6 z-10">
-                            <button onClick={prevSurah} className="p-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all active:scale-95"><Icon name="skip-back" size={32} /></button>
-                            
-                            <button 
-                                onClick={toggle}
-                                className={`h-24 w-24 rounded-full flex items-center justify-center shadow-xl hover:shadow-2xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all active:scale-95 active:translate-y-0 ${loading ? 'bg-gray-100 cursor-wait' : 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'}`}
-                            >
-                                {loading ? <span className="animate-spin text-gray-400"><Icon name="loader-2" size={32} /></span> : 
-                                 isPlaying ? <Icon name="pause" size={40} className="fill-current" /> : <Icon name="play" size={40} className="ml-2 fill-current" />}
-                            </button>
-
-                            <button onClick={nextSurah} className="p-4 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all active:scale-95"><Icon name="skip-forward" size={32} /></button>
-                        </div>
-
-                        <div className="text-center pt-4 border-t border-gray-100">
-                             <h3 className="text-xl font-bold text-gray-800">{selectedSurah.name}</h3>
-                             <p className="text-blue-600 font-medium">{selectedReciter.name}</p>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
-        // --- MAIN APP ---
-        const App = () => {
-            const [view, setView] = useState('home');
-            const [currentSubject, setCurrentSubject] = useState(null);
-            const [subjects, setSubjects] = useState([
-                { id: 'math', title: 'Mathématiques', color: 'bg-indigo-500', icon: 'calculator' },
-                { id: 'fra', title: 'Français', color: 'bg-rose-500', icon: 'book-open' },
-                { id: 'isl', title: 'Éducation Islamique', color: 'bg-emerald-500', icon: 'moon' },
-                { id: 'hist', title: 'Histoire-Géo', color: 'bg-amber-500', icon: 'globe' },
-            ]);
-            const [settings, setSettings] = useState({ paperType: 'seyes', penColor: '#1e3a8a', brushSize: 2 });
-            const [isModalOpen, setIsModalOpen] = useState(false);
-            const [newSub, setNewSub] = useState("");
-
-            const addSubject = () => {
-                if(!newSub.trim()) return;
-                const colors = ['bg-blue-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500'];
-                setSubjects([...subjects, { 
-                    id: Date.now(), 
-                    title: newSub, 
-                    color: colors[Math.floor(Math.random()*colors.length)], 
-                    icon: 'book' 
-                }]);
-                setNewSub("");
-                setIsModalOpen(false);
-            };
-
-            if (view === 'home') return (
-                <div className="flex flex-col h-full bg-neutral-50 overflow-hidden">
-                    <div className="max-w-7xl mx-auto w-full p-6 md:p-10 flex-1 overflow-y-auto">
-                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 animate-fade-in">
-                            <div>
-                                <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Mes Cahiers</h1>
-                                <p className="text-lg text-gray-500 mt-1">Gérez vos notes et cours en toute simplicité</p>
-                            </div>
-                            <Button onClick={() => setIsModalOpen(true)} size="lg" className="rounded-full shadow-lg shadow-blue-200 w-full md:w-auto gap-2 py-3 px-6">
-                                <Icon name="plus" size={24} /> Créer une matière
-                            </Button>
-                        </header>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
-                            {subjects.map((sub, i) => (
-                                <div key={sub.id} onClick={() => { setCurrentSubject(sub); setView('notebook'); }} 
-                                    className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer border border-gray-100 flex flex-col h-[300px] animate-slide-up"
-                                    style={{animationDelay: `${i*50}ms`}}
-                                >
-                                    <div className={`h-3 w-full ${sub.color}`}></div>
-                                    <div className="p-8 flex-1 flex flex-col items-center justify-center text-center gap-6 relative">
-                                        <div className={`absolute w-32 h-32 rounded-full ${sub.color} opacity-5 blur-2xl group-hover:scale-150 transition-transform duration-700`}></div>
-                                        <div className={`w-20 h-20 rounded-2xl ${sub.color} text-white flex items-center justify-center shadow-xl shadow-${sub.color}/30 group-hover:rotate-12 transition-transform duration-300`}>
-                                            <Icon name={sub.icon} size={40} />
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">{sub.title}</h3>
-                                    </div>
-                                    <div className="border-t p-4 bg-gray-50 flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-wider">
-                                        <span>Grand Format</span>
-                                        <span className="group-hover:translate-x-1 transition-transform text-blue-500">Ouvrir</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Nouvelle matière">
-                        <div className="space-y-6">
-                            <input autoFocus className="w-full border border-gray-300 p-4 rounded-xl text-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Mathématiques" value={newSub} onChange={e => setNewSub(e.target.value)} onKeyDown={e => e.key==='Enter' && addSubject()} />
-                            <div className="flex justify-end gap-3"><Button variant="ghost" onClick={() => setIsModalOpen(false)}>Annuler</Button><Button onClick={addSubject}>Créer</Button></div>
-                        </div>
-                    </Modal>
-                </div>
-            );
-
-            return (
-                <NotebookView 
-                    subject={currentSubject} 
-                    onBack={() => setView('home')} 
-                    settings={settings}
-                    onUpdateSettings={setSettings}
-                />
-            );
-        };
-
-        const NotebookView = ({ subject, onBack, settings, onUpdateSettings }) => {
-            const [tab, setTab] = useState('write');
-            const [isMenuOpen, setIsMenuOpen] = useState(false);
-            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-            const TABS = [{id: 'write', icon: 'pen-tool', label: 'Écriture'}, {id: 'history', icon: 'history', label: 'Historique'}, {id: 'quran', icon: 'book-open', label: 'Coran'}];
-
-            return (
-                <div className="h-full flex flex-col bg-neutral-100">
-                    <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm z-30">
-                        <div className="flex items-center gap-3">
-                            <Button variant="ghost" size="icon" onClick={onBack}><Icon name="arrow-left" size={20} /></Button>
-                            <div><h2 className="text-lg font-bold text-gray-800">{subject.title}</h2></div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="hidden md:flex bg-gray-100 p-1 rounded-lg mr-2">
-                                {TABS.map(t => (
-                                    <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${tab === t.id ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                                        <Icon name={t.icon} size={16} /> {t.label}
-                                    </button>
-                                ))}
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}><Icon name="settings" size={20} /></Button>
-                            <button className="md:hidden p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}><Icon name="menu" size={24} /></button>
-                        </div>
-                    </header>
-
-                    {isMenuOpen && (
-                        <div className="md:hidden absolute top-[60px] left-0 w-full bg-white shadow-xl z-50 p-2 animate-slide-up">
-                            {TABS.map(t => (
-                                <button key={t.id} onClick={() => { setTab(t.id); setIsMenuOpen(false); }} className={`w-full flex items-center gap-3 p-4 rounded-lg text-sm font-medium mb-1 ${tab === t.id ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}>
-                                    <Icon name={t.icon} size={20} /> {t.label}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    <main className="flex-1 overflow-hidden relative">
-                        {tab === 'write' && (
-                            <div className="h-full w-full p-2 md:p-8 overflow-auto flex justify-center bg-neutral-200/50">
-                                <div className="w-full max-w-[210mm] h-full min-h-[297mm] bg-white shadow-2xl flex flex-col animate-slide-up">
-                                    <div className="h-24 p-8 flex justify-between items-end border-b border-gray-100">
-                                        <h3 className="font-hand text-3xl text-blue-600">{subject.title}</h3>
-                                        <span className="font-hand text-xl text-gray-400">{new Date().toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="flex-1 relative">
-                                        <NotebookCanvas color={settings.penColor} brushSize={settings.brushSize} paperType={settings.paperType} />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {tab === 'history' && (
-                            <div className="h-full overflow-y-auto p-6 md:p-10 animate-fade-in">
-                                <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-                                    <div className="aspect-[210/297] border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 transition-all cursor-pointer">
-                                        <Icon name="plus" size={32} /><span className="mt-2 font-medium">Nouvelle page</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {tab === 'quran' && (
-                            <div className="h-full w-full bg-gradient-to-br from-blue-50 to-indigo-50 animate-fade-in">
-                                <QuranPlayer />
-                            </div>
-                        )}
-                    </main>
-
-                    <Modal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} title="Paramètres">
-                        <div className="space-y-6">
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-3">Papier</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {[{id:'seyes',l:'Grands Carreaux'},{id:'grid',l:'Petits Carreaux'},{id:'lines',l:'Ligné'},{id:'dots',l:'Pointillés'}].map(t => (
-                                        <button key={t.id} onClick={() => onUpdateSettings({...settings, paperType: t.id})} className={`p-3 rounded-lg border text-sm ${settings.paperType === t.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'hover:bg-gray-50'}`}>{t.l}</button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-3">Couleur</label>
-                                <div className="flex gap-3">
-                                    {['#1e3a8a','#000000','#ef4444','#10b981'].map(c => (
-                                        <button key={c} onClick={() => onUpdateSettings({...settings, penColor: c})} className={`w-10 h-10 rounded-full border-2 ${settings.penColor === c ? 'border-gray-900 scale-110' : 'border-transparent'}`} style={{backgroundColor: c}} />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </Modal>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+Let's output the rest of the cleaned JS cleanly.const LIB = {
+tesseract: 'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/tesseract.min.js',
+tesseractWorker: 'https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/worker.min.js',
+tesseractCore: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
+ort: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.wasm.min.js',
+ortWasm: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/',
+migan: ['https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx', 'https://cdn.jsdelivr.net/npm/migan-onnx@1.0.0/models/migan_pipeline_v2.onnx'],
+miganSize: 28079181
+};
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const nextFrame = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+function icon(name, cls = '') { return `<svg class="ic ${cls}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`; }
+function hydrate(root = document) { root.querySelectorAll('i[data-i]').forEach(el => { const t = document.createElement('template'); t.innerHTML = icon(el.dataset.i, el.className); el.replaceWith(t.content.firstChild); }); }
+const hex2 = v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0');
+const rgbHex = c => ('#' + hex2(c[0]) + hex2(c[1]) + hex2(c[2])).toUpperCase();
+const hexRgb = h => { const n = parseInt(String(h).replace('#', ''), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+const dist3 = (r, g, b, c) => Math.sqrt((r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2);
+function loadImage(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('Impossible de lire l’image.')); im.src = src; }); }
+function canvasOf(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+function ctx2d(c) { return c.getContext('2d', { willReadFrequently: true }); }
+function loadScript(url, test) {
+if (test()) return Promise.resolve();
+loadScript.p = loadScript.p || {};
+if (loadScript.p[url]) return loadScript.p[url];
+return loadScript.p[url] = new Promise((res, rej) => {
+const s = document.createElement('script'); s.src = url; s.async = true; s.crossOrigin = 'anonymous';
+s.onload = () => test() ? res() : rej(new Error('Bibliothèque incomplète'));
+s.onerror = () => { delete loadScript.p[url]; s.remove(); rej(new Error('NET')); };
+document.head.appendChild(s);
+});
+}
+const netError = what => new Error(`${what} n’a pas pu être téléchargé. Une connexion internet est nécessaire la première fois, ensuite tout fonctionne hors ligne.`);
+const canvasCache = new Map();
+async function imageCanvas(src) {
+if (canvasCache.has(src)) return canvasCache.get(src);
+const im = await loadImage(src);
+const c = canvasOf(im.naturalWidth, im.naturalHeight); ctx2d(c).drawImage(im, 0, 0);
+canvasCache.set(src, c);
+while (canvasCache.size > 4) canvasCache.delete(canvasCache.keys().next().value);
+return c;
+}
+const demoRegions = [
+{ id: '1', text: 'ATELIER', x: 21.5, y: 11.2, width: 57, height: 9.1, fontStyle: 'Sans-serif · Gras', fontSize: 108, color: '#EFE6D3', background: 'Vert profond texturé', confidence: 0.96 },
+{ id: '2', text: 'CÉRAMIQUE', x: 12.4, y: 20.5, width: 75, height: 9.4, fontStyle: 'Sans-serif · Gras', fontSize: 96, color: '#EFE6D3', background: 'Vert profond texturé', confidence: 0.96 },
+{ id: '3', text: 'SAMEDI 24 OCTOBRE', x: 15.5, y: 87.8, width: 69, height: 5.3, fontStyle: 'Sans-serif · Gras', fontSize: 50, color: '#17382A', background: 'Papier clair texturé', confidence: 0.94 },
+{ id: '4', text: 'LYON · 14H — 17H', x: 30, y: 94, width: 41, height: 3.2, fontStyle: 'Sans-serif · Espacé', fontSize: 26, color: '#17382A', background: 'Papier clair texturé', confidence: 0.91 }
+];
+const S = {
+source: DEMO_IMAGE, current: DEMO_IMAGE, name: 'atelier-ceramique.jpg', dims: { width: 768, height: 1024 },
+regions: clone(demoRegions), selected: '3', replacement: 'SAMEDI 31 OCTOBRE',
+busy: null, progress: null, status: '', zoom: 100, comparing: false, partial: '',
+history: [], future: [], selecting: false, draft: null, overrides: {}, isDemo: true
+};
+const settings = (() => { try { return { fast: localStorage.getItem('retouche_fast') === '1' }; } catch (e) { return { fast: false }; } })();
+const regionById = id => S.regions.find(r => r.id === id);
+const currentRegion = () => regionById(S.selected);
+const FAMILIES = {
+'Montserrat': { cat: 'Sans-serif géométrique', w: [300, 400, 500, 600, 700, 800] },
+'Poppins': { cat: 'Sans-serif géométrique', w: [400, 500, 700] },
+'Inter': { cat: 'Sans-serif', w: [400, 700] },
+'Oswald': { cat: 'Sans-serif condensé', w: [400, 500, 700] },
+'Bebas Neue': { cat: 'Sans-serif condensé', w: [400], heavy: true },
+'Anton': { cat: 'Sans-serif condensé', w: [400], heavy: true },
+'Playfair Display': { cat: 'Serif contrastée', w: [400, 700] },
+'Merriweather': { cat: 'Serif', w: [400, 700] },
+'Lora': { cat: 'Serif', w: [400, 700] },
+'Roboto Slab': { cat: 'Serif à empattements', w: [400, 700] },
+'Dancing Script': { cat: 'Manuscrite', w: [700] },
+'Pacifico': { cat: 'Manuscrite', w: [400] },
+'Space Mono': { cat: 'Monospace', w: [400, 700] },
+'Arial': { cat: 'Sans-serif', w: [400, 700], sys: true },
+'Georgia': { cat: 'Serif', w: [400, 700], sys: true }
+};
+const fontCss = (fam, w, size) => `${w} ${size}px "${fam}"${FAMILIES[fam]?.cat.startsWith('Serif') ? ', Georgia, serif' : ', Arial, sans-serif'}`;
+let fontsReady = null;
+function ensureFonts() {
+if (fontsReady) return fontsReady;
+const jobs = [];
+for (const [f, d] of Object.entries(FAMILIES)) if (!d.sys) for (const w of d.w) jobs.push(document.fonts.load(`${w} 40px "${f}"`, 'AÉaé0123456789').catch(() => null));
+fontsReady = Promise.race([Promise.all(jobs), sleep(6000)]).then(() => true);
+return fontsReady;
+}
+function fontAvailable(f, w) {
+if (FAMILIES[f]?.sys) return true;
+try { return document.fonts.check(`${w} 40px "${f}"`, 'Aa'); } catch (e) { return false; }
+}
+function weightLabel(fam, w) {
+if (FAMILIES[fam]?.heavy) return 'Gras';
+return w >= 800 ? 'Extra-gras' : w >= 700 ? 'Gras' : w >= 500 ? 'Demi-gras' : w <= 300 ? 'Fin' : 'Normal';
+}
+function median(arr) { if (!arr.length) return 0; const a = Float32Array.from(arr).sort(); return a[a.length >> 1]; }
+function analyzePixels(canvas, box) {
+const W = canvas.width, H = canvas.height;
+const bx = clamp(Math.floor(box.x), 0, W - 1), by = clamp(Math.floor(box.y), 0, H - 1);
+const bw = clamp(Math.ceil(box.w), 1, W - bx), bh = clamp(Math.ceil(box.h), 1, H - by);
+const pad = Math.max(3, Math.round(Math.min(bh, bw) * 0.18));
+const ex = Math.max(0, bx - pad), ey = Math.max(0, by - pad), ex2 = Math.min(W, bx + bw + pad), ey2 = Math.min(H, by + bh + pad);
+const ew = ex2 - ex, eh = ey2 - ey;
+const data = ctx2d(canvas).getImageData(ex, ey, ew, eh).data;
+const R = [], G = [], B = [];
+const step = Math.max(1, Math.floor(Math.sqrt(ew * eh) / 120));
+for (let y = 0; y < eh; y += 1) for (let x = 0; x < ew; x += 1) {
+const gx = ex + x, gy = ey + y;
+if (gx >= bx && gx < bx + bw && gy >= by && gy < by + bh) continue;
+if ((x + y) % step) continue;
+const i = (y * ew + x) * 4; R.push(data[i]); G.push(data[i + 1]); B.push(data[i + 2]);
+}
+let bg = R.length ? [median(R), median(G), median(B)] : null;
+const n = bw * bh, P = new Uint8ClampedArray(n * 3);
+for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+const i = ((y + by - ey) * ew + (x + bx - ex)) * 4, j = (y * bw + x) * 3;
+P[j] = data[i]; P[j + 1] = data[i + 1]; P[j + 2] = data[i + 2];
+}
+let ringSd = 0;
+if (R.length) { const L = R.map((v, k) => 0.299 * v + 0.587 * G[k] + 0.114 * B[k]), mu = L.reduce((a, b) => a + b, 0) / L.length; ringSd = Math.sqrt(L.reduce((a, b) => a + (b - mu) ** 2, 0) / L.length); }
+if (!bg || ringSd > 14) {
+const bins = new Map();
+for (let j = 0; j < n * 3; j += 3) { const key = (P[j] >> 4) << 8 | (P[j + 1] >> 4) << 4 | (P[j + 2] >> 4); bins.set(key, (bins.get(key) || 0) + 1); }
+let bk = 0, bc = -1; for (const [k2, c] of bins) if (c > bc) { bc = c; bk = k2; }
+const cr = ((bk >> 8) << 4) + 8, cg = (((bk >> 4) & 15) << 4) + 8, cb = ((bk & 15) << 4) + 8;
+const acc = [0, 0, 0]; let na = 0;
+for (let j = 0; j < n * 3; j += 3) if (dist3(P[j], P[j + 1], P[j + 2], [cr, cg, cb]) < 28) { acc[0] += P[j]; acc[1] += P[j + 1]; acc[2] += P[j + 2]; na++; }
+bg = na ? acc.map(v => v / na) : [cr, cg, cb];
+}
+const d = new Float32Array(n);
+for (let k = 0; k < n; k++) d[k] = dist3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2], bg);
+const sorted = Float32Array.from(d).sort();
+const p90 = sorted[Math.floor(n * 0.9)] || 0;
+let fg = [0, 0, 0], cnt = 0;
+for (let k = 0; k < n; k++) if (d[k] >= p90 && d[k] > 12) { fg[0] += P[k * 3]; fg[1] += P[k * 3 + 1]; fg[2] += P[k * 3 + 2]; cnt++; }
+if (cnt) fg = fg.map(v => v / cnt); else fg = bg.map(v => v > 128 ? 20 : 235);
+let bgIn = bg.slice();
+for (let it = 0; it < 4; it++) {
+const a = [0, 0, 0], b = [0, 0, 0]; let na = 0, nb = 0;
+for (let k = 0; k < n; k++) {
+const r = P[k * 3], g = P[k * 3 + 1], bb = P[k * 3 + 2];
+if (dist3(r, g, bb, fg) < dist3(r, g, bb, bgIn)) { a[0] += r; a[1] += g; a[2] += bb; na++; } else { b[0] += r; b[1] += g; b[2] += bb; nb++; }
+}
+if (na) fg = a.map(v => v / na);
+if (nb) bgIn = b.map((v, i) => 0.5 * v / nb + 0.5 * bg[i]);
+}
+const contrast = dist3(fg[0], fg[1], fg[2], bg);
+let core = [0, 0, 0], nc = 0;
+for (let k = 0; k < n; k++) {
+const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
+if (dist3(r, g, b, bg) >= contrast * 0.8 && dist3(r, g, b, fg) < contrast * 0.45) { core[0] += r; core[1] += g; core[2] += b; nc++; }
+}
+if (nc > 4) core = core.map(v => v / nc); else core = fg;
+const mask = new Uint8Array(n); let ink = 0;
+if (contrast > 18) for (let k = 0; k < n; k++) {
+const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
+const db = dist3(r, g, b, bg), df = dist3(r, g, b, fg);
+if (db > contrast * 0.42 && df < db) { mask[k] = 1; ink++; }
+}
+const rows = new Int32Array(bh), cols = new Int32Array(bw);
+for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) if (mask[y * bw + x]) rows[y]++;
+const rowMin = Math.max(1, Math.round(bw * 0.004));
+const maxRow = rows.reduce((a, b) => Math.max(a, b), 0);
+const strong = Math.max(rowMin, Math.round(maxRow * 0.06));
+const bands = []; let cur = null;
+for (let y = 0; y < bh; y++) {
+if (rows[y] >= strong) { if (cur && y - cur.e <= 2) { cur.e = y; cur.sum += rows[y]; } else { cur = { s: y, e: y, sum: rows[y] }; bands.push(cur); } }
+}
+let tight = { x: bx, y: by, w: bw, h: bh }, ok = false;
+if (bands.length) {
+const core0 = bh * 0.3, core1 = bh * 0.7;
+const inCore = bands.filter(b => b.e >= core0 && b.s <= core1);
+let main = (inCore.length ? inCore : bands).reduce((a, b) => b.sum > a.sum ? b : a);
+let s = main.s, e = main.e;
+for (const b of bands) { if (b === main) continue; const gap = b.s > e ? b.s - e : s - b.e; if (gap <= 3) { s = Math.min(s, b.s); e = Math.max(e, b.e); } }
+const mh = e - s + 1;
+const extend = (from, dir, maxLen, maxGap) => { let last = from, gap = 0; for (let y = from + dir, k = 0; y >= 0 && y < bh && k < maxLen; y += dir, k++) { if (rows[y] >= maxRow * 0.25 && gap > 0) break; if (rows[y] >= rowMin) { last = y; gap = 0; } else if (++gap > maxGap) break; } return last; };
+s = extend(s, -1, Math.round(mh * 0.4), Math.max(2, Math.round(mh * 0.18))); e = extend(e, 1, Math.round(mh * 0.35), 1);
+for (let y = s; y <= e; y++) for (let x = 0; x < bw; x++) if (mask[y * bw + x]) cols[x]++;
+const total = cols.reduce((a, b) => a + b, 0);
+let x0 = cols.findIndex(v => v > 0), x1 = bw - 1 - [...cols].reverse().findIndex(v => v > 0);
+const trim = (from, dir) => {
+let x = from, run = 0, gap = 0;
+while (x >= 0 && x < bw) {
+if (cols[x]) { run += cols[x]; gap = 0; } else { gap++; if (gap > (e - s + 1) * 1.2) { if (run < total * 0.015) return x + dir; else return from; } }
+x += dir;
+}
+return from;
+};
+if (x0 >= 0) {
+for (let t = 0; t < 3; t++) { const nx0 = trim(x0, 1); if (nx0 === x0) break; x0 = nx0; while (x0 < bw && !cols[x0]) x0++; }
+for (let t = 0; t < 3; t++) { const nx1 = trim(x1, -1); if (nx1 === x1) break; x1 = nx1; while (x1 >= 0 && !cols[x1]) x1--; }
+if (x1 > x0 && e >= s) { tight = { x: bx + x0, y: by + s, w: x1 - x0 + 1, h: e - s + 1 }; ok = true; }
+}
+}
+const lum = c => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+let sd = 0, m = 0;
+{
+const L = [], ty0 = tight.y - by, ty1 = ty0 + tight.h, tx0 = tight.x - bx, tx1 = tx0 + tight.w;
+for (let y = Math.max(0, ty0); y < Math.min(bh, ty1); y++) for (let x = Math.max(0, tx0); x < Math.min(bw, tx1); x++) {
+const k = y * bw + x; if (mask[k]) continue;
+const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
+if (dist3(r, g, b, bg) > contrast * 0.3) continue;
+L.push(0.299 * r + 0.587 * g + 0.114 * b);
+}
+if (L.length < 20) for (let k = 0; k < R.length; k++) L.push(0.299 * R[k] + 0.587 * G[k] + 0.114 * B[k]);
+m = L.reduce((a, b) => a + b, 0) / Math.max(1, L.length); sd = Math.sqrt(L.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, L.length));
+}
+return { bg, fg: core, contrast, mask, maskW: bw, maskH: bh, box: { x: bx, y: by, w: bw, h: bh }, tight, ok, inkRatio: ink / n, bgStd: sd, background: describeBackground(bg, sd), lumBg: lum(bg) };
+}
+function colorNameFr(c) {
+const [r, g, b] = c.map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, dl = mx - mn;
+const s = dl === 0 ? 0 : dl / (1 - Math.abs(2 * l - 1));
+let h = 0;
+if (dl) { h = mx === r ? ((g - b) / dl) % 6 : mx === g ? (b - r) / dl + 2 : (r - g) / dl + 4; h = (h * 60 + 360) % 360; }
+if (l < 0.13) return 'Noir';
+if (l > 0.93 && s < 0.5) return 'Blanc';
+if (s < 0.13) return l > 0.7 ? 'Gris clair' : l < 0.35 ? 'Gris foncé' : 'Gris';
+if (l > 0.72 && h >= 20 && h < 65 && s < 0.65) return 'Papier clair';
+const name = h < 15 || h >= 345 ? 'Rouge' : h < 40 ? 'Orange' : h < 65 ? 'Jaune' : h < 165 ? 'Vert' : h < 200 ? 'Bleu-vert' : h < 255 ? 'Bleu' : h < 290 ? 'Violet' : 'Rose';
+return name + (l < 0.3 ? ' profond' : l < 0.45 ? ' foncé' : l > 0.72 ? ' clair' : '');
+}
+function describeBackground(bg, sd) {
+if (sd > 30) return 'Photo / fond détaillé';
+const t = sd < 4 ? ' uni' : sd < 9 ? ' légèrement texturé' : ' texturé';
+return colorNameFr(bg) + t;
+}
+function measureAdvances(ctx, text, ls) {
+const xs = []; let prev = 0;
+for (let i = 0; i < text.length; i++) { const w = ctx.measureText(text.slice(0, i + 1)).width; xs.push(prev + i * ls); prev = w; }
+return { xs, width: prev + Math.max(0, text.length - 1) * ls };
+}
+function renderLines(lines, fam, weight, size, ls, color, lineGap, align = 'left') {
+const meas = ctx2d(canvasOf(4, 4)); meas.font = fontCss(fam, weight, size);
+const lay = lines.map(t => ({ t, ...measureAdvances(meas, t, ls) }));
+const maxW = Math.max(1, ...lay.map(l => l.width));
+const padX = Math.ceil(size * 0.6 + Math.abs(ls) * 2), padY = Math.ceil(size * 0.6);
+const W = Math.ceil(maxW + padX * 2), H = Math.ceil(size * 1.2 + lineGap * (lines.length - 1) + padY * 2);
+const c = canvasOf(W, H), x = ctx2d(c);
+x.font = fontCss(fam, weight, size); x.fillStyle = color; x.textBaseline = 'alphabetic';
+const base0 = padY + size;
+lay.forEach((l, i) => { const off = align === 'center' ? (maxW - l.width) / 2 : align === 'right' ? maxW - l.width : 0; for (let k = 0; k < l.t.length; k++) x.fillText(l.t[k], padX + off + l.xs[k], base0 + i * lineGap); });
+const ink = inkBox(x, W, H);
+return { canvas: c, ink, base0, padX, lay };
+}
+function inkBox(x, W, H) {
+const a = x.getImageData(0, 0, W, H).data; let x0 = W, y0 = H, x1 = -1, y1 = -1;
+for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) if (a[(y * W + xx) * 4 + 3] > 40) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+return x1 < 0 ? null : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
+}
+function matchFont(pix, text) {
+const t = String(text || '').replace(/\s+/g, ' ').trim();
+if (!pix.ok || !t || t.length > 80) return null;
+const T = pix.tight, TH = 40, k = TH / T.h, TW = clamp(Math.round(T.w * k), 4, 2400);
+const target = new Uint8Array(TW * TH);
+for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
+const sx = Math.floor((T.x - pix.box.x) + x / k), sy = Math.floor((T.y - pix.box.y) + y / k);
+if (sx >= 0 && sy >= 0 && sx < pix.maskW && sy < pix.maskH && pix.mask[sy * pix.maskW + sx]) target[y * TW + x] = 1;
+}
+const work = canvasOf(TW, TH), wx = ctx2d(work);
+const S0 = 60, n = Math.max(1, t.length - 1);
+let best = null, bestSafe = null;
+const SAFE = ['Montserrat', 'Inter', 'Arial'], safeByWeight = {};
+for (const [fam, d] of Object.entries(FAMILIES)) for (const w of d.w) {
+if (!fontAvailable(fam, w)) continue;
+let r = renderLines([t], fam, w, S0, 0, '#000', 0); if (!r.ink) continue;
+const kk = TH / r.ink.h;
+let ls = clamp((TW - r.ink.w * kk) / n / kk, -0.12 * S0, 1.2 * S0);
+if (Math.abs(ls) > 0.5) { r = renderLines([t], fam, w, S0, ls, '#000', 0); if (!r.ink) continue; }
+wx.clearRect(0, 0, TW, TH);
+wx.drawImage(r.canvas, r.ink.x, r.ink.y, r.ink.w, r.ink.h, 0, 0, TW, TH);
+const a = wx.getImageData(0, 0, TW, TH).data;
+let inter = 0, uni = 0;
+for (let i = 0; i < TW * TH; i++) { const p = a[i * 4 + 3] > 110 ? 1 : 0, q = target[i]; inter += p & q; uni += p | q; }
+const stretch = (r.ink.w * kk) / TW, distort = Math.abs(Math.log(stretch));
+const score = (uni ? inter / uni : 0) - distort * 0.35;
+const scale = T.h / r.ink.h;
+const cand = { score, family: fam, weight: w, size: S0 * scale, ls: ls * scale, ascent: (r.base0 - r.ink.y) * scale };
+if (!best || score > best.score) best = cand;
+if (SAFE.includes(fam) && (!bestSafe || score > bestSafe.score)) bestSafe = cand;
+if (fam === 'Montserrat') safeByWeight[w] = cand;
+}
+if (best && best.score < 0.33 && bestSafe) {
+const hw = heuristicFit(pix).weight, mw = FAMILIES.Montserrat.w.reduce((a, b) => Math.abs(b - hw) < Math.abs(a - hw) ? b : a);
+return { ...(safeByWeight[mw] || bestSafe), uncertain: true };
+}
+return best;
+}
+function heuristicFit(pix) {
+const T = pix.tight;
+let inkPx = 0, edges = 0; const { mask, maskW: w, maskH: h } = pix;
+for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; if (mask[i]) { inkPx++; if (!mask[i - 1] || !mask[i + 1] || !mask[i - w] || !mask[i + w]) edges++; } }
+const stroke = edges ? 2 * inkPx / edges : 0, ratio = stroke / Math.max(1, T.h);
+const weight = ratio > 0.17 ? 800 : ratio > 0.12 ? 700 : ratio > 0.085 ? 500 : 400;
+const size = T.h / 0.72;
+return { score: 0, family: 'Montserrat', weight, size, ls: 0, ascent: T.h, heuristic: true };
+}
+function styleLabel(fit, text, pix) {
+if (!fit) return 'Estimé à partir de l’image';
+const parts = [FAMILIES[fit.family]?.cat || 'Sans-serif', weightLabel(fit.family, fit.weight)];
+if (fit.ls > fit.size * 0.12) parts.push('Espacé');
+const letters = String(text || '').replace(/[^A-Za-zÀ-ÿ]/g, '');
+if (letters.length > 1 && letters === letters.toUpperCase()) parts.push('Capitales');
+return parts.join(' · ');
+}
+const ocr = { worker: null, loading: null, state: 'idle', progress: 0 };
+async function ensureOCR() {
+if (ocr.worker) return ocr.worker;
+if (ocr.loading) return ocr.loading;
+ocr.state = 'loading'; renderAIStatus();
+ocr.loading = (async () => {
+try { await loadScript(LIB.tesseract, () => !!window.Tesseract); } catch (e) { throw netError('Le moteur de lecture des textes'); }
+try {
+const w = await Tesseract.createWorker(['fra', 'eng'], 1, {
+workerPath: LIB.tesseractWorker, corePath: LIB.tesseractCore, workerBlobURL: true,
+logger: m => {
+if (m.status && /load|initializ/i.test(m.status) && typeof m.progress === 'number') { ocr.progress = m.progress; renderAIStatus(); }
+if (m.status === 'recognizing text' && S.busy === 'analysis') setProgress(ocrPass.base + m.progress * ocrPass.span);
+},
+errorHandler: err => console.warn('Tesseract', err)
+});
+ocr.worker = w; ocr.state = 'ready'; renderAIStatus();
+return w;
+} catch (e) { console.error(e); throw netError('Le modèle de lecture des textes'); }
+})();
+try { return await ocr.loading; } catch (e) { ocr.state = 'error'; renderAIStatus(); throw e; } finally { ocr.loading = null; }
+}
+const ocrPass = { base: 0, span: 1 };
+function grayCanvas(src, scale, x0 = 0, y0 = 0, w = src.width, h = src.height) {
+const c = canvasOf(Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale))), x = ctx2d(c);
+x.imageSmoothingQuality = 'high'; x.drawImage(src, x0, y0, w, h, 0, 0, c.width, c.height);
+const d = x.getImageData(0, 0, c.width, c.height), p = d.data;
+for (let i = 0; i < p.length; i += 4) { const g = 0.299 * p[i] + 0.587 * p[i + 1] + 0.114 * p[i + 2]; p[i] = p[i + 1] = p[i + 2] = g; }
+x.putImageData(d, 0, 0); return c;
+}
+function wordsFrom(result, scale) {
+const out = [];
+for (const b of result.data.blocks || []) for (const p of b.paragraphs || []) for (const l of p.lines || []) for (const w of l.words || []) {
+const text = (w.text || '').trim();
+if (!text) continue;
+out.push({ text, conf: w.confidence, x0: w.bbox.x0 / scale, y0: w.bbox.y0 / scale, x1: w.bbox.x1 / scale, y1: w.bbox.y1 / scale });
+}
+return out;
+}
+function validWord(w) {
+const t = w.text, h = w.y1 - w.y0, wd = w.x1 - w.x0;
+const alnum = (t.match(/[\p{L}\p{N}]/gu) || []).length;
+if (h < 5 || wd < 3) return false;
+if (!alnum) return /^[—–-·•|&@€$%+]$/.test(t) && w.conf >= 50;
+if (alnum / t.length < 0.5) return false;
+if (alnum === 1 && w.conf < 85) return false;
+if (alnum === 2 && w.conf < 70) return false;
+return w.conf >= 58;
+}
+function iou(a, b) {
+const ix = Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)), iy = Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0));
+const inter = ix * iy, ua = (a.x1 - a.x0) * (a.y1 - a.y0), ub = (b.x1 - b.x0) * (b.y1 - b.y0);
+return { iou: inter / (ua + ub - inter || 1), cover: inter / Math.min(ua, ub || 1) };
+}
+function dedupe(words) {
+const score = w => w.conf + 6 * Math.min(12, w.text.length);
+words.sort((a, b) => score(b) - score(a));
+const kept = [];
+for (const w of words) if (!kept.some(k => { const o = iou(k, w); return o.iou > 0.3 || o.cover > 0.7; })) kept.push(w);
+return kept;
+}
+function groupLines(words) {
+const isPunct = w => !/[\p{L}\p{N}]/u.test(w.text);
+const fits = (L, w) => {
+const h = w.y1 - w.y0, lh = L.y1 - L.y0;
+const gap = w.x0 > L.x1 ? w.x0 - L.x1 : L.x0 > w.x1 ? L.x0 - w.x1 : 0;
+if (isPunct(w)) { const cy = (w.y0 + w.y1) / 2; return cy > L.y0 && cy < L.y1 && gap <= 2.5 * lh ? gap : null; }
+const ov = Math.min(L.y1, w.y1) - Math.max(L.y0, w.y0);
+if (ov < 0.5 * Math.min(h, lh) || h / lh > 1.7 || lh / h > 1.7) return null;
+return gap <= 3.6 * Math.max(h, lh) ? gap : null;
+};
+const words2 = [...words].sort((a, b) => isPunct(a) - isPunct(b) || (a.y0 + a.y1) / 2 - (b.y0 + b.y1) / 2 || a.x0 - b.x0);
+let lines = [];
+const add = (L, w) => { L.words.push(...(w.words || [w])); L.x0 = Math.min(L.x0, w.x0); L.x1 = Math.max(L.x1, w.x1); if (!isPunct(w) || w.words) { L.y0 = Math.min(L.y0, w.y0); L.y1 = Math.max(L.y1, w.y1); } };
+for (const w of words2) {
+let best = null, bestGap = Infinity;
+for (const L of lines) { const g = fits(L, w); if (g !== null && g < bestGap) { best = L; bestGap = g; } }
+if (best) add(best, w); else if (!isPunct(w)) lines.push({ words: [w], x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1, text: 'x' });
+}
+for (let changed = true; changed;) {
+changed = false;
+outer: for (let i = 0; i < lines.length; i++) for (let j = i + 1; j < lines.length; j++) {
+if (fits(lines[i], lines[j]) !== null) { add(lines[i], lines[j]); lines.splice(j, 1); changed = true; break outer; }
+}
+}
+return lines.map(L => {
+L.words.sort((a, b) => a.x0 - b.x0);
+const text = L.words.map(w => w.text).join(' ');
+const conf = L.words.reduce((a, w) => a + w.conf * w.text.length, 0) / L.words.reduce((a, w) => a + w.text.length, 0);
+return { text, conf, x0: L.x0, y0: L.y0, x1: L.x1, y1: L.y1 };
+});
+}
+function buildRegion(canvas, id, text, conf, pxBox, manual = false) {
+const W = canvas.width, H = canvas.height;
+const pix = analyzePixels(canvas, pxBox);
+const T = pix.ok ? pix.tight : pix.box;
+const fit = text ? (matchFont(pix, text) || heuristicFit(pix)) : (pix.ok ? heuristicFit(pix) : null);
+const m = Math.max(2, Math.round(T.h * 0.14 + 0.005 * Math.max(W, H)));
+const x0 = Math.max(0, T.x - m), y0 = Math.max(0, T.y - m), x1 = Math.min(W, T.x + T.w + m), y1 = Math.min(H, T.y + T.h + m);
+return {
+id, text, manual,
+x: x0 / W * 100, y: y0 / H * 100, width: (x1 - x0) / W * 100, height: (y1 - y0) / H * 100,
+fontStyle: manual && !text ? 'À conserver depuis l’image' : styleLabel(fit, text, pix),
+fontSize: fit ? Math.round(fit.size) : 0,
+color: rgbHex(pix.fg), background: manual && !pix.ok ? 'Fond original à reconstruire' : pix.background,
+confidence: manual ? 0 : Math.round(conf) / 100,
+ink: T, fit, bg: rgbHex(pix.bg), baseline: fit ? T.y + fit.ascent : T.y + T.h
+};
+}
+async function detectRegions(src) {
+const canvas = await imageCanvas(src);
+const W = canvas.width, H = canvas.height, M = Math.max(W, H);
+setStatus('Chargement du modèle de lecture…'); setProgress(0.02);
+const worker = await ensureOCR();
+await worker.setParameters({ tessedit_pageseg_mode: '11', preserve_interword_spaces: '1' });
+const s1 = Math.min(1, 2000 / M), s2 = Math.min(2 * s1, 3000 / M, 2.2);
+const passes = s2 > s1 * 1.3 ? [s1, s2] : [s1];
+let words = [];
+for (let i = 0; i < passes.length; i++) {
+ocrPass.base = 0.05 + 0.75 * i / passes.length; ocrPass.span = 0.75 / passes.length;
+setStatus(`Lecture des textes et du fond… (${i + 1}/${passes.length})`);
+const res = await worker.recognize(grayCanvas(canvas, passes[i]), {}, { blocks: true, text: false });
+words = words.concat(wordsFrom(res, passes[i]));
+}
+setStatus('Estimation des polices et des couleurs…'); setProgress(0.85);
+await ensureFonts();
+const lines = groupLines(dedupe(words.filter(validWord)));
+const regions = [];
+for (const L of lines) {
+if (regions.length >= 60) break;
+const pad = (L.y1 - L.y0) * 0.1;
+const r = buildRegion(canvas, String(regions.length + 1), L.text, L.conf, { x: L.x0 - pad, y: L.y0 - pad, w: L.x1 - L.x0 + pad * 2, h: L.y1 - L.y0 + pad * 2 });
+if (r.ink.h < 5) continue;
+regions.push(r);
+if (regions.length % 4 === 0) await nextFrame();
+}
+regions.sort((a, b) => a.y - b.y || a.x - b.x);
+regions.forEach((r, i) => r.id = String(i + 1));
+setProgress(1);
+return regions;
+}
+</script>
 </body>
 </html>
