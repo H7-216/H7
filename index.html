@@ -9,7 +9,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f6b52'/%3E%3Cpath d='M9 23 21 11M19 9l1-2 1 2 2 1-2 1-1 2-1-2-2-1zM11 9v3M9.5 10.5h3' stroke='white' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@400;700&family=Poppins:wght@400;500;700&family=Oswald:wght@400;500;700&family=Bebas+Neue&family=Anton&family=Playfair+Display:wght@400;700&family=Merriweather:wght@400;700&family=Roboto+Slab:wght@400;700&family=Lora:wght@400;700&family=Dancing+Script:wght@700&family=Pacifico&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --background:oklch(0.982 0.003 160);--foreground:oklch(0.25 0.016 160);--card:oklch(1 0 0);
@@ -126,6 +126,8 @@ img,svg{display:block}
 
 .right-panel{border-left:1px solid var(--border)}
 .edit-label{display:block;font-size:11px;font-weight:650;margin-bottom:9px}
+.warn{color:oklch(0.6 0.15 55);font-weight:700}
+.label-hint{font-weight:500;color:var(--muted-foreground);font-size:10px;margin-left:4px}
 .original-text{padding:12px;border:1px solid var(--border);border-radius:5px;background:var(--background);font-size:12px;margin-bottom:20px;white-space:pre-wrap;word-break:break-word}
 .edit-input{width:100%;min-height:90px;resize:vertical;padding:12px;border:1px solid var(--input);border-radius:5px;font-size:13px;outline:none;background:var(--card);display:block}
 input.edit-input{min-height:0;height:46px;margin-bottom:20px}
@@ -138,7 +140,8 @@ input.edit-input{min-height:0;height:46px;margin-bottom:20px}
 .help-dot{display:inline-grid;margin-left:auto;color:var(--muted-foreground);cursor:help}
 .help-dot .ic{width:12px;height:12px}
 .detail-row{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin:14px 0;color:var(--muted-foreground)}
-.detail-row strong{text-align:right;color:var(--foreground);font-size:10px;font-weight:600}
+.detail-row strong{text-align:right;color:var(--foreground);font-size:10px;font-weight:600;display:flex;align-items:center;gap:5px;justify-content:flex-end}
+.detail-row strong .ic{width:12px;height:12px}
 .color-value{display:flex;align-items:center;gap:6px}
 .color-swatch{height:13px;width:13px;border:1px solid var(--border);border-radius:3px;flex-shrink:0}
 .tune{margin-top:4px;border:1px solid var(--border);border-radius:6px;background:var(--background)}
@@ -243,8 +246,16 @@ input.edit-input{min-height:0;height:46px;margin-bottom:20px}
           <h3><i data-i="Cpu" class="text-primary"></i>IA 100 % locale</h3>
           <p>Tout s’exécute dans votre navigateur. Votre image n’est jamais envoyée sur un serveur. Les modèles sont téléchargés une seule fois puis gardés en cache.</p>
           <div class="eng-row">
+            <span class="dot" id="det-dot"></span>
+            <div><b>Repérage des lignes</b><small>PP-OCRv4 (réseau DBNet) · ≈ 5 Mo</small><small id="det-state">Se charge à la première analyse.</small><div class="progress-mini" id="det-prog" hidden><i></i></div></div>
+          </div>
+          <div class="eng-row">
             <span class="dot" id="ocr-dot"></span>
             <div><b>Lecture des textes</b><small>Tesseract (réseau LSTM), français et anglais · ≈ 8 Mo</small><small id="ocr-state">Se charge à la première analyse.</small><div class="progress-mini" id="ocr-prog" hidden><i></i></div></div>
+          </div>
+          <div class="eng-row">
+            <span class="dot" id="fnt-dot"></span>
+            <div><b>Recherche de la police</b><small>Catalogue de 120+ polices Google et polices de l’ordinateur · ≈ 4 Mo</small><small id="fnt-state">Se charge à la première analyse.</small><div class="progress-mini" id="fnt-prog" hidden><i></i></div></div>
           </div>
           <div class="eng-row">
             <span class="dot" id="inp-dot"></span>
@@ -306,7 +317,7 @@ input.edit-input{min-height:0;height:46px;margin-bottom:20px}
     <aside class="right-panel">
       <div class="panel-heading"><i data-i="Type"></i>Modifier le texte<i data-i="Sparkles" class="ml-auto text-primary"></i></div>
       <div class="panel-body">
-        <label class="edit-label" for="old-text">Texte original</label>
+        <label class="edit-label" for="old-text">Texte original <span class="label-hint">corrigez-le si besoin</span></label>
         <div id="old-text-box"></div>
         <label class="edit-label" for="replacement">Nouveau texte</label>
         <textarea id="replacement" class="edit-input" maxlength="1500" placeholder="Votre nouveau texte…"></textarea>
@@ -314,6 +325,7 @@ input.edit-input{min-height:0;height:46px;margin-bottom:20px}
         <div class="style-card">
           <div class="style-title"><i data-i="Sparkles" class="text-primary"></i><span id="style-title">Style de référence</span><span class="help-dot" title="Les informations de police sont des estimations visuelles : une image aplatie ne contient pas la police d’origine."><i data-i="CircleHelp"></i></span></div>
           <div class="detail-row"><span>Écriture</span><strong id="st-font">—</strong></div>
+          <div class="detail-row" id="st-match-row" hidden><span>Correspondance</span><strong id="st-match">—</strong></div>
           <div class="detail-row"><span>Taille estimée</span><strong id="st-size">—</strong></div>
           <div class="detail-row"><span>Couleur estimée</span><strong class="color-value"><span class="color-swatch" id="st-swatch"></span><span id="st-color">—</span></strong></div>
           <div class="detail-row"><span>Fond</span><strong id="st-bg">—</strong></div>
@@ -323,9 +335,10 @@ input.edit-input{min-height:0;height:46px;margin-bottom:20px}
               <label class="tune-row"><span>Police</span><select id="t-family"></select></label>
               <label class="tune-row"><span>Graisse</span><select id="t-weight"></select></label>
               <div class="tune-row"><span>Taille</span><div class="tune-inline"><input type="range" id="t-size" min="6" max="400" step="1"><output id="t-size-o"></output></div></div>
-              <div class="tune-row"><span>Espacement</span><div class="tune-inline"><input type="range" id="t-ls" min="-10" max="80" step="1"><output id="t-ls-o"></output></div></div>
+              <div class="tune-row"><span>Approche</span><div class="tune-inline"><input type="range" id="t-ls" min="-15" max="60" step="1"><output id="t-ls-o"></output></div></div>
               <label class="tune-row"><span>Couleur</span><input type="color" id="t-color"></label>
               <div class="tune-row"><span>Alignement</span><div class="seg" id="t-align"><button data-v="left" title="Gauche"><i data-i="AlignLeft"></i></button><button data-v="center" title="Centré"><i data-i="AlignCenter"></i></button><button data-v="right" title="Droite"><i data-i="AlignRight"></i></button></div></div>
+              <div class="tune-row"><span>Lettres</span><div class="seg" id="t-reuse"><button data-v="orig" title="Réutilise les lettres de l’image : forme et couleur exactes">Originales</button><button data-v="redraw" title="Redessine tout le texte dans la police retrouvée">Redessinées</button></div></div>
               <div class="tune-row"><span>Effacement</span><div class="seg" id="t-erase"><button data-v="glyphs">Lettres</button><button data-v="rect">Zone entière</button></div></div>
               <button class="tune-reset" id="t-reset"><i data-i="RotateCcw"></i>Revenir au style estimé</button>
             </div>
@@ -358,6 +371,8 @@ const LIB = {
   tesseractCore: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@7.0.0',
   ort: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.wasm.min.js',
   ortWasm: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/',
+  ppdet: ['https://cdn.jsdelivr.net/npm/paddle-ocr-onnx-models@0.2.0/models/ch_PP-OCRv4_det_infer.onnx', 'https://huggingface.co/SWHL/RapidOCR/resolve/main/PP-OCRv4/ch_PP-OCRv4_det_infer.onnx'],
+  ppdetSize: 4745517,
   migan: ['https://huggingface.co/andraniksargsyan/migan/resolve/main/migan_pipeline_v2.onnx', 'https://cdn.jsdelivr.net/npm/migan-onnx@1.0.0/models/migan_pipeline_v2.onnx'],
   miganSize: 28079181
 };
@@ -423,48 +438,92 @@ const regionById = id => S.regions.find(r => r.id === id);
 const currentRegion = () => regionById(S.selected);
 
 /* =============================================================================
-   POLICES CANDIDATES (estimation de l'écriture)
+   CATALOGUE DE POLICES : 120+ familles Google Fonts (variables quand c'est possible)
+   + polices système installées. Chargées une seule fois, à la première recherche.
    ============================================================================= */
-const FAMILIES = {
-  'Montserrat': { cat: 'Sans-serif géométrique', w: [300, 400, 500, 600, 700, 800] },
-  'Poppins': { cat: 'Sans-serif géométrique', w: [400, 500, 700] },
-  'Inter': { cat: 'Sans-serif', w: [400, 700] },
-  'Oswald': { cat: 'Sans-serif condensé', w: [400, 500, 700] },
-  'Bebas Neue': { cat: 'Sans-serif condensé', w: [400], heavy: true },
-  'Anton': { cat: 'Sans-serif condensé', w: [400], heavy: true },
-  'Playfair Display': { cat: 'Serif contrastée', w: [400, 700] },
-  'Merriweather': { cat: 'Serif', w: [400, 700] },
-  'Lora': { cat: 'Serif', w: [400, 700] },
-  'Roboto Slab': { cat: 'Serif à empattements', w: [400, 700] },
-  'Dancing Script': { cat: 'Manuscrite', w: [700] },
-  'Pacifico': { cat: 'Manuscrite', w: [400] },
-  'Space Mono': { cat: 'Monospace', w: [400, 700] },
-  'Arial': { cat: 'Sans-serif', w: [400, 700], sys: true },
-  'Georgia': { cat: 'Serif', w: [400, 700], sys: true }
-};
-const fontCss = (fam, w, size) => `${w} ${size}px "${fam}"${FAMILIES[fam]?.cat.startsWith('Serif') ? ', Georgia, serif' : ', Arial, sans-serif'}`;
-let fontsReady = null;
-function ensureFonts() {
-  if (fontsReady) return fontsReady;
-  const jobs = [];
-  for (const [f, d] of Object.entries(FAMILIES)) if (!d.sys) for (const w of d.w) jobs.push(document.fonts.load(`${w} 40px "${f}"`, 'AÉaé0123456789').catch(() => null));
-  fontsReady = Promise.race([Promise.all(jobs), sleep(6000)]).then(() => true);
-  return fontsReady;
+const FONT_CATALOG = [{"f":"Abhaya Libre","c":"Serif","w":[400,500,600,700,800]},{"f":"Abril Fatface","c":"Décorative","w":[400]},{"f":"Alegreya Sans","c":"Sans-serif","w":[100,300,400,500,700,800,900],"i":1},{"f":"Alegreya","c":"Serif","w":[400,500,600,700,800,900],"v":[400,900],"i":1},{"f":"Alfa Slab One","c":"Décorative","w":[400]},{"f":"Amatic SC","c":"Manuscrite","w":[400,700]},{"f":"Anton","c":"Sans-serif","w":[400]},{"f":"Archivo Black","c":"Sans-serif","w":[400]},{"f":"Archivo Narrow","c":"Sans-serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Archivo","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Arvo","c":"Serif","w":[400,700],"i":1},{"f":"Asap","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Assistant","c":"Sans-serif","w":[200,300,400,500,600,700,800],"v":[200,800]},{"f":"Audiowide","c":"Décorative","w":[400]},{"f":"Barlow Condensed","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Barlow","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Bebas Neue","c":"Sans-serif","w":[400]},{"f":"Big Shoulders Display","c":"Décorative","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Bitter","c":"Serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Bodoni Moda","c":"Serif","w":[400,500,600,700,800,900],"v":[400,900],"i":1},{"f":"Bungee","c":"Décorative","w":[400]},{"f":"Cabin","c":"Sans-serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Caveat","c":"Manuscrite","w":[400,500,600,700],"v":[400,700]},{"f":"Chivo","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Cinzel","c":"Serif","w":[400,500,600,700,800,900],"v":[400,900]},{"f":"Comfortaa","c":"Décorative","w":[300,400,500,600,700],"v":[300,700]},{"f":"Cormorant Garamond","c":"Serif","w":[300,400,500,600,700],"v":[300,700],"i":1},{"f":"Cormorant","c":"Serif","w":[300,400,500,600,700],"v":[300,700],"i":1},{"f":"Crimson Text","c":"Serif","w":[400,600,700],"i":1},{"f":"Dancing Script","c":"Manuscrite","w":[400,500,600,700],"v":[400,700]},{"f":"DM Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,1000],"i":1},{"f":"DM Serif Display","c":"Serif","w":[400],"i":1},{"f":"Domine","c":"Serif","w":[400,500,600,700],"v":[400,700]},{"f":"EB Garamond","c":"Serif","w":[400,500,600,700,800],"v":[400,800],"i":1},{"f":"Encode Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Exo 2","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Figtree","c":"Sans-serif","w":[300,400,500,600,700,800,900],"v":[300,900],"i":1},{"f":"Fira Sans Condensed","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Fira Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Fjalla One","c":"Sans-serif","w":[400]},{"f":"Fredoka","c":"Sans-serif","w":[300,400,500,600,700],"v":[300,700]},{"f":"Gelasio","c":"Serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Great Vibes","c":"Manuscrite","w":[400]},{"f":"Heebo","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Hind","c":"Sans-serif","w":[300,400,500,600,700]},{"f":"IBM Plex Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700],"v":[100,700],"i":1},{"f":"IBM Plex Serif","c":"Serif","w":[100,200,300,400,500,600,700],"i":1},{"f":"Indie Flower","c":"Manuscrite","w":[400]},{"f":"Inter","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Josefin Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700],"v":[100,700],"i":1},{"f":"Jost","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Kanit","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Karla","c":"Sans-serif","w":[200,300,400,500,600,700,800],"v":[200,800],"i":1},{"f":"Kaushan Script","c":"Manuscrite","w":[400]},{"f":"Lato","c":"Sans-serif","w":[100,300,400,700,900],"i":1},{"f":"League Spartan","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Lexend","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Libre Baskerville","c":"Serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Libre Bodoni","c":"Serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Libre Franklin","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Lobster","c":"Décorative","w":[400]},{"f":"Lora","c":"Serif","w":[400,500,600,700],"v":[400,700],"i":1},{"f":"Luckiest Guy","c":"Décorative","w":[400]},{"f":"Manrope","c":"Sans-serif","w":[200,300,400,500,600,700,800],"v":[200,800]},{"f":"Merriweather","c":"Serif","w":[300,400,500,600,700,800,900],"v":[300,900],"i":1},{"f":"Montserrat","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Mukta","c":"Sans-serif","w":[200,300,400,500,600,700,800]},{"f":"Mulish","c":"Sans-serif","w":[200,300,400,500,600,700,800,900],"v":[200,1000],"i":1},{"f":"Noto Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Noto Serif","c":"Serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Nunito","c":"Sans-serif","w":[200,300,400,500,600,700,800,900],"v":[200,1000],"i":1},{"f":"Open Sans","c":"Sans-serif","w":[300,400,500,600,700,800],"v":[300,800],"i":1},{"f":"Orbitron","c":"Sans-serif","w":[400,500,600,700,800,900],"v":[400,900]},{"f":"Oswald","c":"Sans-serif","w":[200,300,400,500,600,700],"v":[200,700]},{"f":"Outfit","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Overpass","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Oxygen","c":"Sans-serif","w":[300,400,700]},{"f":"Pacifico","c":"Manuscrite","w":[400]},{"f":"Passion One","c":"Décorative","w":[400,700,900]},{"f":"Patrick Hand","c":"Manuscrite","w":[400]},{"f":"Permanent Marker","c":"Manuscrite","w":[400]},{"f":"Playfair Display","c":"Serif","w":[400,500,600,700,800,900],"v":[400,900],"i":1},{"f":"Playfair","c":"Serif","w":[300,400,500,600,700,800,900],"v":[300,900],"i":1},{"f":"Plus Jakarta Sans","c":"Sans-serif","w":[200,300,400,500,600,700,800],"v":[200,800],"i":1},{"f":"Poppins","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"Prata","c":"Serif","w":[400]},{"f":"Prompt","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"i":1},{"f":"PT Sans Narrow","c":"Sans-serif","w":[400,700]},{"f":"PT Sans","c":"Sans-serif","w":[400,700],"i":1},{"f":"PT Serif","c":"Serif","w":[400,700],"i":1},{"f":"Quicksand","c":"Sans-serif","w":[300,400,500,600,700],"v":[300,700]},{"f":"Rajdhani","c":"Sans-serif","w":[300,400,500,600,700]},{"f":"Raleway","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Red Hat Display","c":"Sans-serif","w":[300,400,500,600,700,800,900],"v":[300,900],"i":1},{"f":"Righteous","c":"Décorative","w":[400]},{"f":"Roboto Condensed","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Roboto Mono","c":"Monospace","w":[100,200,300,400,500,600,700],"v":[100,700],"i":1},{"f":"Roboto Slab","c":"Serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900]},{"f":"Roboto","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Rubik","c":"Sans-serif","w":[300,400,500,600,700,800,900],"v":[300,900],"i":1},{"f":"Russo One","c":"Sans-serif","w":[400]},{"f":"Saira Condensed","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900]},{"f":"Saira","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Satisfy","c":"Manuscrite","w":[400]},{"f":"Signika","c":"Sans-serif","w":[300,400,500,600,700],"v":[300,700]},{"f":"Sora","c":"Sans-serif","w":[100,200,300,400,500,600,700,800],"v":[100,800]},{"f":"Source Sans 3","c":"Sans-serif","w":[200,300,400,500,600,700,800,900],"v":[200,900],"i":1},{"f":"Source Serif 4","c":"Serif","w":[200,300,400,500,600,700,800,900],"v":[200,900],"i":1},{"f":"Space Grotesk","c":"Sans-serif","w":[300,400,500,600,700],"v":[300,700]},{"f":"Space Mono","c":"Monospace","w":[400,700],"i":1},{"f":"Spectral","c":"Serif","w":[200,300,400,500,600,700,800],"i":1},{"f":"Staatliches","c":"Décorative","w":[400]},{"f":"Syne","c":"Sans-serif","w":[400,500,600,700,800],"v":[400,800]},{"f":"Teko","c":"Sans-serif","w":[300,400,500,600,700],"v":[300,700]},{"f":"Titillium Web","c":"Sans-serif","w":[200,300,400,600,700,900],"i":1},{"f":"Ubuntu","c":"Sans-serif","w":[300,400,500,700],"i":1},{"f":"Ultra","c":"Serif","w":[400]},{"f":"Unbounded","c":"Sans-serif","w":[200,300,400,500,600,700,800,900],"v":[200,900]},{"f":"Vollkorn","c":"Serif","w":[400,500,600,700,800,900],"v":[400,900],"i":1},{"f":"Work Sans","c":"Sans-serif","w":[100,200,300,400,500,600,700,800,900],"v":[100,900],"i":1},{"f":"Yeseva One","c":"Décorative","w":[400]},{"f":"Zilla Slab","c":"Serif","w":[300,400,500,600,700],"i":1}];
+const SYSTEM_FONTS = [
+  ['Arial', 'Sans-serif'], ['Helvetica', 'Sans-serif'], ['Helvetica Neue', 'Sans-serif'], ['Arial Black', 'Sans-serif', [900]], ['Impact', 'Sans-serif', [400]],
+  ['Verdana', 'Sans-serif'], ['Tahoma', 'Sans-serif'], ['Trebuchet MS', 'Sans-serif'], ['Segoe UI', 'Sans-serif'], ['Calibri', 'Sans-serif'], ['Futura', 'Sans-serif'],
+  ['Gill Sans', 'Sans-serif'], ['Avenir', 'Sans-serif'], ['Avenir Next', 'Sans-serif'], ['Franklin Gothic Medium', 'Sans-serif', [400]], ['Century Gothic', 'Sans-serif'],
+  ['Georgia', 'Serif'], ['Times New Roman', 'Serif'], ['Cambria', 'Serif'], ['Garamond', 'Serif'], ['Baskerville', 'Serif'], ['Didot', 'Serif'], ['Rockwell', 'Serif'],
+  ['Courier New', 'Monospace'], ['Comic Sans MS', 'Manuscrite']
+].map(([f, c, w]) => ({ f, c, w: w || [400, 700], sys: 1, i: 1 }));
+const WEIGHT_NAMES = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' };
+const WEIGHT_FR = { 100: 'Très fin', 200: 'Extra-fin', 300: 'Léger', 400: 'Normal', 500: 'Medium', 600: 'Demi-gras', 700: 'Gras', 800: 'Extra-gras', 900: 'Noir' };
+const roundW = w => clamp(Math.round(w / 100) * 100, 100, 900);
+const weightLabel = (f, w) => WEIGHT_FR[roundW(w)] || 'Normal';
+let FONTS = FONT_CATALOG.slice();
+const fontByName = name => FONTS.find(e => e.f === name);
+function googleCssUrl(e) {
+  const name = encodeURIComponent(e.f).replace(/%20/g, '+');
+  let spec;
+  if (e.v) spec = e.i ? `ital,wght@0,${e.v[0]}..${e.v[1]};1,${e.v[0]}..${e.v[1]}` : `wght@${e.v[0]}..${e.v[1]}`;
+  else if (e.w.length === 1 && e.w[0] === 400) spec = e.i ? 'ital@0;1' : '';
+  else spec = e.i ? 'ital,wght@' + [...e.w.map(w => '0,' + w), ...e.w.map(w => '1,' + w)].join(';') : 'wght@' + e.w.join(';');
+  return `https://fonts.googleapis.com/css2?family=${name}${spec ? ':' + spec : ''}&display=swap`;
 }
-function fontAvailable(f, w) {
-  if (FAMILIES[f]?.sys) return true;
-  try { return document.fonts.check(`${w} 40px "${f}"`, 'Aa'); } catch (e) { return false; }
+function weightsOf(e) {
+  if (e.v) { const a = []; for (let w = Math.ceil(e.v[0] / 100) * 100; w <= Math.min(900, e.v[1]); w += 100) a.push(w); return a.length ? a : [e.v[0]]; }
+  return e.w;
 }
-function weightLabel(fam, w) {
-  if (FAMILIES[fam]?.heavy) return 'Gras';
-  return w >= 800 ? 'Extra-gras' : w >= 700 ? 'Gras' : w >= 500 ? 'Demi-gras' : w <= 300 ? 'Fin' : 'Normal';
+const nearestWeight = (e, w) => { if (e.v) return clamp(w, e.v[0], e.v[1]); return e.w.reduce((a, b) => Math.abs(b - w) < Math.abs(a - w) ? b : a); };
+const fontSpec = (e, w, it, size) => `${it ? 'italic ' : ''}${Math.round(w)} ${size}px "${e.f}"${e.c === 'Serif' ? ', Georgia, serif' : ', Arial, sans-serif'}`;
+const fontKey = (e, w, it, size) => `${it ? 'italic ' : ''}${Math.round(w)} ${size}px "${e.f}"`;   // sans police de secours (pour check/load)
+const faceSet = new Set(), faceJobs = new Map();
+const faceReady = (e, w, it) => !!e.sys || (!e.failed && faceSet.has(fontKey(e, w, it, 64)));
+const fontsState = { ready: null, state: 'idle', loaded: 0, total: FONT_CATALOG.length };
+function detectSystemFonts() {
+  const c = ctx2d(canvasOf(8, 8)), probe = 'mmmmmmmmmlliWQ@#0Ïé';
+  const wOf = f => { c.font = `72px ${f}`; return c.measureText(probe).width; };
+  const mono = wOf('monospace'), serif = wOf('serif'), sans = wOf('sans-serif');
+  const ok = SYSTEM_FONTS.filter(s => { const a = wOf(`"${s.f}", monospace`), b = wOf(`"${s.f}", serif`); return a !== mono || b !== serif || wOf(`"${s.f}", sans-serif`) !== sans && a !== mono; });
+  FONTS = FONT_CATALOG.concat(ok);
+}
+async function loadFace(e, w, it, chars) {
+  // document.fonts.check() n'est pas fiable sous Chrome : on suit nous-mêmes les polices réellement chargées
+  if (e.sys) return true;
+  if (e.failed) return false;
+  const key = fontKey(e, w, it, 64), job = key + '|' + chars;
+  if (faceJobs.has(job)) return faceJobs.get(job);
+  const p = (async () => {
+    let ok = false;
+    try { const faces = await Promise.race([document.fonts.load(key, chars), sleep(8000).then(() => [])]); ok = faces.length > 0; } catch (x) { }
+    if (ok) faceSet.add(key);
+    return ok;
+  })();
+  faceJobs.set(job, p);
+  return p;
+}
+function ensureFontCatalog() {
+  if (fontsState.ready) return fontsState.ready;
+  fontsState.state = 'loading'; renderAIStatus();
+  fontsState.ready = (async () => {
+    detectSystemFonts();
+    await Promise.race([Promise.all(FONT_CATALOG.map(e => new Promise(res => {
+      let l = [...document.querySelectorAll('link[data-font]')].find(x => x.dataset.font === e.f);
+      if (!l) { l = document.createElement('link'); l.rel = 'stylesheet'; l.href = googleCssUrl(e); l.dataset.font = e.f; l.onload = () => res(); l.onerror = () => { e.failed = 1; res(); }; document.head.appendChild(l); }
+      else res();
+    }))), sleep(20000)]);
+    fontsState.loaded = 0;
+    const sample = 'AaBbCcÉéGgMmOoRrSs0123456789';
+    const queue = FONT_CATALOG.filter(e => !e.failed);
+    const worker = async () => { while (queue.length) { const e = queue.shift(); await loadFace(e, nearestWeight(e, 400), false, sample); await loadFace(e, nearestWeight(e, 700), false, sample); fontsState.loaded++; if (fontsState.loaded % 8 === 0) { renderAIStatus(); if (S.busy) setProgress(0.1 + 0.3 * fontsState.loaded / fontsState.total); } } };
+    await Promise.race([Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]), sleep(45000)]);
+    const usable = FONTS.filter(e => faceReady(e, nearestWeight(e, 400), false)).length;
+    fontsState.state = usable > 10 ? 'ready' : 'error'; fontsState.usable = usable; renderAIStatus();
+    return usable;
+  })();
+  return fontsState.ready;
 }
 
 /* =============================================================================
-   ANALYSE DES PIXELS D'UNE ZONE : couleurs, masque des lettres, boîte serrée, fond
+   ANALYSE DES PIXELS D'UNE ZONE : couleur exacte, masque des lettres, fond
    ============================================================================= */
 function median(arr) { if (!arr.length) return 0; const a = Float32Array.from(arr).sort(); return a[a.length >> 1]; }
-function analyzePixels(canvas, box) {
+/* Analyse d'une zone : modèle du fond (plan de couleur pour un dégradé, groupes de couleurs pour une photo),
+   lettres = pixels qui n'appartiennent pas au fond. Donne la couleur exacte, un masque et une opacité par pixel. */
+function analyzePixels(canvas, box, ref, clampY) {
   const W = canvas.width, H = canvas.height;
   const bx = clamp(Math.floor(box.x), 0, W - 1), by = clamp(Math.floor(box.y), 0, H - 1);
   const bw = clamp(Math.ceil(box.w), 1, W - bx), bh = clamp(Math.ceil(box.h), 1, H - by);
@@ -472,123 +531,140 @@ function analyzePixels(canvas, box) {
   const ex = Math.max(0, bx - pad), ey = Math.max(0, by - pad), ex2 = Math.min(W, bx + bw + pad), ey2 = Math.min(H, by + bh + pad);
   const ew = ex2 - ex, eh = ey2 - ey;
   const data = ctx2d(canvas).getImageData(ex, ey, ew, eh).data;
-  // 1. fond = médiane de l'anneau autour de la zone
-  const R = [], G = [], B = [];
-  const step = Math.max(1, Math.floor(Math.sqrt(ew * eh) / 120));
-  for (let y = 0; y < eh; y += 1) for (let x = 0; x < ew; x += 1) {
+  // anneau autour de la zone
+  const ring = [];
+  const step = Math.max(1, Math.floor(Math.sqrt(ew * eh) / 140));
+  for (let y = 0; y < eh; y++) for (let x = 0; x < ew; x++) {
     const gx = ex + x, gy = ey + y;
     if (gx >= bx && gx < bx + bw && gy >= by && gy < by + bh) continue;
     if ((x + y) % step) continue;
-    const i = (y * ew + x) * 4; R.push(data[i]); G.push(data[i + 1]); B.push(data[i + 2]);
+    const i = (y * ew + x) * 4; ring.push([gx - bx, gy - by, data[i], data[i + 1], data[i + 2]]);
   }
-  let bg = R.length ? [median(R), median(G), median(B)] : null;
-  // pixels intérieurs
   const n = bw * bh, P = new Uint8ClampedArray(n * 3);
-  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
-    const i = ((y + by - ey) * ew + (x + bx - ex)) * 4, j = (y * bw + x) * 3;
-    P[j] = data[i]; P[j + 1] = data[i + 1]; P[j + 2] = data[i + 2];
-  }
-  // anneau hétérogène (photo, autre texte) → couleur dominante à l'intérieur de la zone
-  let ringSd = 0;
-  if (R.length) { const L = R.map((v, k) => 0.299 * v + 0.587 * G[k] + 0.114 * B[k]), mu = L.reduce((a, b) => a + b, 0) / L.length; ringSd = Math.sqrt(L.reduce((a, b) => a + (b - mu) ** 2, 0) / L.length); }
-  if (!bg || ringSd > 14) {
-    const bins = new Map();
-    for (let j = 0; j < n * 3; j += 3) { const key = (P[j] >> 4) << 8 | (P[j + 1] >> 4) << 4 | (P[j + 2] >> 4); bins.set(key, (bins.get(key) || 0) + 1); }
-    let bk = 0, bc = -1; for (const [k2, c] of bins) if (c > bc) { bc = c; bk = k2; }
-    const cr = ((bk >> 8) << 4) + 8, cg = (((bk >> 4) & 15) << 4) + 8, cb = ((bk & 15) << 4) + 8;
-    const acc = [0, 0, 0]; let na = 0;
-    for (let j = 0; j < n * 3; j += 3) if (dist3(P[j], P[j + 1], P[j + 2], [cr, cg, cb]) < 28) { acc[0] += P[j]; acc[1] += P[j + 1]; acc[2] += P[j + 2]; na++; }
-    bg = na ? acc.map(v => v / na) : [cr, cg, cb];
-  }
-  // 2. couleur du texte : pixels les plus éloignés du fond, puis 2-moyennes
-  const d = new Float32Array(n);
-  for (let k = 0; k < n; k++) d[k] = dist3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2], bg);
-  const sorted = Float32Array.from(d).sort();
-  const p90 = sorted[Math.floor(n * 0.9)] || 0, p97 = sorted[Math.floor(n * 0.97)] || 0;
-  let fg = [0, 0, 0], cnt = 0;
-  for (let k = 0; k < n; k++) if (d[k] >= p90 && d[k] > 12) { fg[0] += P[k * 3]; fg[1] += P[k * 3 + 1]; fg[2] += P[k * 3 + 2]; cnt++; }
-  if (cnt) fg = fg.map(v => v / cnt); else fg = bg.map(v => v > 128 ? 20 : 235);
-  let bgIn = bg.slice();
-  for (let it = 0; it < 4; it++) {
-    const a = [0, 0, 0], b = [0, 0, 0]; let na = 0, nb = 0;
-    for (let k = 0; k < n; k++) {
-      const r = P[k * 3], g = P[k * 3 + 1], bb = P[k * 3 + 2];
-      if (dist3(r, g, bb, fg) < dist3(r, g, bb, bgIn)) { a[0] += r; a[1] += g; a[2] += bb; na++; } else { b[0] += r; b[1] += g; b[2] += bb; nb++; }
+  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) { const i = ((y + by - ey) * ew + (x + bx - ex)) * 4, j = (y * bw + x) * 3; P[j] = data[i]; P[j + 1] = data[i + 1]; P[j + 2] = data[i + 2]; }
+  // 1. dégradé : plan de couleur ajusté sur l'anneau (moindres carrés robustes)
+  let plane = null, planeSd = 1e9;
+  if (ring.length >= 12) {
+    let use = ring.map(() => true);
+    for (let iter = 0; iter < 3; iter++) {
+      const coef = [];
+      let A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], bv = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], cntU = 0;
+      ring.forEach((r, k) => { if (!use[k]) return; const v = [1, r[0] / bw, r[1] / bh]; cntU++; for (let a = 0; a < 3; a++) { for (let b = 0; b < 3; b++) A[a][b] += v[a] * v[b]; for (let c = 0; c < 3; c++) bv[c][a] += v[a] * r[2 + c]; } });
+      if (cntU < 8) break;
+      const solve = (M, y) => { const m = M.map((r, i) => [...r, y[i]]); for (let i = 0; i < 3; i++) { let p = i; for (let k = i + 1; k < 3; k++) if (Math.abs(m[k][i]) > Math.abs(m[p][i])) p = k; [m[i], m[p]] = [m[p], m[i]]; if (Math.abs(m[i][i]) < 1e-9) return null; for (let k = 0; k < 3; k++) if (k !== i) { const f = m[k][i] / m[i][i]; for (let c = i; c < 4; c++) m[k][c] -= f * m[i][c]; } } return m.map((r, i) => r[3] / r[i]); };
+      let okc = true; for (let c = 0; c < 3; c++) { const s = solve(A, bv[c]); if (!s) { okc = false; break; } coef.push(s); }
+      if (!okc) break;
+      const res = ring.map(r => Math.sqrt([0, 1, 2].reduce((acc, c) => acc + (r[2 + c] - (coef[c][0] + coef[c][1] * r[0] / bw + coef[c][2] * r[1] / bh)) ** 2, 0)));
+      const kept = res.filter((v, k) => use[k]); const sd = Math.sqrt(kept.reduce((a, v) => a + v * v, 0) / Math.max(1, kept.length));
+      plane = coef; planeSd = sd;
+      use = res.map(v => v < Math.max(8, 2.5 * sd));
     }
-    if (na) fg = a.map(v => v / na);
-    if (nb) bgIn = b.map((v, i) => 0.5 * v / nb + 0.5 * bg[i]);
   }
-  const contrast = dist3(fg[0], fg[1], fg[2], bg);
-  // couleur « cœur » des lettres (sans l'anticrénelage)
-  let core = [0, 0, 0], nc = 0;
-  for (let k = 0; k < n; k++) {
-    const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
-    if (dist3(r, g, b, bg) >= contrast * 0.8 && dist3(r, g, b, fg) < contrast * 0.45) { core[0] += r; core[1] += g; core[2] += b; nc++; }
+  const planeAt = (x, y) => [0, 1, 2].map(c => plane[c][0] + plane[c][1] * x / bw + plane[c][2] * y / bh);
+  // 2. photo / fond varié : groupes de couleurs de l'anneau (k-moyennes)
+  let centers = null;
+  const usePlane = plane && planeSd < 22;
+  if (!usePlane && ring.length) {
+    let C = [0, 0.25, 0.5, 0.75].map(f => ring[Math.floor(f * (ring.length - 1))].slice(2)), cnt = [];
+    for (let it = 0; it < 8; it++) {
+      const acc = C.map(() => [0, 0, 0]); cnt = C.map(() => 0);
+      for (const r of ring) { let bi = 0, bd = Infinity; C.forEach((c, i) => { const d = dist3(r[2], r[3], r[4], c); if (d < bd) { bd = d; bi = i; } }); cnt[bi]++; for (let c = 0; c < 3; c++) acc[bi][c] += r[2 + c]; }
+      C = C.map((c, i) => cnt[i] ? acc[i].map(v => v / cnt[i]) : c);
+    }
+    centers = C.filter((c, i) => cnt[i] >= ring.length * 0.1);
+    var mainShare = Math.max(...cnt) / Math.max(1, ring.length);
+    if (!centers.length) centers = [C[cnt.indexOf(Math.max(...cnt))]];
   }
-  if (nc > 4) core = core.map(v => v / nc); else core = fg;
-  // 3. masque des lettres
-  const mask = new Uint8Array(n); let ink = 0;
+  if (!usePlane && !centers) centers = [[P[0], P[1], P[2]]];
+  // modèle de couleurs imposé (analyse d'une zone élargie à partir d'une zone fiable)
+  let planeAbs = usePlane ? (gx, gy) => planeAt(gx - bx, gy - by) : null;
+  let usePl = usePlane;
+  if (ref && ref.model) { usePl = ref.model.usePlane; planeAbs = ref.model.planeAbs; centers = ref.model.centers; }
+  // distance de chaque pixel au fond (« étrangeté »)
+  const fd = new Float32Array(n);
+  for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) {
+    const k = y * bw + x, r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
+    if (usePl) fd[k] = dist3(r, g, b, planeAbs(x + bx, y + by));
+    else { let m = Infinity; for (const c of centers) m = Math.min(m, dist3(r, g, b, c)); fd[k] = m; }
+  }
+  const sorted = Float32Array.from(fd).sort();
+  const p98 = sorted[Math.floor(n * 0.98)] || 0;
+  // couleur du texte : pixels les plus étrangers au fond
+  const fr = [], fgc = [], fb = [];
+  for (let k = 0; k < n; k++) if (fd[k] >= p98 * 0.7 && fd[k] > 20) { fr.push(P[k * 3]); fgc.push(P[k * 3 + 1]); fb.push(P[k * 3 + 2]); }
+  let fg = ref ? ref.fg.slice() : fr.length ? [median(fr), median(fgc), median(fb)] : [P[0], P[1], P[2]];
+  // fond « représentatif » (description, compatibilité)
+  const bgAt = (x, y) => usePl ? planeAbs(x + bx, y + by) : centers.reduce((a, c) => dist3(fg[0], fg[1], fg[2], c) > dist3(fg[0], fg[1], fg[2], a) ? c : a, centers[0]);
+  const bg = usePl ? planeAbs(bx + bw / 2, by + bh / 2) : (() => { let best = centers[0], bc = -1; for (const c of centers) { let k2 = 0; for (const r of ring) if (dist3(r[2], r[3], r[4], c) < 30) k2++; if (k2 > bc) { bc = k2; best = c; } } return best; })();
+  const contrast = Math.max(1, usePl ? dist3(fg[0], fg[1], fg[2], planeAbs(bx + bw / 2, by + bh / 2)) : Math.min(...centers.map(c => dist3(fg[0], fg[1], fg[2], c))));
+  // opacité par pixel et masque des lettres
+  const alpha = new Float32Array(n), mask = new Uint8Array(n); let ink = 0;
   if (contrast > 18) for (let k = 0; k < n; k++) {
-    const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
-    const db = dist3(r, g, b, bg), df = dist3(r, g, b, fg);
-    if (db > contrast * 0.42 && df < db) { mask[k] = 1; ink++; }
+    const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2], df = dist3(r, g, b, fg);
+    const a = df < fd[k] * 1.4 ? clamp((fd[k] - contrast * 0.1) / (contrast * 0.8), 0, 1) : 0;
+    alpha[k] = a;
+    if (fd[k] > contrast * 0.42 && df < fd[k]) { mask[k] = 1; ink++; }
   }
-  // 4. boîte serrée : bande de lignes principale (+ accents / jambages proches)
+  // couleur exacte du cœur des lettres
+  const cr = [], cg = [], cb = [];
+  for (let k = 0; k < n; k++) if (mask[k] && fd[k] >= contrast * 0.8 && dist3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2], fg) < contrast * 0.45) { cr.push(P[k * 3]); cg.push(P[k * 3 + 1]); cb.push(P[k * 3 + 2]); }
+  const core = cr.length > 4 ? [median(cr), median(cg), median(cb)] : fg;
+  // boîte serrée : bande de lignes principale + accents / jambages
   const rows = new Int32Array(bh), cols = new Int32Array(bw);
   for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) if (mask[y * bw + x]) rows[y]++;
   const rowMin = Math.max(1, Math.round(bw * 0.004));
   const maxRow = rows.reduce((a, b) => Math.max(a, b), 0);
   const strong = Math.max(rowMin, Math.round(maxRow * 0.06));
   const bands = []; let cur = null;
-  for (let y = 0; y < bh; y++) {
-    if (rows[y] >= strong) { if (cur && y - cur.e <= 2) { cur.e = y; cur.sum += rows[y]; } else { cur = { s: y, e: y, sum: rows[y] }; bands.push(cur); } }
-  }
+  for (let y = 0; y < bh; y++) if (rows[y] >= strong) { if (cur && y - cur.e <= 2) { cur.e = y; cur.sum += rows[y]; } else { cur = { s: y, e: y, sum: rows[y] }; bands.push(cur); } }
   let tight = { x: bx, y: by, w: bw, h: bh }, ok = false;
   if (bands.length) {
-    const core0 = bh * 0.3, core1 = bh * 0.7;   // la zone fournie est centrée sur la ligne de texte
+    const core0 = bh * 0.3, core1 = bh * 0.7;
     const inCore = bands.filter(b => b.e >= core0 && b.s <= core1);
-    let main = (inCore.length ? inCore : bands).reduce((a, b) => b.sum > a.sum ? b : a);
+    const main = (inCore.length ? inCore : bands).reduce((a, b) => b.sum > a.sum ? b : a);
     let s = main.s, e = main.e;
-    // fusionne les bandes voisines de taille comparable (lignes coupées par un trait fin)
     for (const b of bands) { if (b === main) continue; const gap = b.s > e ? b.s - e : s - b.e; if (gap <= 3) { s = Math.min(s, b.s); e = Math.max(e, b.e); } }
     const mh = e - s + 1;
-    // accents (haut) et jambages (bas) : lignes plus faibles, proches
-    // accents au-dessus (petit écart permis), jambages en dessous (contigus) ; une ligne « forte » = autre ligne de texte
-    const extend = (from, dir, maxLen, maxGap) => { let last = from, gap = 0; for (let y = from + dir, k = 0; y >= 0 && y < bh && k < maxLen; y += dir, k++) { if (rows[y] >= maxRow * 0.25 && gap > 0) break; if (rows[y] >= rowMin) { last = y; gap = 0; } else if (++gap > maxGap) break; } return last; };
-    s = extend(s, -1, Math.round(mh * 0.4), Math.max(2, Math.round(mh * 0.18))); e = extend(e, 1, Math.round(mh * 0.35), 1);
+    const extend = (from, dir, maxLen, maxGap) => { let last = from, gap = 0; for (let y = from + dir, k = 0; y >= 0 && y < bh && k < maxLen; y += dir, k++) { if (clampY && (y + by < clampY[0] || y + by > clampY[1])) break; if (rows[y] >= maxRow * 0.25) break; if (rows[y] >= rowMin) { last = y; gap = 0; } else if (++gap > maxGap) break; } return last; };
+    s = extend(s, -1, Math.round(mh * 1.0), Math.max(2, Math.round(mh * 0.18))); e = extend(e, 1, Math.round(mh * 0.6), 1);
     for (let y = s; y <= e; y++) for (let x = 0; x < bw; x++) if (mask[y * bw + x]) cols[x]++;
     const total = cols.reduce((a, b) => a + b, 0);
     let x0 = cols.findIndex(v => v > 0), x1 = bw - 1 - [...cols].reverse().findIndex(v => v > 0);
-    // retire les petits amas isolés aux extrémités (bruit de fond)
-    const trim = (from, dir) => {
-      let x = from, run = 0, gap = 0;
-      while (x >= 0 && x < bw) {
-        if (cols[x]) { run += cols[x]; gap = 0; } else { gap++; if (gap > (e - s + 1) * 1.2) { if (run < total * 0.015) return x + dir; else return from; } }
-        x += dir;
-      }
-      return from;
-    };
+    const trim = (from, dir) => { let x = from, run = 0, gap = 0; while (x >= 0 && x < bw) { if (cols[x]) { run += cols[x]; gap = 0; } else { gap++; if (gap > (e - s + 1) * 1.2) { if (run < total * 0.015) return x + dir; else return from; } } x += dir; } return from; };
     if (x0 >= 0) {
       for (let t = 0; t < 3; t++) { const nx0 = trim(x0, 1); if (nx0 === x0) break; x0 = nx0; while (x0 < bw && !cols[x0]) x0++; }
       for (let t = 0; t < 3; t++) { const nx1 = trim(x1, -1); if (nx1 === x1) break; x1 = nx1; while (x1 >= 0 && !cols[x1]) x1--; }
       if (x1 > x0 && e >= s) { tight = { x: bx + x0, y: by + s, w: x1 - x0 + 1, h: e - s + 1 }; ok = true; }
     }
   }
-  // 5. fond : variation, dégradé, nom de couleur
-  const lum = c => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
-  let sd = 0, m = 0;
+  // texture du fond derrière les lettres
+  let sd, inner = null;
   {
-    const L = [], ty0 = tight.y - by, ty1 = ty0 + tight.h, tx0 = tight.x - bx, tx1 = tx0 + tight.w;
-    for (let y = Math.max(0, ty0); y < Math.min(bh, ty1); y++) for (let x = Math.max(0, tx0); x < Math.min(bw, tx1); x++) {
-      const k = y * bw + x; if (mask[k]) continue;
-      const r = P[k * 3], g = P[k * 3 + 1], b = P[k * 3 + 2];
-      if (dist3(r, g, b, bg) > contrast * 0.3) continue;            // anticrénelage
-      L.push(0.299 * r + 0.587 * g + 0.114 * b);
+    const L = [], ty0 = tight.y - by, tx0 = tight.x - bx, ir = [], ig = [], ib = [];
+    for (let y = Math.max(0, ty0); y < Math.min(bh, ty0 + tight.h); y++) for (let x = Math.max(0, tx0); x < Math.min(bw, tx0 + tight.w); x++) {
+      const k = y * bw + x; if (mask[k] || alpha[k] > 0.05) continue;
+      const B = usePl ? planeAbs(x + bx, y + by) : bg; L.push(P[k * 3] - B[0] + P[k * 3 + 1] - B[1] + P[k * 3 + 2] - B[2]);
+      ir.push(P[k * 3]); ig.push(P[k * 3 + 1]); ib.push(P[k * 3 + 2]);
     }
-    if (L.length < 20) for (let k = 0; k < R.length; k++) L.push(0.299 * R[k] + 0.587 * G[k] + 0.114 * B[k]);
-    m = L.reduce((a, b) => a + b, 0) / Math.max(1, L.length); sd = Math.sqrt(L.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, L.length));
+    if (ir.length >= 50) { const c = [median(ir), median(ig), median(ib)]; let v = 0; for (let i = 0; i < ir.length; i++) v += (0.299 * ir[i] + 0.587 * ig[i] + 0.114 * ib[i] - (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2])) ** 2; inner = { c, sd: Math.sqrt(v / ir.length) }; }
+    if (L.length < 20) sd = usePl ? planeSd : 40;
+    else { const m = L.reduce((a, b) => a + b, 0) / L.length; sd = Math.sqrt(L.reduce((a, b) => a + (b - m) ** 2, 0) / L.length) / Math.sqrt(3); }
+    if (!usePl && !(ref && ref.model) && (typeof mainShare === 'undefined' || mainShare < 0.7)) sd = Math.max(sd, centers.length > 1 ? 31 : sd);
   }
-  return { bg, fg: core, contrast, mask, maskW: bw, maskH: bh, box: { x: bx, y: by, w: bw, h: bh }, tight, ok, inkRatio: ink / n, bgStd: sd, background: describeBackground(bg, sd), lumBg: lum(bg) };
+  // profil de couleur ligne par ligne (texte en dégradé)
+  const prof = [];
+  for (let y = tight.y - by; y < tight.y - by + tight.h; y++) {
+    const r = [], g = [], b = [];
+    if (y >= 0 && y < bh) for (let x = tight.x - bx; x < tight.x - bx + tight.w; x++) { const k = y * bw + x; if (mask[k] && fd[k] >= contrast * 0.82 && dist3(P[k * 3], P[k * 3 + 1], P[k * 3 + 2], core) < contrast * 0.5) { r.push(P[k * 3]); g.push(P[k * 3 + 1]); b.push(P[k * 3 + 2]); } }
+    prof.push(r.length >= 2 ? [median(r), median(g), median(b)] : null);
+  }
+  for (let i = 0; i < prof.length; i++) if (!prof[i]) { let a = i - 1, b = i + 1; while (a >= 0 && !prof[a]) a--; while (b < prof.length && !prof[b]) b++; prof[i] = a >= 0 && b < prof.length ? prof[a].map((v, c) => (v + prof[b][c]) / 2) : (a >= 0 ? prof[a] : b < prof.length ? prof[b] : core); }
+  let lmin = 255, lmax = 0; for (const c of prof) { const l = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]; lmin = Math.min(lmin, l); lmax = Math.max(lmax, l); }
+  const gradient = prof.length > 4 && lmax - lmin > 18 && dist3(prof[0][0], prof[0][1], prof[0][2], prof[prof.length - 1]) > 26;
+  const slope = usePl && plane && usePlane ? Math.hypot(...[0, 1, 2].map(c => plane[c][1])) + Math.hypot(...[0, 1, 2].map(c => plane[c][2])) : 0;
+  if (inner && slope <= 25) sd = Math.min(sd, inner.sd);
+  const background = slope > 25 ? colorNameFr(bg) + ' en dégradé' : inner ? describeBackground(inner.c, inner.sd) : !usePl && centers.length > 1 ? 'Photo / fond détaillé' : describeBackground(bg, sd);
+  return { bg, fg: core, contrast, mask, alpha, fd, maskW: bw, maskH: bh, box: { x: bx, y: by, w: bw, h: bh }, tight, ok, inkRatio: ink / n, bgStd: sd, background, profile: { y0: tight.y, rows: prof, gradient }, bgModel: usePl ? 'plane' : 'clusters', bgLocal: (gx, gy) => bgAt(gx - bx, gy - by), model: { usePlane: usePl, planeAbs, centers } };
 }
 function colorNameFr(c) {
   const [r, g, b] = c.map(v => v / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, dl = mx - mn;
@@ -607,93 +683,283 @@ function describeBackground(bg, sd) {
   const t = sd < 4 ? ' uni' : sd < 9 ? ' légèrement texturé' : ' texturé';
   return colorNameFr(bg) + t;
 }
+const profileColor = (prof, y) => { if (!prof || !prof.rows.length) return null; const i = clamp(Math.round(y - prof.y0), 0, prof.rows.length - 1); return prof.rows[i]; };
 
 /* =============================================================================
-   RENDU DE TEXTE (crénage conservé, espacement réglable) + ESTIMATION DE POLICE
+   DÉCOUPAGE DES LETTRES (composantes connexes ; accents et points rattachés)
    ============================================================================= */
-function measureAdvances(ctx, text, ls) {
+function segmentGlyphs(pix, text, symbols) {
+  if (!pix.ok) return null;
+  const { mask, maskW: bw, box, tight: T } = pix;
+  const ox = T.x - box.x, oy = T.y - box.y, w = T.w, h = T.h, n = w * h;
+  const lab = new Int32Array(n), comps = [];
+  const at = (x, y) => mask[(y + oy) * bw + x + ox];
+  const stack = new Int32Array(n);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * w + x; if (lab[i] || !at(x, y)) continue;
+    const id = comps.length + 1, c = { id, x0: x, y0: y, x1: x, y1: y, area: 0, px: [] };
+    let sp = 0; stack[sp++] = i; lab[i] = id;
+    while (sp) {
+      const j = stack[--sp], jx = j % w, jy = (j / w) | 0; c.area++; c.px.push(j);
+      if (jx < c.x0) c.x0 = jx; if (jx > c.x1) c.x1 = jx; if (jy < c.y0) c.y0 = jy; if (jy > c.y1) c.y1 = jy;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const xx = jx + dx, yy = jy + dy; if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+        const k = yy * w + xx; if (!lab[k] && at(xx, yy)) { lab[k] = id; stack[sp++] = k; }
+      }
+    }
+    comps.push(c);
+  }
+  const minA = Math.max(2, h * h * 0.0006);
+  const kept = comps.filter(c => c.area >= minA);
+  // 1. corps des lettres (composantes hautes) ; 2. accents, points, cédilles rattachés à la lettre qu'ils surplombent le plus
+  const maxH = Math.max(1, ...kept.map(c => c.y1 - c.y0 + 1));
+  const isBody = c => (c.y1 - c.y0 + 1) >= maxH * 0.42;
+  const units = [];
+  for (const c of kept.filter(isBody).sort((a, b) => a.x0 - b.x0)) {
+    const cw = c.x1 - c.x0 + 1;
+    let best = null, bestOv = 0;
+    for (const u of units) { const ov = Math.min(u.x1, c.x1) - Math.max(u.x0, c.x0) + 1; const frac = ov / Math.min(cw, u.x1 - u.x0 + 1); if (frac > bestOv) { bestOv = frac; best = u; } }
+    if (best && bestOv >= 0.8) { best.comps.push(c); best.x0 = Math.min(best.x0, c.x0); best.x1 = Math.max(best.x1, c.x1); best.y0 = Math.min(best.y0, c.y0); best.y1 = Math.max(best.y1, c.y1); best.area += c.area; }
+    else units.push({ comps: [c], x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, area: c.area });
+  }
+  for (const c of kept.filter(c => !isBody(c))) {
+    const cw = c.x1 - c.x0 + 1, cx = (c.x0 + c.x1) / 2;
+    let best = null, bestScore = -1;
+    for (const u of units) {
+      const ov = Math.min(u.x1, c.x1) - Math.max(u.x0, c.x0) + 1;
+      if (ov <= 0) continue;
+      const sc = ov / cw - Math.abs((u.x0 + u.x1) / 2 - cx) / (u.x1 - u.x0 + 1) * 0.3;
+      if (sc > bestScore) { bestScore = sc; best = u; }
+    }
+    if (best && bestScore >= 0.35) { best.comps.push(c); best.x0 = Math.min(best.x0, c.x0); best.x1 = Math.max(best.x1, c.x1); best.y0 = Math.min(best.y0, c.y0); best.y1 = Math.max(best.y1, c.y1); best.area += c.area; }
+    else units.push({ comps: [c], x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, area: c.area });   // ponctuation isolée
+  }
+  units.sort((a, b) => (a.x0 + a.x1) - (b.x0 + b.x1));
+  const chars = []; let brk = false;
+  for (const ch of String(text || '')) { if (/\s/.test(ch)) { brk = true; continue; } chars.push({ ch, brk }); brk = false; }
+  let glyphs = null, exact = false;
+  if (chars.length && units.length === chars.length) { glyphs = units.map((u, i) => ({ ...u, ch: chars[i].ch, brk: chars[i].brk })); exact = true; }
+  else if (chars.length && symbols && symbols.length === chars.length) {
+    const g = chars.map((c, i) => ({ ch: c.ch, brk: c.brk, comps: [], x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity, area: 0, sym: symbols[i] }));
+    for (const u of units) {
+      const cx = T.x + (u.x0 + u.x1) / 2;
+      let bi = 0, bd = Infinity; g.forEach((s, i) => { const d0 = Math.abs((s.sym.x0 + s.sym.x1) / 2 - cx); if (d0 < bd) { bd = d0; bi = i; } });
+      const t = g[bi]; t.comps.push(...u.comps); t.x0 = Math.min(t.x0, u.x0); t.x1 = Math.max(t.x1, u.x1); t.y0 = Math.min(t.y0, u.y0); t.y1 = Math.max(t.y1, u.y1); t.area += u.area;
+    }
+    glyphs = g.filter(x => x.comps.length);
+    exact = glyphs.length === g.length;
+    glyphs = g.map(x => x.comps.length ? x : { ...x, missing: true });
+  }
+  if (!glyphs) return { exact: false, glyphs: [], units, lab, T, w, h, pix };
+  glyphs.forEach((g, i) => { g.idx = i; g.ids = new Set(g.comps.map(c => c.id)); if (!g.missing) { g.gx0 = T.x + g.x0; g.gx1 = T.x + g.x1; g.gy0 = T.y + g.y0; g.gy1 = T.y + g.y1; } });
+  return { exact, glyphs, units, lab, T, w, h, pix };
+}
+
+/* =============================================================================
+   RECHERCHE DE LA POLICE, LETTRE PAR LETTRE
+   ============================================================================= */
+const GS = 72, GC = 232, GOX = 52, GBY = 168;
+const gcv = canvasOf(GC, GC), gctx = ctx2d(gcv);
+function renderGlyph(e, w, it, ch, size = GS, sx = 1, skew = 0) {
+  gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.clearRect(0, 0, GC, GC);
+  gctx.font = fontSpec(e, w, it, size);
+  const m = gctx.measureText(ch);
+  gctx.setTransform(sx, 0, -skew, 1, GOX, GBY); gctx.fillStyle = '#000'; gctx.textBaseline = 'alphabetic';
+  gctx.fillText(ch, 0, 0);
+  const a = gctx.getImageData(0, 0, GC, GC).data;
+  let x0 = GC, y0 = GC, x1 = -1, y1 = -1;
+  for (let y = 0; y < GC; y++) for (let x = 0; x < GC; x++) if (a[(y * GC + x) * 4 + 3] > 60) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  const iw = x1 - x0 + 1, ih = y1 - y0 + 1, alpha = new Uint8Array(iw * ih);
+  for (let y = 0; y < ih; y++) for (let x = 0; x < iw; x++) alpha[y * iw + x] = a[((y + y0) * GC + x + x0) * 4 + 3];
+  return { alpha, iw, ih, left: x0 - GOX, top: y0 - GBY, bottom: y1 - GBY, adv: m.width * sx };
+}
+function glyphTargets(seg) {
+  const out = [], seen = new Set();
+  for (const g of seg.glyphs) {
+    if (g.missing || !/[\p{L}\p{N}]/u.test(g.ch) || seen.has(g.ch)) continue;
+    seen.add(g.ch);
+    const gw = g.x1 - g.x0 + 1, gh = g.y1 - g.y0 + 1;
+    if (gw < 2 || gh < 3) continue;
+    const sc = Math.min(1, 44 / Math.max(1, seg.h));
+    const tw = Math.max(1, Math.round(gw * sc)), th = Math.max(1, Math.round(gh * sc));
+    // opacité moyenne par pixel réduit, limitée aux composantes de la lettre (et à leur bord anticrénelé)
+    const m = new Float32Array(tw * th), cnt = new Float32Array(tw * th);
+    const ox = seg.T.x - seg.pix.box.x, oy = seg.T.y - seg.pix.box.y;
+    for (let y = g.y0 - 1; y <= g.y1 + 1; y++) for (let x = g.x0 - 1; x <= g.x1 + 1; x++) {
+      if (x < 0 || y < 0 || x >= seg.w || y >= seg.h) continue;
+      let near = false; for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < seg.w && yy < seg.h && g.ids.has(seg.lab[yy * seg.w + xx])) { near = true; break; } }
+      if (!near) continue;
+      const tx = Math.floor((x - g.x0) * sc), ty = Math.floor((y - g.y0) * sc);
+      if (tx < 0 || ty < 0 || tx >= tw || ty >= th) continue;
+      m[ty * tw + tx] += seg.pix.alpha[(y + oy) * seg.pix.maskW + x + ox];
+    }
+    const cell = 1 / (sc * sc);
+    for (let i = 0; i < m.length; i++) m[i] = Math.min(1, m[i] / cell);
+    let area = 0; for (const v of m) area += v;
+    out.push({ ch: g.ch, m, tw, th, sc, h: gh, w: gw, area: area + 1, g });
+  }
+  out.sort((a, b) => b.area - a.area);
+  return out.slice(0, 12);
+}
+function iouGlyph(t, r, k) {
+  // IoU « douce » (opacités anticrénelées) entre la lettre réelle et la lettre rendue à l'échelle k, centres alignés
+  const rw = r.iw * k, rh = r.ih * k;
+  const W = Math.ceil(Math.max(t.tw, rw)) + 2, H = Math.ceil(Math.max(t.th, rh)) + 2;
+  const tx = (W - t.tw) / 2, ty = (H - t.th) / 2, rx = (W - rw) / 2, ry = (H - rh) / 2;
+  let mn = 0, mx = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ax = Math.floor(x - tx), ay = Math.floor(y - ty);
+    const A = ax >= 0 && ay >= 0 && ax < t.tw && ay < t.th ? t.m[ay * t.tw + ax] : 0;
+    // échantillonnage moyen de la lettre rendue sur la surface du pixel
+    const fx0 = (x - rx) / k, fy0 = (y - ry) / k, f = 1 / k;
+    let s = 0, c = 0;
+    const st = Math.max(1, Math.floor(f / 3));
+    for (let yy = Math.floor(fy0); yy < Math.ceil(fy0 + f); yy += st) for (let xx = Math.floor(fx0); xx < Math.ceil(fx0 + f); xx += st) { c++; if (xx >= 0 && yy >= 0 && xx < r.iw && yy < r.ih) s += r.alpha[yy * r.iw + xx]; }
+    const Bv = c ? s / c / 255 : 0;
+    mn += Math.min(A, Bv); mx += Math.max(A, Bv);
+  }
+  return mx ? mn / mx : 0;
+}
+function scoreFont(targets, e, w, it, sx = 1, skew = 0) {
+  const rs = [];
+  for (const t of targets) { const r = renderGlyph(e, w, it, t.ch, GS, sx, skew); if (!r) return null; rs.push(r); }
+  const ratios = targets.map((t, i) => t.th / rs[i].ih);
+  const wsum = targets.reduce((a, t) => a + t.area, 0);
+  const sortedR = ratios.map((v, i) => [v, targets[i].area]).sort((a, b) => a[0] - b[0]);
+  let acc = 0, k = sortedR[0][0]; for (const [v, a] of sortedR) { acc += a; if (acc >= wsum / 2) { k = v; break; } }
+  let num = 0;
+  targets.forEach((t, i) => { num += iouGlyph(t, rs[i], k) * t.area; });
+  // cohérence des proportions : les rapports de hauteur doivent être identiques pour la bonne police
+  const mean = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+  const rel = Math.sqrt(ratios.reduce((a, b) => a + (b - mean) ** 2, 0) / ratios.length) / mean;
+  return { score: num / wsum - 0.8 * rel, k, rs };
+}
+async function searchFont(seg, onStep) {
+  const targets = glyphTargets(seg);
+  if (targets.length < 1) return null;
+  const chars = [...new Set(targets.map(t => t.ch))].join('');
+  await ensureFontCatalog();
+  // 1. tri rapide : chaque famille en normal et gras
+  const stage1 = [];
+  const fams = FONTS.filter(e => !e.failed);
+  for (let i = 0; i < fams.length; i++) {
+    const e = fams[i];
+    for (const w of [...new Set([nearestWeight(e, 400), nearestWeight(e, 700)])]) {
+      if (!(await loadFace(e, w, false, chars))) continue;
+      const s = scoreFont(targets, e, w, false); if (s) { if (e.sys) s.score -= 0.04; stage1.push({ e, w, it: false, sx: 1, skew: 0, ...s }); }
+    }
+    if (i % 12 === 0) { onStep && onStep(0.1 + 0.4 * i / fams.length); await nextFrame(); }
+  }
+  stage1.sort((a, b) => b.score - a.score);
+  const top = [...new Map(stage1.map(c => [c.e.f, c])).values()].slice(0, 8);
+  // 2. toutes les graisses (+ italique) des meilleures familles
+  let stage2 = [];
+  for (let i = 0; i < top.length; i++) {
+    const e = top[i].e;
+    for (const it of e.i ? [false, true] : [false]) for (const w of weightsOf(e)) {
+      const ok = await loadFace(e, w, it, chars); if (!ok && !e.sys) continue;
+      const s = scoreFont(targets, e, w, it); if (s) { if (e.sys) s.score -= 0.04; stage2.push({ e, w, it, sx: 1, skew: 0, ...s }); }
+    }
+    onStep && onStep(0.5 + 0.3 * i / top.length); await nextFrame();
+  }
+  stage2.sort((a, b) => b.score - a.score);
+  { const p = stage2.find(c => c.e.c === 'Sans-serif' || c.e.c === 'Serif'); if (p && stage2[0] && stage2[0] !== p && (stage2[0].e.c === 'Manuscrite' || stage2[0].e.c === 'Décorative') && stage2[0].score - p.score < 0.06) stage2.splice(stage2.indexOf(p), 1), stage2.unshift(p); }
+  // 3. affinage : graisse fine (polices variables), largeur, inclinaison
+  const finals = stage2.slice(0, 3);
+  let best = finals[0] || top[0];
+  for (const c of finals) {
+    const ws = c.e.v ? [c.w - 50, c.w - 25, c.w, c.w + 25, c.w + 50].filter(w => w >= c.e.v[0] && w <= c.e.v[1]) : [c.w];
+    for (const w of ws) for (const sx of [0.94, 0.97, 1, 1.03, 1.06]) {
+      const s = scoreFont(targets, c.e, w, c.it, sx, 0); if (!s) continue;
+      const sc = s.score - Math.abs(sx - 1) * 0.6;
+      if (sc > best.score) best = { e: c.e, w, it: c.it, sx, skew: 0, ...s, score: sc };
+    }
+    if (!c.it) for (const skew of [0.12, 0.2]) { const s = scoreFont(targets, c.e, best.e === c.e ? best.w : c.w, false, best.e === c.e ? best.sx : 1, skew); if (s && s.score - 0.02 > best.score) best = { e: c.e, w: best.e === c.e ? best.w : c.w, it: false, sx: best.e === c.e ? best.sx : 1, skew, ...s }; }
+    await nextFrame();
+  }
+  onStep && onStep(0.95);
+  // taille réelle, ligne de base, approche (espacement mesuré)
+  const size = GS * best.k / targets[0].sc;
+  const kSrc = size / GS;
+  const bases = [];
+  targets.forEach((t, i) => { const r = best.rs[i]; if (Math.abs(r.bottom) <= GS * 0.04) bases.push(t.g.gy1 + 1); });
+  const baseline = bases.length ? median(bases) : median(targets.map((t, i) => t.g.gy1 + 1 - best.rs[i].bottom * kSrc));
+  const metrics = ch => { const r = renderGlyph(best.e, best.w, best.it, ch, GS, best.sx, best.skew); return r ? { adv: r.adv * kSrc, left: r.left * kSrc, right: (r.left + r.iw) * kSrc } : null; };
+  const spaceAdv = (() => { gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.font = fontSpec(best.e, best.w, best.it, GS); return gctx.measureText(' ').width * best.sx * kSrc; })();
+  const trk = [], sp = [];
+  const gl = seg.glyphs;
+  for (let i = 1; i < gl.length; i++) {
+    const a = gl[i - 1], b = gl[i]; if (a.missing || b.missing) continue;
+    const ma = metrics(a.ch), mb = metrics(b.ch); if (!ma || !mb) continue;
+    const pred = ma.adv - ma.right + mb.left, act = b.gx0 - (a.gx1 + 1);
+    if (b.brk) sp.push(act - pred - spaceAdv); else trk.push(act - pred);
+  }
+  const tracking = trk.length ? median(trk) : 0;
+  const spaceExtra = sp.length ? median(sp) : tracking;
+  const name = `${best.e.f}${best.e.sys ? '' : ''} ${WEIGHT_NAMES[roundW(best.w)] || ''}${best.it ? ' Italic' : ''}`.trim();
+  return { family: best.e.f, weight: Math.round(best.w), italic: best.it, sx: best.sx, skew: best.skew, size, score: clamp(best.score, 0, 1), baseline, tracking, spaceExtra, spaceAdv, name, cat: best.e.c, sys: !!best.e.sys };
+}
+/* Dessine une ligne avec approche réglable (crénage conservé) et renvoie son opacité + boîte d'encre */
+function renderTextLine(e, w, it, text, size, ls, sx = 1, skew = 0) {
+  const m = ctx2d(canvasOf(4, 4)); m.font = fontSpec(e, w, it, size);
   const xs = []; let prev = 0;
-  for (let i = 0; i < text.length; i++) { const w = ctx.measureText(text.slice(0, i + 1)).width; xs.push(prev + i * ls); prev = w; }
-  return { xs, width: prev + Math.max(0, text.length - 1) * ls };
+  for (let i = 0; i < text.length; i++) { const wd = m.measureText(text.slice(0, i + 1)).width; xs.push(prev + i * ls); prev = wd; }
+  const width = (prev + Math.max(0, text.length - 1) * ls) * sx;
+  const pad = Math.ceil(size * 0.7), Wc = Math.ceil(width + pad * 2 + Math.abs(skew) * size), Hc = Math.ceil(size * 1.8);
+  const c = canvasOf(Wc, Hc), x = ctx2d(c), base0 = Math.round(size * 1.25);
+  x.setTransform(sx, 0, -skew, 1, pad, base0); x.font = fontSpec(e, w, it, size); x.fillStyle = '#000';
+  for (let i = 0; i < text.length; i++) x.fillText(text[i], xs[i], 0);
+  const a = x.getImageData(0, 0, Wc, Hc).data;
+  let x0 = Wc, y0 = Hc, x1 = -1, y1 = -1;
+  for (let y = 0; y < Hc; y++) for (let xx = 0; xx < Wc; xx++) if (a[(y * Wc + xx) * 4 + 3] > 60) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return null;
+  return { a, Wc, Hc, ink: { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 }, base0 };
 }
-/* Dessine des lignes dans un canvas hors-écran et retourne la boîte d'encre réelle. */
-function renderLines(lines, fam, weight, size, ls, color, lineGap, align = 'left') {
-  const meas = ctx2d(canvasOf(4, 4)); meas.font = fontCss(fam, weight, size);
-  const lay = lines.map(t => ({ t, ...measureAdvances(meas, t, ls) }));
-  const maxW = Math.max(1, ...lay.map(l => l.width));
-  const padX = Math.ceil(size * 0.6 + Math.abs(ls) * 2), padY = Math.ceil(size * 0.6);
-  const W = Math.ceil(maxW + padX * 2), H = Math.ceil(size * 1.2 + lineGap * (lines.length - 1) + padY * 2);
-  const c = canvasOf(W, H), x = ctx2d(c);
-  x.font = fontCss(fam, weight, size); x.fillStyle = color; x.textBaseline = 'alphabetic';
-  const base0 = padY + size;
-  lay.forEach((l, i) => { const off = align === 'center' ? (maxW - l.width) / 2 : align === 'right' ? maxW - l.width : 0; for (let k = 0; k < l.t.length; k++) x.fillText(l.t[k], padX + off + l.xs[k], base0 + i * lineGap); });
-  const ink = inkBox(x, W, H);
-  return { canvas: c, ink, base0, padX, lay };
-}
-function inkBox(x, W, H) {
-  const a = x.getImageData(0, 0, W, H).data; let x0 = W, y0 = H, x1 = -1, y1 = -1;
-  for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++) if (a[(y * W + xx) * 4 + 3] > 40) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-  return x1 < 0 ? null : { x: x0, y: y0, w: x1 - x0 + 1, h: y1 - y0 + 1 };
-}
-/* Compare l'ancien texte rendu dans chaque police avec la forme réelle des lettres. */
-function matchFont(pix, text) {
+async function searchFontLine(pix, text, onStep) {
   const t = String(text || '').replace(/\s+/g, ' ').trim();
-  if (!pix.ok || !t || t.length > 80) return null;
-  const T = pix.tight, TH = 40, k = TH / T.h, TW = clamp(Math.round(T.w * k), 4, 2400);
-  // masque cible réduit
-  const target = new Uint8Array(TW * TH);
-  for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) {
-    const sx = Math.floor((T.x - pix.box.x) + x / k), sy = Math.floor((T.y - pix.box.y) + y / k);
-    if (sx >= 0 && sy >= 0 && sx < pix.maskW && sy < pix.maskH && pix.mask[sy * pix.maskW + sx]) target[y * TW + x] = 1;
+  if (!pix.ok || !t || t.length > 90) return null;
+  await ensureFontCatalog();
+  const T = pix.tight, TH = 40, k = TH / T.h, TW = clamp(Math.round(T.w * k), 4, 3000);
+  const target = new Float32Array(TW * TH), cnt = new Float32Array(TW * TH);
+  for (let y = 0; y < T.h; y++) for (let x = 0; x < T.w; x++) {
+    const lx = T.x - pix.box.x + x, ly = T.y - pix.box.y + y; const i = Math.min(TH - 1, Math.floor(y * k)) * TW + Math.min(TW - 1, Math.floor(x * k));
+    target[i] += pix.alpha[ly * pix.maskW + lx]; cnt[i]++;
   }
-  const work = canvasOf(TW, TH), wx = ctx2d(work);
-  const S0 = 60, n = Math.max(1, t.length - 1);
-  let best = null, bestSafe = null;
-  const SAFE = ['Montserrat', 'Inter', 'Arial'], safeByWeight = {};
-  for (const [fam, d] of Object.entries(FAMILIES)) for (const w of d.w) {
-    if (!fontAvailable(fam, w)) continue;
-    let r = renderLines([t], fam, w, S0, 0, '#000', 0); if (!r.ink) continue;
+  for (let i = 0; i < target.length; i++) target[i] = cnt[i] ? target[i] / cnt[i] : 0;
+  const work = canvasOf(TW, TH), wx = ctx2d(work), S0 = 56, n = Math.max(1, t.length - 1);
+  const score = (e, w, it) => {
+    let r = renderTextLine(e, w, it, t, S0, 0); if (!r) return null;
     const kk = TH / r.ink.h;
-    let ls = clamp((TW - r.ink.w * kk) / n / kk, -0.12 * S0, 1.2 * S0);
-    if (Math.abs(ls) > 0.5) { r = renderLines([t], fam, w, S0, ls, '#000', 0); if (!r.ink) continue; }
-    wx.clearRect(0, 0, TW, TH);
-    wx.drawImage(r.canvas, r.ink.x, r.ink.y, r.ink.w, r.ink.h, 0, 0, TW, TH);
-    const a = wx.getImageData(0, 0, TW, TH).data;
-    let inter = 0, uni = 0;
-    for (let i = 0; i < TW * TH; i++) { const p = a[i * 4 + 3] > 110 ? 1 : 0, q = target[i]; inter += p & q; uni += p | q; }
-    // pénalise une déformation trop forte (largeur forcée)
-    const stretch = (r.ink.w * kk) / TW, distort = Math.abs(Math.log(stretch));
-    const score = (uni ? inter / uni : 0) - distort * 0.35;
-    const scale = T.h / r.ink.h;              // facteur rendu → pixels source
-    const cand = { score, family: fam, weight: w, size: S0 * scale, ls: ls * scale, ascent: (r.base0 - r.ink.y) * scale };
-    if (!best || score > best.score) best = cand;
-    if (SAFE.includes(fam) && (!bestSafe || score > bestSafe.score)) bestSafe = cand;
-    if (fam === 'Montserrat') safeByWeight[w] = cand;
+    const ls = clamp((TW - r.ink.w * kk) / n / kk, -0.15 * S0, 1.2 * S0);
+    if (Math.abs(ls) > 0.4) { r = renderTextLine(e, w, it, t, S0, ls); if (!r) return null; }
+    const src = canvasOf(r.Wc, r.Hc), sx = ctx2d(src), id = sx.createImageData(r.Wc, r.Hc); id.data.set(r.a); sx.putImageData(id, 0, 0);
+    wx.clearRect(0, 0, TW, TH); wx.drawImage(src, r.ink.x, r.ink.y, r.ink.w, r.ink.h, 0, 0, TW, TH);
+    const d = wx.getImageData(0, 0, TW, TH).data; let mn = 0, mx = 0;
+    for (let i = 0; i < TW * TH; i++) { const A = target[i], B = d[i * 4 + 3] / 255; mn += Math.min(A, B); mx += Math.max(A, B); }
+    const stretch = (r.ink.w * kk) / TW;
+    const sc = T.h / r.ink.h;
+    return { score: (mx ? mn / mx : 0) - Math.abs(Math.log(stretch)) * 0.5 - (e.sys ? 0.04 : 0), e, w, it, size: S0 * sc, ls: ls * sc, baseline: T.y + (r.base0 - r.ink.y) * sc };
+  };
+  const fams = FONTS.filter(e => !e.failed); let all = [];
+  for (let i = 0; i < fams.length; i++) {
+    const e = fams[i];
+    for (const w of [...new Set([nearestWeight(e, 400), nearestWeight(e, 700)])]) { if (!(await loadFace(e, w, false, t))) continue; const s = score(e, w, false); if (s) all.push(s); }
+    if (i % 10 === 0) { onStep && onStep(0.1 + 0.5 * i / fams.length); await nextFrame(); }
   }
-  if (best && best.score < 0.33 && bestSafe) {
-    // texte lu de façon imparfaite : police neutre, graisse déduite de l'épaisseur du trait
-    const hw = heuristicFit(pix).weight, mw = FAMILIES.Montserrat.w.reduce((a, b) => Math.abs(b - hw) < Math.abs(a - hw) ? b : a);
-    return { ...(safeByWeight[mw] || bestSafe), uncertain: true };
-  }
-  return best;
+  all.sort((a, b) => b.score - a.score);
+  const top = [...new Map(all.map(c => [c.e.f, c])).values()].slice(0, 6);
+  for (const c of top) for (const it of c.e.i ? [false, true] : [false]) for (const w of weightsOf(c.e)) { if (!(await loadFace(c.e, w, it, t))) continue; const s = score(c.e, w, it); if (s) all.push(s); }
+  all.sort((a, b) => b.score - a.score);
+  let b = all[0]; if (!b) return null;
+  const plain = all.find(c => c.e.c === 'Sans-serif' || c.e.c === 'Serif');
+  if (plain && plain !== b && (b.e.c === 'Manuscrite' || b.e.c === 'Décorative') && b.score - plain.score < 0.08) b = plain;
+  const weak = b.score < 0.3;   // correspondance faible : pas d'approche forcée (évite un texte étiré)
+  return { family: b.e.f, weight: weak ? Math.min(b.w, 700) : b.w, italic: b.it, sx: 1, skew: 0, size: b.size, score: clamp(b.score, 0, 1), baseline: b.baseline, tracking: weak ? 0 : b.ls, spaceExtra: weak ? 0 : b.ls, name: `${b.e.f} ${WEIGHT_NAMES[roundW(b.w)] || ''}${b.it ? ' Italic' : ''}`.trim(), cat: b.e.c, sys: !!b.e.sys, line: true };
 }
-/* Estimation sans texte connu (zone manuelle) : épaisseur du trait → graisse */
-function heuristicFit(pix) {
-  const T = pix.tight;
-  let inkPx = 0, edges = 0; const { mask, maskW: w, maskH: h } = pix;
-  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x; if (mask[i]) { inkPx++; if (!mask[i - 1] || !mask[i + 1] || !mask[i - w] || !mask[i + w]) edges++; } }
-  const stroke = edges ? 2 * inkPx / edges : 0, ratio = stroke / Math.max(1, T.h);
-  const weight = ratio > 0.17 ? 800 : ratio > 0.12 ? 700 : ratio > 0.085 ? 500 : 400;
-  const size = T.h / 0.72;
-  return { score: 0, family: 'Montserrat', weight, size, ls: 0, ascent: T.h, heuristic: true };
-}
-function styleLabel(fit, text, pix) {
-  if (!fit) return 'Estimé à partir de l’image';
-  const parts = [FAMILIES[fit.family]?.cat || 'Sans-serif', weightLabel(fit.family, fit.weight)];
-  if (fit.ls > fit.size * 0.12) parts.push('Espacé');
-  const letters = String(text || '').replace(/[^A-Za-zÀ-ÿ]/g, '');
-  if (letters.length > 1 && letters === letters.toUpperCase()) parts.push('Capitales');
-  return parts.join(' · ');
+function fontLabel(f) {
+  if (!f) return 'Recherche de la police…';
+  return `${f.family} · ${weightLabel(f.family, f.weight)}${f.italic || f.skew ? ' · Italique' : ''}${f.sx < 0.98 ? ' · Étroite' : f.sx > 1.02 ? ' · Large' : ''}`;
 }
 
 /* =============================================================================
@@ -792,28 +1058,208 @@ function groupLines(words) {
     return { text, conf, x0: L.x0, y0: L.y0, x1: L.x1, y1: L.y1 };
   });
 }
-/* Construit une zone éditable complète (boîte serrée + style) à partir d'une boîte en pixels */
-function buildRegion(canvas, id, text, conf, pxBox, manual = false) {
-  const W = canvas.width, H = canvas.height;
-  const pix = analyzePixels(canvas, pxBox);
-  const T = pix.ok ? pix.tight : pix.box;
-  const fit = text ? (matchFont(pix, text) || heuristicFit(pix)) : (pix.ok ? heuristicFit(pix) : null);
-  const m = Math.max(2, Math.round(T.h * 0.14 + 0.005 * Math.max(W, H)));
-  const x0 = Math.max(0, T.x - m), y0 = Math.max(0, T.y - m), x1 = Math.min(W, T.x + T.w + m), y1 = Math.min(H, T.y + T.h + m);
-  return {
-    id, text, manual,
-    x: x0 / W * 100, y: y0 / H * 100, width: (x1 - x0) / W * 100, height: (y1 - y0) / H * 100,
-    fontStyle: manual && !text ? 'À conserver depuis l’image' : styleLabel(fit, text, pix),
-    fontSize: fit ? Math.round(fit.size) : 0,
-    color: rgbHex(pix.fg), background: manual && !pix.ok ? 'Fond original à reconstruire' : pix.background,
-    confidence: manual ? 0 : Math.round(conf) / 100,
-    ink: T, fit, bg: rgbHex(pix.bg), baseline: fit ? T.y + fit.ascent : T.y + T.h
-  };
+/* =============================================================================
+   DÉTECTION DES LIGNES (PP-OCRv4, réseau DBNet) + LECTURE (Tesseract)
+   ============================================================================= */
+const det = { session: null, loading: null, state: 'idle', progress: 0 };
+async function ensureORT() {
+  try { await loadScript(LIB.ort, () => !!window.ort); } catch (e) { throw netError('ONNX Runtime'); }
+  ort.env.wasm.wasmPaths = LIB.ortWasm;
+  ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 2) : 1;
+}
+async function fetchModel(key, urls, size, onProg) {
+  const cached = await IDB.get(key);
+  if (cached && cached.byteLength > 1e5) return cached;
+  let lastErr;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const total = +res.headers.get('content-length') || size;
+      const reader = res.body.getReader(), chunks = []; let got = 0;
+      while (true) { const { done, value } = await reader.read(); if (done) break; chunks.push(value); got += value.length; onProg && onProg(Math.min(0.99, got / total)); }
+      const buf = new Uint8Array(got); let o = 0; for (const c of chunks) { buf.set(c, o); o += c.length; }
+      IDB.put(key, buf.buffer);
+      return buf.buffer;
+    } catch (e) { lastErr = e; console.warn('Modèle indisponible depuis', url, e); }
+  }
+  throw lastErr || new Error('NET');
+}
+async function ensureDetector() {
+  if (det.session) return det.session;
+  if (det.loading) return det.loading;
+  det.state = 'loading'; det.progress = 0; renderAIStatus();
+  det.loading = (async () => {
+    await ensureORT();
+    let buf; try { buf = await fetchModel('ppocr_det_v4', LIB.ppdet, LIB.ppdetSize, p => { det.progress = p; renderAIStatus(); }); } catch (e) { throw netError('Le détecteur de texte'); }
+    det.session = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
+    det.state = 'ready'; det.progress = 1; renderAIStatus();
+    return det.session;
+  })();
+  try { return await det.loading; } catch (e) { det.state = 'error'; renderAIStatus(); throw e; } finally { det.loading = null; }
+}
+async function runDetector(canvas, sx, sy, sw, sh, scale) {
+  const nw = Math.max(32, Math.round(sw * scale / 32) * 32), nh = Math.max(32, Math.round(sh * scale / 32) * 32);
+  const c = canvasOf(nw, nh), x = ctx2d(c); x.imageSmoothingQuality = 'high'; x.drawImage(canvas, sx, sy, sw, sh, 0, 0, nw, nh);
+  const p = x.getImageData(0, 0, nw, nh).data, n = nw * nh, t = new Float32Array(3 * n);
+  const mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225];
+  for (let i = 0; i < n; i++) { t[i] = (p[i * 4 + 2] / 255 - mean[0]) / std[0]; t[n + i] = (p[i * 4 + 1] / 255 - mean[1]) / std[1]; t[2 * n + i] = (p[i * 4] / 255 - mean[2]) / std[2]; }
+  const out = await det.session.run({ [det.session.inputNames[0]]: new ort.Tensor('float32', t, [1, 3, nh, nw]) });
+  const prob = out[det.session.outputNames[0]].data;
+  // composantes connexes de la carte de probabilité
+  const lab = new Int32Array(n), boxes = [], stack = new Int32Array(n);
+  for (let i = 0; i < n; i++) {
+    if (lab[i] || prob[i] <= 0.3) continue;
+    let sp = 0, x0 = nw, y0 = nh, x1 = -1, y1 = -1, area = 0, ssum = 0; stack[sp++] = i; lab[i] = 1;
+    while (sp) {
+      const j = stack[--sp], jx = j % nw, jy = (j / nw) | 0; area++; ssum += prob[j];
+      if (jx < x0) x0 = jx; if (jx > x1) x1 = jx; if (jy < y0) y0 = jy; if (jy > y1) y1 = jy;
+      if (jx > 0 && !lab[j - 1] && prob[j - 1] > 0.3) { lab[j - 1] = 1; stack[sp++] = j - 1; }
+      if (jx < nw - 1 && !lab[j + 1] && prob[j + 1] > 0.3) { lab[j + 1] = 1; stack[sp++] = j + 1; }
+      if (jy > 0 && !lab[j - nw] && prob[j - nw] > 0.3) { lab[j - nw] = 1; stack[sp++] = j - nw; }
+      if (jy < nh - 1 && !lab[j + nw] && prob[j + nw] > 0.3) { lab[j + nw] = 1; stack[sp++] = j + nw; }
+    }
+    if (area < 8 || ssum / area < 0.55) continue;
+    const bw = x1 - x0 + 1, bh = y1 - y0 + 1, d = area * 1.6 / (2 * (bw + bh));
+    const kx = sw / nw, ky = sh / nh;
+    boxes.push({ x0: sx + (x0 - d) * kx, y0: sy + (y0 - d) * ky, x1: sx + (x1 + 1 + d) * kx, y1: sy + (y1 + 1 + d) * ky, score: ssum / area });
+  }
+  return boxes;
+}
+async function detectBoxes(canvas) {
+  await ensureDetector();
+  const W = canvas.width, H = canvas.height, M = Math.max(W, H);
+  const k = M > 1920 ? 1920 / M : M < 960 ? 960 / M : 1;
+  let boxes = await runDetector(canvas, 0, 0, W, H, k);
+  if (k < 0.75) { // très grande image : seconde passe en tuiles pour les petits textes
+    const sc = Math.min(1, k * 2), T = Math.round(1400 / sc), ov = Math.round(T * 0.15);
+    for (let y = 0; y < H; y += T - ov) for (let x = 0; x < W; x += T - ov) {
+      const tw = Math.min(T, W - x), th = Math.min(T, H - y); if (tw < 64 || th < 64) continue;
+      const more = await runDetector(canvas, x, y, tw, th, sc);
+      for (const b of more) if (!boxes.some(a => iou(a, b).cover > 0.5)) boxes.push(b);
+      await nextFrame();
+    }
+  }
+  boxes = boxes.map(b => ({ x0: clamp(b.x0, 0, W), y0: clamp(b.y0, 0, H), x1: clamp(b.x1, 0, W), y1: clamp(b.y1, 0, H), score: b.score })).filter(b => b.x1 - b.x0 >= 4 && b.y1 - b.y0 >= 4);
+  // mots d'une même ligne séparés par un grand espace → une seule zone (comme une ligne de l'affiche)
+  for (let changed = true; changed;) {
+    changed = false;
+    outer: for (let i = 0; i < boxes.length; i++) for (let j = 0; j < boxes.length; j++) {
+      if (i === j) continue;
+      const a = boxes[i], b = boxes[j], ha = a.y1 - a.y0, hb = b.y1 - b.y0;
+      const ov = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+      if (ov < 0.7 * Math.min(ha, hb) || Math.max(ha, hb) / Math.min(ha, hb) > 1.3) continue;
+      const gap = b.x0 - a.x1;
+      if (gap < -2 || gap > 1.1 * Math.max(ha, hb)) continue;
+      boxes[i] = { x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1), score: Math.max(a.score, b.score) };
+      boxes.splice(j, 1); changed = true; break outer;
+    }
+  }
+  return boxes;
+}
+/* image « encre noire sur blanc » calculée avec les vraies couleurs du texte et du fond */
+function inkCanvas(canvas, pix, pb, scale) {
+  const sw = Math.max(1, Math.round(pb.w)), sh = Math.max(1, Math.round(pb.h)), px0 = Math.round(pb.x), py0 = Math.round(pb.y);
+  const src = ctx2d(canvas).getImageData(px0, py0, sw, sh).data;
+  const F = pix.fg, C = pix.contrast;
+  const pad = 16, c0 = canvasOf(sw, sh), x0 = ctx2d(c0), im = x0.createImageData(sw, sh);
+  for (let y = 0; y < sh; y++) for (let x = 0; x < sw; x++) {
+    const i = y * sw + x, gx = px0 + x, gy = py0 + y;
+    let a;
+    const lx = gx - pix.box.x, ly = gy - pix.box.y;
+    if (lx >= 0 && ly >= 0 && lx < pix.maskW && ly < pix.maskH) a = pix.alpha[ly * pix.maskW + lx];
+    else { const B = pix.bgLocal(gx, gy), r = src[i * 4], g = src[i * 4 + 1], b = src[i * 4 + 2], fdv = dist3(r, g, b, B), df = dist3(r, g, b, F); a = df < fdv * 1.4 ? clamp((fdv - C * 0.1) / (C * 0.8), 0, 1) : 0; }
+    const v = 255 * (1 - a); im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = v; im.data[i * 4 + 3] = 255;
+  }
+  { // hors de la bande de la ligne (au-dessus / au-dessous) = fond : on le blanchit
+    const T = pix.tight, m = Math.max(2, Math.round(T.h * 0.08));
+    for (let y = 0; y < sh; y++) { const gy = py0 + y; if (gy >= T.y - m && gy <= T.y + T.h + m) continue; for (let x = 0; x < sw; x++) { const i = y * sw + x; im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = 255; } }
+  }
+  x0.putImageData(im, 0, 0);
+  const c = canvasOf(Math.round(sw * scale) + pad * 2, Math.round(sh * scale) + pad * 2), x = ctx2d(c);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = 'high'; x.drawImage(c0, pad, pad, sw * scale, sh * scale);
+  return { c, pad };
+}
+async function readLine(canvas, pix, box) {
+  const worker = await ensureOCR();
+  await worker.setParameters({ tessedit_pageseg_mode: '7', preserve_interword_spaces: '1' });
+  const T = pix.ok ? pix.tight : box;
+  const padY = Math.round(T.h * 0.3), padX = Math.round(T.h * 0.4);
+  const pb = { x: Math.max(0, T.x - padX), y: Math.max(0, T.y - padY) };
+  pb.w = Math.min(canvas.width, T.x + T.w + padX) - pb.x; pb.h = Math.min(canvas.height, T.y + T.h + padY) - pb.y;
+  const scale = clamp(52 / Math.max(4, T.h), 0.4, 6);
+  const tries = [];
+  if (pix.contrast > 30) tries.push(inkCanvas(canvas, pix, pb, scale));
+  tries.push({ c: grayCanvas(canvas, scale, pb.x, pb.y, pb.w, pb.h), pad: 0 });
+  let best = null;
+  for (const t of tries) {
+    const res = await worker.recognize(t.c, {}, { blocks: true, text: true });
+    const syms = [];
+    for (const b of res.data.blocks || []) for (const p of b.paragraphs || []) for (const l of p.lines || []) for (const wd of l.words || []) for (const s of wd.symbols || []) syms.push({ ch: s.text, x0: pb.x + (s.bbox.x0 - t.pad) / scale, x1: pb.x + (s.bbox.x1 - t.pad) / scale, conf: s.confidence });
+    const text = (res.data.text || '').replace(/\s+/g, ' ').trim();
+    const cand = { text, conf: res.data.confidence || 0, symbols: syms };
+    if (!best || cand.conf > best.conf + 2) best = cand;
+    if (best.conf >= 80) break;
+  }
+  return best;
+}
+function cleanText(t) {
+  t = t.replace(/\s+/g, ' ').trim();
+  // bruit fréquent aux extrémités d'une ligne lue isolément
+  t = t.replace(/^[|_~`'‘’"“”«»\[\]{}\\/.,:;]+\s*/, '').replace(/\s*[|_~`'‘’"“”«»\[\]{}\\/,:;]+$/, '');
+  return t.trim();
 }
 async function detectRegions(src) {
+  const canvas = await imageCanvas(src), W = canvas.width, H = canvas.height;
+  let boxes = null;
+  try {
+    setStatus('Repérage des lignes de texte…'); setProgress(0.03);
+    boxes = await detectBoxes(canvas);
+  } catch (e) { console.warn('Détecteur indisponible, lecture pleine page', e); }
+  if (!boxes) return detectRegionsTesseract(src);
+  boxes.sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0);
+  setStatus('Lecture des textes…'); setProgress(0.15);
+  await ensureOCR();
+  const regions = [];
+  for (let i = 0; i < boxes.length && regions.length < 60; i++) {
+    const b = boxes[i];
+    setProgress(0.15 + 0.8 * i / boxes.length);
+    const bh = b.y1 - b.y0, pad = bh * 0.12;
+    const pix = analyzePixels(canvas, { x: b.x0 - pad, y: b.y0 - pad, w: b.x1 - b.x0 + 2 * pad, h: bh + 2 * pad });
+    if (!pix.ok || pix.tight.h < 5) continue;
+    const rd = await readLine(canvas, pix, { x: b.x0, y: b.y0, w: b.x1 - b.x0, h: bh });
+    const text = cleanText(rd.text || '');
+    const alnum = (text.match(/[\p{L}\p{N}]/gu) || []).length;
+    if (!alnum || rd.conf < 35 || (alnum < 2 && rd.conf < 75) || alnum / Math.max(1, text.replace(/\s/g, '').length) < 0.5) continue;
+    // un caractère parasite en bout de ligne (bord de photo, trait) empêche un découpage exact : on le retire
+    let finalText = text, syms = rd.symbols;
+    const seg0 = segmentGlyphs(pix, text, null);
+    if (seg0 && !seg0.exact && seg0.units.length) {
+      const T0 = pix.tight, outside = sym => sym && ((sym.x0 + sym.x1) / 2 > T0.x + T0.w - 2 || (sym.x0 + sym.x1) / 2 < T0.x + 2);
+      const sy = rd.symbols || [], weak = (ch, sym) => !/[\p{L}\p{N}]/u.test(ch) || !sym || sym.conf < 80 || outside(sym);
+      const endWeak = weak(text.slice(-1), sy[sy.length - 1]), startWeak = weak(text[0], sy[0]);
+      const cands = [];
+      if (endWeak) cands.push(text.slice(0, -1).trim());
+      if (startWeak) cands.push(text.slice(1).trim());
+      if (endWeak && startWeak) cands.push(text.slice(1, -1).trim());
+      for (const cand of cands) {
+        if (!cand || cand.length < 2) continue;
+        const sg = segmentGlyphs(pix, cand, null);
+        if (sg && sg.exact) { finalText = cand; syms = null; break; }
+      }
+    }
+    regions.push(buildRegion(canvas, String(regions.length + 1), finalText, rd.conf, pix, syms));
+    if (i % 3 === 0) await nextFrame();
+  }
+  regions.sort((a, b) => a.y - b.y || a.x - b.x);
+  regions.forEach((r, i) => r.id = String(i + 1));
+  setProgress(1);
+  return regions;
+}
+/* Repli : lecture pleine page par Tesseract (si le détecteur ne peut pas être chargé) */
+async function detectRegionsTesseract(src) {
   const canvas = await imageCanvas(src);
-  const W = canvas.width, H = canvas.height, M = Math.max(W, H);
-  setStatus('Chargement du modèle de lecture…'); setProgress(0.02);
+  const M = Math.max(canvas.width, canvas.height);
   const worker = await ensureOCR();
   await worker.setParameters({ tessedit_pageseg_mode: '11', preserve_interword_spaces: '1' });
   const s1 = Math.min(1, 2000 / M), s2 = Math.min(2 * s1, 3000 / M, 2.2);
@@ -821,39 +1267,86 @@ async function detectRegions(src) {
   let words = [];
   for (let i = 0; i < passes.length; i++) {
     ocrPass.base = 0.05 + 0.75 * i / passes.length; ocrPass.span = 0.75 / passes.length;
-    setStatus(`Lecture des textes et du fond… (${i + 1}/${passes.length})`);
+    setStatus(`Lecture des textes… (${i + 1}/${passes.length})`);
     const res = await worker.recognize(grayCanvas(canvas, passes[i]), {}, { blocks: true, text: false });
     words = words.concat(wordsFrom(res, passes[i]));
   }
-  setStatus('Estimation des polices et des couleurs…'); setProgress(0.85);
-  await ensureFonts();
   const lines = groupLines(dedupe(words.filter(validWord)));
   const regions = [];
   for (const L of lines) {
     if (regions.length >= 60) break;
     const pad = (L.y1 - L.y0) * 0.1;
-    const r = buildRegion(canvas, String(regions.length + 1), L.text, L.conf, { x: L.x0 - pad, y: L.y0 - pad, w: L.x1 - L.x0 + pad * 2, h: L.y1 - L.y0 + pad * 2 });
-    if (r.ink.h < 5) continue;
-    regions.push(r);
-    if (regions.length % 4 === 0) await nextFrame();
+    const pix = analyzePixels(canvas, { x: L.x0 - pad, y: L.y0 - pad, w: L.x1 - L.x0 + pad * 2, h: L.y1 - L.y0 + pad * 2 });
+    if (!pix.ok || pix.tight.h < 5) continue;
+    regions.push(buildRegion(canvas, String(regions.length + 1), L.text, L.conf, pix, null));
   }
   regions.sort((a, b) => a.y - b.y || a.x - b.x);
   regions.forEach((r, i) => r.id = String(i + 1));
-  setProgress(1);
   return regions;
 }
+function buildRegion(canvas, id, text, conf, pix, symbols, manual = false) {
+  const W = canvas.width, H = canvas.height, T = pix.ok ? pix.tight : pix.box;
+  const m = Math.max(2, Math.round(T.h * 0.14 + 0.004 * Math.max(W, H)));
+  const x0 = Math.max(0, T.x - m), y0 = Math.max(0, T.y - m), x1 = Math.min(W, T.x + T.w + m), y1 = Math.min(H, T.y + T.h + m);
+  return {
+    id, text, manual,
+    x: x0 / W * 100, y: y0 / H * 100, width: (x1 - x0) / W * 100, height: (y1 - y0) / H * 100,
+    fontStyle: 'Recherche de la police…', fontSize: Math.round(T.h * 1.35),
+    color: rgbHex(pix.fg), gradient: pix.profile.gradient ? [rgbHex(pix.profile.rows[0]), rgbHex(pix.profile.rows[pix.profile.rows.length - 1])] : null,
+    background: pix.background, bgStd: pix.bgStd,
+    confidence: manual ? 0 : Math.round(conf) / 100,
+    ink: T, symbols: symbols || null, font: undefined, bg: rgbHex(pix.bg)
+  };
+}
 async function ocrCrop(canvas, box) {
-  const worker = await ensureOCR();
-  await worker.setParameters({ tessedit_pageseg_mode: '7' });
-  const scale = clamp(56 / Math.max(8, box.h), 0.5, 4);
-  const res = await worker.recognize(grayCanvas(canvas, scale, box.x, box.y, box.w, box.h), {}, { blocks: true, text: true });
-  const text = (res.data.text || '').replace(/\s+/g, ' ').trim();
-  return { text, conf: res.data.confidence || 0 };
+  const pix = analyzePixels(canvas, box);
+  const rd = await readLine(canvas, pix, box);
+  return { text: cleanText(rd.text || ''), conf: rd.conf, symbols: rd.symbols, pix };
+}
+
+/* Analyse fine d'une zone : découpage des lettres + recherche de la police (mise en cache) */
+const fontJobs = new Map();
+function ensureRegionFont(r, src) {
+  if (r.font !== undefined) return Promise.resolve(r.font);
+  const key = r.id + '|' + src.length + '|' + r.text;
+  if (fontJobs.has(key)) return fontJobs.get(key);
+  const textAt = r.text;
+  const job = (async () => {
+    const canvas = await imageCanvas(src), W = canvas.width, H = canvas.height;
+    const R0 = { x: Math.floor(r.x / 100 * W), y: Math.floor(r.y / 100 * H), w: Math.ceil(r.width / 100 * W), h: Math.ceil(r.height / 100 * H) };
+    const pix0 = analyzePixels(canvas, R0);
+    const cy = Math.max(4, Math.round(R0.h * 0.12));
+    const pix = analyzePixels(canvas, expandBox(R0, W, H), pix0.contrast > 25 ? pix0 : null, [R0.y - cy, R0.y + R0.h + cy]);
+    let font = null;
+    if (pix.ok && r.text) {
+      const seg = segmentGlyphs(pix, r.text, r.symbols);
+      if (seg && seg.exact && seg.glyphs.length >= 2) {
+        try { font = await searchFont(seg, p => { if (S.busy === 'edit') setProgress(p * 0.25); }); } catch (e) { console.warn(e); }
+      }
+      if (!font || font.score < 0.45) {   // découpage incertain : comparaison sur la ligne entière
+        try { const f2 = await searchFontLine(pix, r.text, p => { if (S.busy === 'edit') setProgress(p * 0.25); }); if (f2 && (!font || f2.score > font.score)) font = f2; } catch (e) { console.warn(e); }
+      }
+    }
+    const capsOnly = r.text && r.text === r.text.toUpperCase() && !/[gjpqyQJ]/.test(r.text);
+    if (!font) font = { family: 'Montserrat', weight: 700, italic: false, sx: 1, skew: 0, size: (pix.ok ? pix.tight.h : 30) / (capsOnly ? 0.72 : 0.95), score: 0, baseline: pix.ok ? pix.tight.y + pix.tight.h : null, tracking: 0, spaceExtra: 0, name: 'Montserrat Bold', cat: 'Sans-serif', fallback: true };
+    const live = S.regions.find(x => x.id === r.id) || r;
+    // résultat obsolète (le texte original a été corrigé entre-temps) : on l'ignore
+    for (const t of new Set([r, live])) {
+      if (t.text !== textAt) continue;
+      t.font = font; t.fontStyle = font.fallback ? 'Estimée à partir de l’image' : fontLabel(font); t.fontSize = Math.round(font.size);
+      t.ink = pix.ok ? pix.tight : t.ink; t.color = rgbHex(pix.fg); t.bgStd = pix.bgStd; t.background = pix.background;
+      t.gradient = pix.profile.gradient ? [rgbHex(pix.profile.rows[0]), rgbHex(pix.profile.rows[pix.profile.rows.length - 1])] : null;
+    }
+    if (S.selected === r.id) renderRight();
+    return font;
+  })();
+  fontJobs.set(key, job);
+  job.catch(() => fontJobs.delete(key));
+  return job;
 }
 
 /* =============================================================================
    RECONSTRUCTION DU FOND
-   A. MI-GAN (IA, ONNX Runtime Web)  — B. repli rapide sans IA (pull-push + grain)
    ============================================================================= */
 const inp = { session: null, loading: null, state: 'idle', progress: 0 };
 const IDB = {
@@ -861,45 +1354,20 @@ const IDB = {
   async get(k) { try { const db = await this.open(); return await new Promise(res => { const q = db.transaction('files').objectStore('files').get(k); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (e) { return null; } },
   async put(k, v) { try { const db = await this.open(); await new Promise(res => { const t = db.transaction('files', 'readwrite'); t.objectStore('files').put(v, k); t.oncomplete = res; t.onerror = res; }); } catch (e) { } }
 };
-async function downloadModel() {
-  const cached = await IDB.get('migan_pipeline_v2');
-  if (cached && cached.byteLength > 1e6) return cached;
-  let lastErr;
-  for (const url of LIB.migan) {
-    try {
-      const res = await fetch(url, { mode: 'cors' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const total = +res.headers.get('content-length') || LIB.miganSize;
-      const reader = res.body.getReader(), chunks = []; let got = 0;
-      while (true) {
-        const { done, value } = await reader.read(); if (done) break;
-        chunks.push(value); got += value.length; inp.progress = Math.min(0.99, got / total); renderAIStatus();
-        if (S.busy === 'edit') setStatus(`Téléchargement du modèle d’effacement… ${Math.round(inp.progress * 100)} %`);
-      }
-      const buf = new Uint8Array(got); let o = 0; for (const c of chunks) { buf.set(c, o); o += c.length; }
-      IDB.put('migan_pipeline_v2', buf.buffer);
-      return buf.buffer;
-    } catch (e) { lastErr = e; console.warn('Modèle indisponible depuis', url, e); }
-  }
-  throw lastErr || new Error('NET');
-}
 async function ensureInpainter() {
   if (inp.session) return inp.session;
   if (inp.loading) return inp.loading;
   inp.state = 'loading'; inp.progress = 0; renderAIStatus();
   inp.loading = (async () => {
-    try { await loadScript(LIB.ort, () => !!window.ort); } catch (e) { throw netError('ONNX Runtime'); }
-    ort.env.wasm.wasmPaths = LIB.ortWasm;
-    ort.env.wasm.numThreads = self.crossOriginIsolated ? Math.min(4, navigator.hardwareConcurrency || 2) : 1;
-    let buf; try { buf = await downloadModel(); } catch (e) { throw netError('Le modèle d’effacement MI-GAN'); }
-    inp.progress = 1; renderAIStatus();
-    const s = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
-    inp.session = s; inp.state = 'ready'; renderAIStatus();
-    return s;
+    await ensureORT();
+    let buf; try { buf = await fetchModel('migan_pipeline_v2', LIB.migan, LIB.miganSize, p => { inp.progress = p; renderAIStatus(); if (S.busy === 'edit') setStatus(`Téléchargement du modèle d’effacement… ${Math.round(p * 100)} %`); }); } catch (e) { throw netError('Le modèle d’effacement MI-GAN'); }
+    inp.progress = 1;
+    inp.session = await ort.InferenceSession.create(buf, { executionProviders: ['wasm'], graphOptimizationLevel: 'all' });
+    inp.state = 'ready'; renderAIStatus();
+    return inp.session;
   })();
   try { return await inp.loading; } catch (e) { inp.state = 'error'; renderAIStatus(); throw e; } finally { inp.loading = null; }
 }
-/* Exécute MI-GAN sur une fenêtre de l'image. hole : Uint8Array (1 = à reconstruire) sur la fenêtre. */
 async function miganRun(ctx, win, hole, write) {
   const { x, y, w, h } = win, n = w * h;
   const px = ctx.getImageData(x, y, w, h);
@@ -910,19 +1378,17 @@ async function miganRun(ctx, win, hole, write) {
   for (let i = 0; i < n; i++) if (write[i]) { px.data[i * 4] = o[i]; px.data[i * 4 + 1] = o[n + i]; px.data[i * 4 + 2] = o[2 * n + i]; }
   ctx.putImageData(px, x, y);
 }
-/* Les très grandes zones sont traitées par morceaux (≤ 640 px) pour garder la résolution du modèle.
-   Chaque passe reçoit tous les trous de sa fenêtre (l'ancien texte n'est jamais vu comme contexte)
-   mais n'écrit que son morceau ; les morceaux suivants profitent du fond déjà reconstruit. */
+/* Morceaux ≤ 384 px : le modèle travaille en pleine résolution (pas de flou). */
 async function inpaintAI(canvas, mask, mb) {
   const ctx = ctx2d(canvas), W = canvas.width, H = canvas.height;
-  const CH = 640, nx = Math.ceil(mb.w / CH), ny = Math.ceil(mb.h / CH);
+  const CH = 384, nx = Math.ceil(mb.w / CH), ny = Math.ceil(mb.h / CH);
   const live = mask.slice();
   let k = 0;
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     k++;
     const cx0 = mb.x + Math.floor(i * mb.w / nx), cx1 = mb.x + Math.floor((i + 1) * mb.w / nx);
     const cy0 = mb.y + Math.floor(j * mb.h / ny), cy1 = mb.y + Math.floor((j + 1) * mb.h / ny);
-    const pad = nx * ny > 1 ? 160 : 96;
+    const pad = 64;
     const wx0 = Math.max(0, cx0 - pad), wy0 = Math.max(0, cy0 - pad), wx1 = Math.min(W, cx1 + pad), wy1 = Math.min(H, cy1 + pad);
     const win = { x: wx0, y: wy0, w: wx1 - wx0, h: wy1 - wy0 };
     const hole = new Uint8Array(win.w * win.h), write = new Uint8Array(win.w * win.h);
@@ -934,22 +1400,22 @@ async function inpaintAI(canvas, mask, mb) {
     }
     if (!any) continue;
     setStatus(nx * ny > 1 ? `Reconstruction du fond par l’IA… (${k}/${nx * ny})` : 'Reconstruction du fond par l’IA…');
-    setProgress(0.3 + 0.55 * (k - 1) / (nx * ny));
+    setProgress(0.4 + 0.4 * (k - 1) / (nx * ny));
     await nextFrame();
     await miganRun(ctx, win, hole, write);
     for (let yy = cy0; yy < cy1; yy++) for (let xx = cx0; xx < cx1; xx++) live[yy * W + xx] = 0;
   }
 }
-/* Remplissage lisse (pull-push multi-échelle) : parfait pour les fonds unis et les dégradés.
-   grain = true : ajoute la texture fine recopiée depuis le fond voisin (loin des lettres). */
-function fillSmooth(canvas, mask, mb, grain) {
+/* Remplissage lisse multi-échelle (fonds unis / dégradés) ; grain recopié depuis le fond voisin */
+function fillSmooth(canvas, mask, mb, grain, exclude) {
   const W = canvas.width, H = canvas.height, ctx = ctx2d(canvas);
   const pad = Math.max(16, Math.round(Math.max(mb.w, mb.h) * 0.2));
   const x0 = Math.max(0, mb.x - pad), y0 = Math.max(0, mb.y - pad), x1 = Math.min(W, mb.x + mb.w + pad), y1 = Math.min(H, mb.y + mb.h + pad);
   const w = x1 - x0, h = y1 - y0, n = w * h;
   const img = ctx.getImageData(x0, y0, w, h), p = img.data;
-  const known = new Uint8Array(n); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) known[y * w + x] = mask[(y + y0) * W + x + x0] ? 0 : 1;
-  // pyramide : moyenne pondérée vers le bas, interpolation bilinéaire vers le haut
+  // known = source fiable ; les autres textes voisins (exclude) ne servent pas de source mais ne sont pas modifiés
+  const known = new Uint8Array(n), fillMe = new Uint8Array(n);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const g = (y + y0) * W + x + x0; fillMe[y * w + x] = mask[g] ? 1 : 0; known[y * w + x] = mask[g] || (exclude && exclude[g]) ? 0 : 1; }
   const levels = [{ w, h, c: [0, 1, 2].map(ch => { const a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = known[i] ? p[i * 4 + ch] : 0; return a; }), wt: Float32Array.from(known) }];
   while (levels.length < 24) {
     const L = levels[levels.length - 1]; if (L.w <= 1 && L.h <= 1) break;
@@ -971,21 +1437,19 @@ function fillSmooth(canvas, mask, mb, grain) {
     }
   }
   const base = levels[0].c;
-  let far = null, res = null;
+  let far = null, res = null, lim = 0;
   if (grain) {
-    // pixels connus éloignés des lettres (pas de halo) et leur résidu haute fréquence
-    const R = 4; far = Uint8Array.from(known);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!known[y * w + x]) for (let dy = -R; dy <= R; dy++) { const yy = y + dy; if (yy < 0 || yy >= h) continue; for (let dx = -R; dx <= R; dx++) { const xx = x + dx; if (xx >= 0 && xx < w) far[yy * w + xx] = 0; } }
+    const RR = 5; far = Uint8Array.from(known);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (!known[y * w + x]) for (let dy = -RR; dy <= RR; dy++) { const yy = y + dy; if (yy < 0 || yy >= h) continue; for (let dx = -RR; dx <= RR; dx++) { const xx = x + dx; if (xx >= 0 && xx < w) far[yy * w + xx] = 0; } }
     res = [0, 1, 2].map(ch => { const o = new Float32Array(n); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; if (!far[i]) continue; let s = 0, c = 0; for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < w && yy < h && known[yy * w + xx]) { s += p[(yy * w + xx) * 4 + ch]; c++; } } o[i] = p[i * 4 + ch] - s / c; } return o; });
+    const a = []; for (let i = 0; i < n; i += 3) if (far[i]) a.push(Math.abs(res[1][i])); a.sort((u, v) => u - v);
+    const mad = a.length ? a[a.length >> 1] : 0; lim = mad * 1.48 * 1.6; if (lim < 1.5) grain = false;
   }
-  // amplitude du grain = bruit réel du fond (écart absolu médian) ; les contours d'autres textes sont écrêtés
-  let lim = 0;
-  if (grain) { const a = []; for (let i = 0; i < n; i += 3) if (far[i]) a.push(Math.abs(res[1][i])); a.sort((u, v) => u - v); const mad = a.length ? a[a.length >> 1] : 0; lim = mad * 1.48 * 2.2; if (lim < 1.5) grain = false; }
-  const B = 10, offs = new Map();
-  const pick = (bx, by) => { const key = bx + ',' + by; if (offs.has(key)) return offs.get(key); let best = null; for (let t = 0; t < 40; t++) { const dx = Math.round((Math.random() * 2 - 1) * Math.max(pad, mb.h)), dy = Math.round((Math.random() * 2 - 1) * Math.max(8, pad)); const sx = bx * B + dx, sy = by * B + dy; if (sx < 0 || sy < 0 || sx + B >= w || sy + B >= h) continue; let ok = true; for (let yy = 0; yy < B && ok; yy += 3) for (let xx = 0; xx < B; xx += 3) if (!far[(sy + yy) * w + sx + xx]) { ok = false; break; } if (ok) { best = [dx, dy]; break; } } offs.set(key, best); return best; };
+  const BL = 10, offs = new Map();
+  const pick = (bx, by) => { const key = bx + ',' + by; if (offs.has(key)) return offs.get(key); let best = null; for (let t = 0; t < 40; t++) { const dx = Math.round((Math.random() * 2 - 1) * Math.max(pad, mb.h)), dy = Math.round((Math.random() * 2 - 1) * Math.max(8, pad)); const sx = bx * BL + dx, sy = by * BL + dy; if (sx < 0 || sy < 0 || sx + BL >= w || sy + BL >= h) continue; let ok = true; for (let yy = 0; yy < BL && ok; yy += 3) for (let xx = 0; xx < BL; xx += 3) if (!far[(sy + yy) * w + sx + xx]) { ok = false; break; } if (ok) { best = [dx, dy]; break; } } offs.set(key, best); return best; };
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const i = y * w + x; if (known[i]) continue;
-    const o = grain ? pick(x / B | 0, y / B | 0) : null;
+    const i = y * w + x; if (!fillMe[i]) continue;
+    const o = grain ? pick(x / BL | 0, y / BL | 0) : null;
     for (let ch = 0; ch < 3; ch++) {
       let v = base[ch][i];
       if (o) { const j = (y + o[1]) * w + (x + o[0]); if (j >= 0 && j < n && far[j]) v += clamp(res[ch][j], -lim, lim); }
@@ -994,120 +1458,304 @@ function fillSmooth(canvas, mask, mb, grain) {
   }
   ctx.putImageData(img, x0, y0);
 }
+/* Raccord : ramène la teinte moyenne locale du remplissage IA sur celle du fond voisin
+   (supprime les « fantômes » plus sombres ou plus clairs), en gardant la texture. */
+function harmonize(work, smooth, mask, mb, rb) {
+  const W = work.width, pad = rb * 3 + 8;
+  const x0 = Math.max(0, mb.x - pad), y0 = Math.max(0, mb.y - pad), x1 = Math.min(W, mb.x + mb.w + pad), y1 = Math.min(work.height, mb.y + mb.h + pad);
+  const w = x1 - x0, h = y1 - y0;
+  const A = ctx2d(work).getImageData(x0, y0, w, h), Bm = ctx2d(smooth).getImageData(x0, y0, w, h).data, a = A.data;
+  const blur = (src, ch) => {
+    const I = new Float64Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) { let s = 0; for (let x = 0; x < w; x++) { s += src[(y * w + x) * 4 + ch]; I[(y + 1) * (w + 1) + x + 1] = I[y * (w + 1) + x + 1] + s; } }
+    const o = new Float32Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const xa = Math.max(0, x - rb), xb = Math.min(w, x + rb + 1), ya = Math.max(0, y - rb), yb = Math.min(h, y + rb + 1); o[y * w + x] = (I[yb * (w + 1) + xb] - I[ya * (w + 1) + xb] - I[yb * (w + 1) + xa] + I[ya * (w + 1) + xa]) / ((xb - xa) * (yb - ya)); }
+    return o;
+  };
+  for (let ch = 0; ch < 3; ch++) {
+    const la = blur(a, ch), lb = blur(Bm, ch);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const g = (y + y0) * W + x + x0; if (!mask[g]) continue; const i = y * w + x; a[i * 4 + ch] = clamp(Math.round(a[i * 4 + ch] + (lb[i] - la[i])), 0, 255); }
+  }
+  ctx2d(work).putImageData(A, x0, y0);
+}
 
 /* =============================================================================
-   RETOUCHE : masque → effacement → nouveau texte → composition de la zone seule
+   RETOUCHE : effacer seulement ce qui change, réutiliser les vraies lettres,
+   dessiner les lettres manquantes dans la police retrouvée
    ============================================================================= */
+/* zone d'analyse élargie (accents, jambages qui dépassent du cadre) */
+function expandBox(R, W, H) {
+  const py = Math.max(4, Math.round(R.h * 0.3)), px = Math.max(4, Math.round(R.h * 0.2));
+  const x = Math.max(0, R.x - px), y = Math.max(0, R.y - py);
+  return { x, y, w: Math.min(W, R.x + R.w + px) - x, h: Math.min(H, R.y + R.h + py) - y };
+}
+function autoAlign(r) {
+  const W = S.dims.width, I = r.ink, cx = I ? I.x + I.w / 2 : (r.x + r.width / 2) / 100 * W;
+  return Math.abs(cx - W / 2) < W * 0.06 ? 'center' : cx < W / 2 ? 'left' : 'right';
+}
 function effectiveStyle(r) {
-  const fit = r.fit || { family: 'Montserrat', weight: 700, size: (r.ink?.h || 30) / 0.72, ls: 0, ascent: r.ink?.h || 30 };
+  const f = r.font || { family: 'Montserrat', weight: 700, italic: false, sx: 1, skew: 0, size: (r.ink?.h || 30) / 0.72, tracking: 0, spaceExtra: 0 };
   const o = S.overrides[r.id] || {};
-  const W = S.dims.width, inkCx = r.ink ? r.ink.x + r.ink.w / 2 : (r.x + r.width / 2) / 100 * W;
-  const autoAlign = Math.abs(inkCx - W / 2) < W * 0.06 ? 'center' : inkCx < W / 2 ? 'left' : 'right';
   return {
-    family: o.family || fit.family, weight: o.weight || fit.weight,
-    size: o.size || fit.size, ls: o.ls ?? fit.ls, color: o.color || r.color || '#333333',
-    align: o.align || autoAlign, erase: o.erase || 'glyphs',
-    baseline: r.baseline ?? (r.ink ? r.ink.y + fit.ascent : null)
+    family: o.family || f.family, weight: o.weight || f.weight, italic: f.italic, sx: o.family ? 1 : f.sx, skew: o.family ? 0 : f.skew,
+    size: o.size || f.size, tracking: (o.ls ?? 0) + (f.tracking || 0), spaceExtra: f.spaceExtra || 0,
+    color: o.color || null, align: o.align || autoAlign(r), erase: o.erase || 'glyphs',
+    reuse: (o.reuse || 'orig') === 'orig' && !o.family && !o.weight && !o.size,
+    custom: !!(o.family || o.weight || o.size || o.color)
   };
 }
-async function ensureRegionAnalysis(r, src) {
-  if (r.ink && r.fit !== undefined) return r;
-  const canvas = await imageCanvas(src), W = canvas.width, H = canvas.height;
-  await ensureFonts();
-  const pix = analyzePixels(canvas, { x: r.x / 100 * W, y: r.y / 100 * H, w: r.width / 100 * W, h: r.height / 100 * H });
-  r.ink = pix.ok ? pix.tight : pix.box;
-  r.fit = r.text ? (matchFont(pix, r.text) || heuristicFit(pix)) : heuristicFit(pix);
-  r.baseline = r.ink.y + r.fit.ascent;
-  if (!r.color || r.manual) r.color = rgbHex(pix.fg);
-  r.bg = rgbHex(pix.bg);
-  return r;
+function lcsPairs(a, b) {
+  const n = a.length, m = b.length, L = Array.from({ length: n + 1 }, () => new Int16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const map = new Array(m).fill(-1); let i = 0, j = 0;
+  while (i < n && j < m) { if (a[i] === b[j]) { map[j] = i; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; }
+  return map;
 }
 async function performEdit(src, r, newText) {
-  const base = await imageCanvas(src), W = base.width, H = base.height;
-  await ensureRegionAnalysis(r, src);
+  const base = await imageCanvas(src), W = base.width, H = base.height, bctx = ctx2d(base);
+  setStatus('Analyse de l’écriture d’origine…'); setProgress(0.03);
+  const font = await ensureRegionFont(r, src);
   const st = effectiveStyle(r);
+  const e = fontByName(st.family) || { f: st.family, c: 'Sans-serif', w: [400, 700], sys: 1 };
   const R = { x: Math.floor(r.x / 100 * W), y: Math.floor(r.y / 100 * H) };
   R.w = Math.min(W - R.x, Math.ceil(r.width / 100 * W)); R.h = Math.min(H - R.y, Math.ceil(r.height / 100 * H));
-  const work = canvasOf(W, H), wctx = ctx2d(work); wctx.drawImage(base, 0, 0);
+  const pix0 = analyzePixels(base, R);
+  const cy = Math.max(4, Math.round(R.h * 0.12));
+  const pix = analyzePixels(base, expandBox(R, W, H), pix0.contrast > 25 ? pix0 : null, [R.y - cy, R.y + R.h + cy]);
+  const T = pix.ok ? pix.tight : { x: R.x, y: R.y, w: R.w, h: R.h };
+  // zone de travail = la ligne de texte (accents compris) + une marge ; jamais les lignes voisines
+  const rad0 = 2 + Math.round(T.h * 0.03);
+  const zm = rad0 + 2 + Math.round(T.h * 0.5);
+  const Z = pix.ok ? { x: Math.max(0, T.x - zm), y: Math.max(0, T.y - zm) } : { x: R.x, y: R.y };
+  Z.w = pix.ok ? Math.min(W, T.x + T.w + zm) - Z.x : R.w; Z.h = pix.ok ? Math.min(H, T.y + T.h + zm) - Z.y : R.h;
+  const seg = pix.ok && r.text ? segmentGlyphs(pix, r.text, r.symbols) : null;
+  const glyphs = seg ? seg.glyphs : [];
 
-  // 1. masque des anciennes lettres (dilaté), limité à la zone
-  setStatus('Repérage des lettres à effacer…'); setProgress(0.1);
-  const pix = analyzePixels(base, R);
-  const mask = new Uint8Array(W * H);
+  // 1. masque de tout l'ancien texte (lettres + anticrénelage + ombre/contour éventuels)
+  setStatus('Repérage précis des lettres…'); setProgress(0.28);
+  const mask = new Uint8Array(W * H), owner = new Int32Array(W * H).fill(-1);
+  const Id0 = bctx.getImageData(0, 0, W, H).data;
   let erase = st.erase;
   if (erase === 'glyphs' && (pix.contrast < 25 || pix.inkRatio > 0.62 || pix.inkRatio < 0.003)) erase = 'rect';
+  const bw = pix.maskW, bh = pix.maskH, ox = pix.box.x, oy = pix.box.y;
+  const dpx = bctx.getImageData(ox, oy, bw, bh).data;
+  const rad = 2 + Math.round(T.h * 0.03);
+  const inZ = (x, y) => x >= Z.x && y >= Z.y && x < Z.x + Z.w && y < Z.y + Z.h;
+  const protect = new Uint8Array(W * H);
   if (erase === 'rect') { for (let y = R.y; y < R.y + R.h; y++) mask.fill(1, y * W + R.x, y * W + R.x + R.w); }
   else {
-    const rad = Math.max(2, Math.round((r.ink?.h || R.h) * 0.07)) + 1;
-    const bw = pix.maskW, bh = pix.maskH, ox = pix.box.x, oy = pix.box.y;
-    // inclut l'anticrénelage
-    const soft = new Uint8Array(bw * bh), d = ctx2d(base).getImageData(ox, oy, bw, bh).data;
-    for (let k = 0; k < bw * bh; k++) { const db = dist3(d[k * 4], d[k * 4 + 1], d[k * 4 + 2], pix.bg); if (pix.mask[k] || db > pix.contrast * 0.22) soft[k] = 1; }
-    for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) if (soft[y * bw + x]) {
-      for (let dy = -rad; dy <= rad; dy++) { const yy = y + oy + dy; if (yy < R.y || yy >= R.y + R.h) continue; for (let dx = -rad; dx <= rad; dx++) { if (dx * dx + dy * dy > rad * rad) continue; const xx = x + ox + dx; if (xx >= R.x && xx < R.x + R.w) mask[yy * W + xx] = 1; } }
+    // noyau = lettres + anticrénelage ; anneau d'ombre/contour sur fond régulier
+    const core = new Uint8Array(bw * bh);
+    // lettres de CETTE ligne : dans la boîte serrée (accents compris) + 2 px d'anticrénelage ;
+    // l'encre en dehors (autre ligne, autre texte) est protégée
+    const inT = (x, y) => x >= T.x - 2 && y >= T.y - 2 && x <= T.x + T.w + 1 && y <= T.y + T.h + 1;
+    for (let k = 0; k < bw * bh; k++) {
+      const gx = ox + k % bw, gy = oy + ((k / bw) | 0), ink = pix.mask[k] || pix.alpha[k] > 0.06;
+      if (ink && inT(gx, gy)) core[k] = 1;
+      else if ((pix.mask[k] || pix.alpha[k] > 0.25) && !inT(gx, gy)) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const xx = gx + dx, yy = gy + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && !inT(xx, yy)) protect[yy * W + xx] = 1; }
+    }
+    if (pix.bgStd < 14) {
+      const thr = Math.max(20, pix.bgStd * 4), reach = Math.round(T.h * 0.22);
+      const near = new Uint8Array(bw * bh);
+      for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) if (pix.mask[y * bw + x]) for (let dy = -reach; dy <= reach; dy += Math.max(1, reach >> 2)) for (let dx = -reach; dx <= reach; dx += Math.max(1, reach >> 2)) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < bw && yy < bh) near[yy * bw + xx] = 1; }
+      for (let k = 0; k < bw * bh; k++) if (near[k] && !core[k] && pix.fd[k] > thr) core[k] = 1;
+    }
+    for (let y = 0; y < bh; y++) for (let x = 0; x < bw; x++) if (core[y * bw + x]) {
+      for (let dy = -rad; dy <= rad; dy++) { const yy = y + oy + dy; if (yy < Z.y || yy >= Z.y + Z.h) continue; for (let dx = -rad; dx <= rad; dx++) { if (dx * dx + dy * dy > rad * rad) continue; const xx = x + ox + dx; if (xx >= Z.x && xx < Z.x + Z.w && !protect[yy * W + xx]) mask[yy * W + xx] = 1; } }
     }
   }
+  const U = erase === 'rect' ? R : Z;
   let mb = { x: W, y: H, x1: -1, y1: -1 };
-  for (let y = R.y; y < R.y + R.h; y++) for (let x = R.x; x < R.x + R.w; x++) if (mask[y * W + x]) { if (x < mb.x) mb.x = x; if (y < mb.y) mb.y = y; if (x > mb.x1) mb.x1 = x; if (y > mb.y1) mb.y1 = y; }
-  if (mb.x1 < 0) mb = { x: R.x, y: R.y, x1: R.x + R.w - 1, y1: R.y + R.h - 1 };
+  for (let y = U.y; y < U.y + U.h; y++) for (let x = U.x; x < U.x + U.w; x++) if (mask[y * W + x]) { if (x < mb.x) mb.x = x; if (y < mb.y) mb.y = y; if (x > mb.x1) mb.x1 = x; if (y > mb.y1) mb.y1 = y; }
+  if (mb.x1 < 0) mb = { x: U.x, y: U.y, x1: U.x + U.w - 1, y1: U.y + U.h - 1 };
   mb.w = mb.x1 - mb.x + 1; mb.h = mb.y1 - mb.y + 1;
+  // chaque pixel du masque appartient à la lettre la plus proche (pour garder/déplacer les lettres)
+  if (seg && glyphs.length) {
+    const q = []; const gw = seg.w;
+    for (const g of glyphs) { if (g.missing) continue; for (const c of g.comps) for (const j of c.px) { const gx = seg.T.x + (j % gw), gy = seg.T.y + ((j / gw) | 0); const k = gy * W + gx; if (owner[k] < 0) { owner[k] = g.idx; q.push(k); } } }
+    const dist = new Uint8Array(W * H), lim = rad + 2;
+    for (let h0 = 0; h0 < q.length; h0++) { const k = q[h0], x = k % W; if (dist[k] >= lim) continue; for (const nb of [k - 1, k + 1, k - W, k + W]) { if (nb < 0 || nb >= W * H || (nb === k - 1 && x === 0) || (nb === k + 1 && x === W - 1)) continue; if (mask[nb] && owner[nb] < 0) { owner[nb] = owner[k]; dist[nb] = dist[k] + 1; q.push(nb); } } }
+  }
 
-  // 2. reconstruction du fond
-  //    - fond uni ou dégradé : interpolation lisse + grain (net, sans « fantôme »)
-  //    - fond texturé ou photo : MI-GAN, avec les trous pré-remplis (la couleur de l'ancien texte ne fuit pas)
+  // pixels d'autres textes autour du trou (ne doivent pas servir de « fond »)
+  const exclude = new Uint8Array(W * H);
+  {
+    const pad = Math.round(Math.max(16, T.h * 0.6)), F = pix.fg, C = pix.contrast;
+    const x0 = Math.max(0, mb.x - pad), y0 = Math.max(0, mb.y - pad), x1 = Math.min(W, mb.x + mb.w + pad), y1 = Math.min(H, mb.y + mb.h + pad);
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+      const k = y * W + x; if (mask[k]) continue;
+      const r = Id0[k * 4], g = Id0[k * 4 + 1], b = Id0[k * 4 + 2], B = pix.bgLocal(x, y);
+      if (dist3(r, g, b, F) < C * 0.5 && dist3(r, g, b, B) > C * 0.4) exclude[k] = 1;
+    }
+    // un peu d'extension pour couvrir l'anticrénelage de ces textes
+    const ex2 = exclude.slice();
+    for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (exclude[y * W + x]) for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) { const xx = x + dx, yy = y + dy; if (xx >= 0 && yy >= 0 && xx < W && yy < H && !mask[yy * W + xx]) ex2[yy * W + xx] = 1; }
+    exclude.set(ex2);
+  }
+  // 2. fond sous TOUT l'ancien texte (sert aussi à extraire les lettres sans leur fond)
+  const work = canvasOf(W, H), wctx = ctx2d(work); wctx.drawImage(base, 0, 0);
   let usedFast = settings.fast, notice = '';
-  const smoothBg = pix.bgStd < 10 && pix.contrast > 25;
-  setStatus('Reconstruction du fond…'); setProgress(0.25); await nextFrame();
-  fillSmooth(work, mask, mb, smoothBg || usedFast);
+  const smoothBg = (pix.bgStd < 10 || pix.bgModel === 'plane') && pix.contrast > 25;
+  setStatus('Reconstruction du fond…'); setProgress(0.35); await nextFrame();
+  fillSmooth(work, mask, mb, smoothBg || usedFast, exclude);
   if (!usedFast && !smoothBg) {
+    const smooth = canvasOf(W, H); ctx2d(smooth).drawImage(work, 0, 0);
     try {
       if (!inp.session) setStatus('Chargement du modèle d’effacement (une seule fois)…');
       await ensureInpainter();
       await inpaintAI(work, mask, mb);
-    } catch (e) { console.warn(e); usedFast = true; notice = e.message.includes('téléchargé') ? 'Le modèle d’effacement n’a pas pu être téléchargé : la reconstruction rapide sans IA a été utilisée.' : 'Le modèle d’effacement a rencontré un problème : la reconstruction rapide sans IA a été utilisée.'; wctx.drawImage(base, 0, 0); fillSmooth(work, mask, mb, true); }
+      if (pix.bgStd < 25) { const stroke = Math.max(2, Math.round(T.h * 0.08)); harmonize(work, smooth, mask, mb, stroke); }
+      // garde-fou : un pixel reconstruit qui ressemble au texte (fragment « inventé ») est remplacé par le fond lissé
+      {
+        const wd = wctx.getImageData(mb.x, mb.y, mb.w, mb.h), sd = ctx2d(smooth).getImageData(mb.x, mb.y, mb.w, mb.h).data, a2 = wd.data, F = pix.fg;
+        let fixed = 0;
+        for (let y = 0; y < mb.h; y++) for (let x = 0; x < mb.w; x++) {
+          if (!mask[(y + mb.y) * W + x + mb.x]) continue;
+          const i = (y * mb.w + x) * 4, Bv = [sd[i], sd[i + 1], sd[i + 2]];
+          const dF = dist3(a2[i], a2[i + 1], a2[i + 2], F), dB = dist3(a2[i], a2[i + 1], a2[i + 2], Bv), dFB = dist3(F[0], F[1], F[2], Bv);
+          if (dFB > 30 && dF < dB * 0.9 && dB > dFB * 0.35) { const t = clamp((dB / dFB - 0.35) / 0.4, 0, 1); for (let c = 0; c < 3; c++) a2[i + c] = a2[i + c] * (1 - t) + Bv[c] * t; fixed++; }
+        }
+        if (fixed) wctx.putImageData(wd, mb.x, mb.y);
+      }
+    } catch (x) { console.warn(x); usedFast = true; notice = x.message.includes('téléchargé') ? 'Le modèle d’effacement n’a pas pu être téléchargé : la reconstruction rapide sans IA a été utilisée.' : 'Le modèle d’effacement a rencontré un problème : la reconstruction rapide sans IA a été utilisée.'; wctx.drawImage(base, 0, 0); fillSmooth(work, mask, mb, true, exclude); }
   }
   S.partial = work.toDataURL('image/jpeg', 0.7); renderCanvas();
+  const Bd = wctx.getImageData(0, 0, W, H).data, Id = Id0;
 
-  // 3. nouveau texte dans le style estimé
-  setStatus('Écriture du nouveau texte…'); setProgress(0.9); await nextFrame();
-  await ensureFonts();
-  const lines = newText.replace(/\r/g, '').split('\n').map(l => l.replace(/\s+$/, '')).filter((l, i, a) => l || a.length === 1);
-  try { await document.fonts.load(fontCss(st.family, st.weight, 40), newText); } catch (e) { }
-  let size = st.size, ls = st.ls;
-  const lineGap = () => size * 1.18;
-  let rr = renderLines(lines, st.family, st.weight, size, ls, st.color, lineGap(), st.align);
-  if (rr.ink) {
-    const maxW = R.w - 2, maxH = R.h - 2;
-    const f = Math.min(1, maxW / rr.ink.w, maxH / rr.ink.h);
-    if (f < 0.999) { size *= f; ls *= f; rr = renderLines(lines, st.family, st.weight, size, ls, st.color, lineGap(), st.align); }
-  }
-  const out = canvasOf(W, H), octx = ctx2d(out);
-  octx.drawImage(base, 0, 0);
-  octx.save(); octx.beginPath(); octx.rect(R.x, R.y, R.w, R.h); octx.clip();
-  octx.drawImage(work, 0, 0);
-  let newInk = r.ink, newBaseline = r.baseline;
-  if (rr.ink && newText.trim()) {
-    const I = r.ink || { x: R.x, y: R.y, w: R.w, h: R.h };
-    let destInkX = st.align === 'left' ? I.x : st.align === 'right' ? I.x + I.w - rr.ink.w : I.x + I.w / 2 - rr.ink.w / 2;
-    destInkX = clamp(destInkX, R.x + 1, R.x + R.w - 1 - rr.ink.w);
-    let dx = destInkX - rr.ink.x, dy;
-    if (lines.length === 1) {
-      const baseline = st.baseline ?? (I.y + I.h);
-      dy = baseline - rr.base0;
-      // garde l'encre dans la zone
-      const top = rr.ink.y + dy, bottom = top + rr.ink.h;
-      if (top < R.y + 1) dy += R.y + 1 - top; else if (bottom > R.y + R.h - 1) dy -= bottom - (R.y + R.h - 1);
-    } else {
-      dy = I.y + I.h / 2 - rr.ink.h / 2 - rr.ink.y;
-      dy = clamp(dy, R.y + 1 - rr.ink.y, R.y + R.h - 1 - rr.ink.y - rr.ink.h);
+  // 3. mise en page du nouveau texte
+  setStatus('Écriture du nouveau texte…'); setProgress(0.85); await nextFrame();
+  await loadFace(e, st.weight, st.italic, newText.replace(/\s/g, '') || 'A');
+  // police choisie à la main (sans taille imposée) : on garde la hauteur réelle des lettres d'origine
+  const ov = S.overrides[r.id] || {};
+  if ((ov.family || ov.weight) && !ov.size && font && !font.fallback && r.text) {
+    const ref = fontByName(font.family), sample = r.text.replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (ref) {
+      await loadFace(ref, font.weight, font.italic, sample);
+      const a = renderTextLine(ref, font.weight, font.italic, sample, GS, 0, font.sx, font.skew), b = renderTextLine(e, st.weight, st.italic, sample, GS, 0, st.sx, st.skew);
+      if (a && b && b.ink.h > 0) { st.size = font.size * (a.ink.h / b.ink.h); st.tracking = (ov.ls || 0); st.spaceExtra = 0; }
     }
-    octx.drawImage(rr.canvas, Math.round(dx), Math.round(dy));
-    newInk = { x: Math.round(rr.ink.x + dx), y: Math.round(rr.ink.y + dy), w: rr.ink.w, h: rr.ink.h };
-    if (lines.length === 1) newBaseline = Math.round(dy) + rr.base0;
   }
-  octx.restore();
+  const kSrc = st.size / GS;
+  const fRow = y => { const c = profileColor(pix.profile, y); return c || pix.fg; };
+  const overrideColor = st.color ? hexRgb(st.color) : null;
+  const lines = newText.replace(/\r/g, '').split('\n').map(l => l.replace(/\s+$/, '')).filter((l, i, a) => l || a.length === 1);
+  const oldChars = glyphs.map(g => g.ch);
+  const usable = seg && seg.exact && st.reuse && !st.custom;
+  const lib = new Map(); if (usable) for (const g of glyphs) if (!g.missing && !lib.has(g.ch)) lib.set(g.ch, g);
+  const metricsCache = new Map();
+  const metrics = ch => { if (metricsCache.has(ch)) return metricsCache.get(ch); const g = renderGlyph(e, st.weight, st.italic, ch, GS, st.sx, st.skew); const m = g ? { adv: g.adv * kSrc, left: g.left * kSrc, right: (g.left + g.iw) * kSrc, top: g.top * kSrc, bottom: g.bottom * kSrc } : { adv: st.size * 0.3, left: 0, right: st.size * 0.3, top: -st.size * 0.7, bottom: 0 }; metricsCache.set(ch, m); return m; };
+  const spaceAdv = (() => { gctx.setTransform(1, 0, 0, 1, 0, 0); gctx.font = fontSpec(e, st.weight, st.italic, GS); return gctx.measureText(' ').width * st.sx * kSrc; })();
+  const baseline0 = font && font.baseline != null && !font.fallback ? font.baseline : T.y + T.h;
+  const items = [];
+  const layoutLine = (text, li, nLines) => {
+    const out = []; let cursor = 0, prev = null, pendingSpace = false;
+    const chars = [];
+    for (const ch of text) { if (/\s/.test(ch)) { pendingSpace = true; continue; } chars.push({ ch, brk: pendingSpace }); pendingSpace = false; }
+    const map = usable && nLines === 1 ? lcsPairs(oldChars, chars.map(c => c.ch)) : new Array(chars.length).fill(-1);
+    chars.forEach((c, j) => {
+      const oi = map[j];
+      let it;
+      if (oi >= 0) { const g = glyphs[oi]; it = { kind: 'clone', g, ch: c.ch, w: g.gx1 - g.gx0 + 1, oi, dyTop: g.gy0 - baseline0 }; }
+      else if (lib.has(c.ch)) { const g = lib.get(c.ch); it = { kind: 'clone', g, ch: c.ch, w: g.gx1 - g.gx0 + 1, oi: -1, dyTop: g.gy0 - baseline0 }; }
+      else { const m = metrics(c.ch); it = { kind: 'render', ch: c.ch, w: m.right - m.left, m }; }
+      if (!prev) it.x0 = 0;
+      else if (prev.oi >= 0 && it.oi === prev.oi + 1 && glyphs[it.oi].brk === c.brk) it.x0 = prev.x0 + (it.g.gx0 - prev.g.gx0);
+      else {
+        const ma = metrics(prev.ch), mbm = metrics(c.ch);
+        const gap = ma.adv - ma.right + mbm.left + st.tracking + (c.brk ? spaceAdv + (st.spaceExtra - st.tracking) : 0);
+        it.x0 = prev.x0 + prev.w + Math.max(c.brk ? st.size * 0.12 : -st.size * 0.1, gap);
+      }
+      out.push(it); prev = it;
+    });
+    return out;
+  };
+  const lineGap = st.size * 1.2;
+  const anchorL = T.x, anchorR = T.x + T.w, anchorC = T.x + T.w / 2;
+  lines.forEach((text, li) => {
+    const L = layoutLine(text, li, lines.length);
+    if (!L.length) return;
+    const width = L[L.length - 1].x0 + L[L.length - 1].w;
+    let start = st.align === 'left' ? anchorL : st.align === 'right' ? anchorR - width : anchorC - width / 2;
+    // si le début (ou la fin) est inchangé, on garde les lettres exactement à leur place
+    if (usable && lines.length === 1) {
+      const firstKept = L.find(it => it.oi >= 0);
+      if (st.align === 'left' && L[0].oi === 0) start = glyphs[0].gx0;
+      else if (st.align === 'right' && L[L.length - 1].oi === glyphs.length - 1) start = glyphs[glyphs.length - 1].gx1 + 1 - width;
+      else if (st.align === 'center' && firstKept) {
+        const dw = Math.abs(width - (anchorR - anchorL));
+        if (dw < 1.5 || dw <= Math.max(T.h * 1.2, (anchorR - anchorL) * 0.08)) {
+          // garde la plus longue partie inchangée (début ou fin) au pixel près
+          let pre = 0; while (pre < L.length && L[pre].oi === pre) pre++;
+          let suf = 0; while (suf < L.length && L[L.length - 1 - suf].oi === glyphs.length - 1 - suf) suf++;
+          if (pre >= suf && pre > 0) start = glyphs[0].gx0;
+          else if (suf > 0) start = glyphs[glyphs.length - 1].gx1 + 1 - width;
+          else start = firstKept.g.gx0 - firstKept.x0;
+        }
+      }
+    }
+    start = Math.round(start);
+    const bl = baseline0 + (li - (lines.length - 1) / 2) * lineGap;
+    for (const it of L) { it.X = start + Math.round(it.x0); it.BL = bl; items.push(it); }
+  });
+  // trop large pour l'image : on réduit tout (lettres dessinées)
+  if (items.length) {
+    const minX = Math.min(...items.map(i => i.X)), maxX = Math.max(...items.map(i => i.X + i.w));
+    if (minX < 0 || maxX > W) throw new Error('Le nouveau texte est trop long pour tenir dans l’image à cette taille. Raccourcissez-le ou réduisez la taille dans « Ajuster le rendu ».');
+  }
+  // lettres conservées exactement à leur place
+  const keep = new Set();
+  for (const it of items) if (it.kind === 'clone' && it.oi >= 0 && it.X === it.g.gx0 && Math.abs(it.BL - baseline0) < 0.5) keep.add(it.oi);
+
+  // 4. composition finale
+  const out = canvasOf(W, H), octx = ctx2d(out); octx.drawImage(base, 0, 0);
+  const O = octx.getImageData(0, 0, W, H), od = O.data;
+  for (let y = mb.y; y <= mb.y1; y++) for (let x = mb.x; x <= mb.x1; x++) {
+    const k = y * W + x; if (!mask[k]) continue;
+    if (owner[k] >= 0 && keep.has(owner[k])) continue;
+    od[k * 4] = Bd[k * 4]; od[k * 4 + 1] = Bd[k * 4 + 1]; od[k * 4 + 2] = Bd[k * 4 + 2];
+  }
+  const comp = (k, a, c) => { od[k * 4] = od[k * 4] * (1 - a) + c[0] * a; od[k * 4 + 1] = od[k * 4 + 1] * (1 - a) + c[1] * a; od[k * 4 + 2] = od[k * 4 + 2] * (1 - a) + c[2] * a; };
+  const F0 = pix.fg, B0 = pix.bg;
+  let inkBox = null;
+  const grow = (x, y) => { if (!inkBox) inkBox = { x0: x, y0: y, x1: x, y1: y }; else { inkBox.x0 = Math.min(inkBox.x0, x); inkBox.y0 = Math.min(inkBox.y0, y); inkBox.x1 = Math.max(inkBox.x1, x); inkBox.y1 = Math.max(inkBox.y1, y); } };
+  for (const it of items) {
+    if (it.kind === 'clone') {
+      const g = it.g, dx = it.X - g.gx0, dy = Math.round(it.BL - baseline0);
+      if (keep.has(it.oi) && dx === 0 && dy === 0) { grow(g.gx0, g.gy0); grow(g.gx1, g.gy1); continue; }
+      const x0 = Math.max(0, g.gx0 - rad - 1), x1 = Math.min(W - 1, g.gx1 + rad + 1), y0 = Math.max(0, g.gy0 - rad - 1), y1 = Math.min(H - 1, g.gy1 + rad + 1);
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        const k = y * W + x; if (owner[k] !== g.idx) continue;
+        const Iv = [Id[k * 4], Id[k * 4 + 1], Id[k * 4 + 2]], Bv = [Bd[k * 4], Bd[k * 4 + 1], Bd[k * 4 + 2]], Fv = fRow(y);
+        const D = [Fv[0] - Bv[0], Fv[1] - Bv[1], Fv[2] - Bv[2]], DD = D[0] ** 2 + D[1] ** 2 + D[2] ** 2;
+        let a = DD > 100 ? clamp(((Iv[0] - Bv[0]) * D[0] + (Iv[1] - Bv[1]) * D[1] + (Iv[2] - Bv[2]) * D[2]) / DD, 0, 1) : 0;
+        if (a < 0.02) continue;
+        let C;
+        if (overrideColor) C = overrideColor;
+        else if (a > 0.55) C = [0, 1, 2].map(c => clamp((Iv[c] - (1 - a) * Bv[c]) / a, 0, 255));
+        else C = Fv;
+        const tx = x + dx, ty = y + dy; if (tx < 0 || ty < 0 || tx >= W || ty >= H) continue;
+        comp(ty * W + tx, a, C); if (a > 0.3) grow(tx, ty);
+      }
+    } else {
+      // lettre absente du texte d'origine : dessinée dans la police retrouvée, couleur mesurée ligne par ligne
+      const sz = Math.round(st.size * 1.6) + 8, gc = canvasOf(sz * 2, sz * 2), gx = ctx2d(gc);
+      const fx = it.X - it.m.left, ox0 = Math.round(sz * 0.5), oy0 = Math.round(sz * 1.4);
+      gx.setTransform(st.sx, 0, -st.skew, 1, ox0 + (fx - Math.floor(fx)), oy0 + (it.BL - Math.floor(it.BL)));
+      gx.font = fontSpec(e, st.weight, st.italic, st.size); gx.fillStyle = '#000'; gx.fillText(it.ch, 0, 0);
+      const a = gx.getImageData(0, 0, gc.width, gc.height).data;
+      const baseX = Math.floor(fx) - ox0, baseY = Math.floor(it.BL) - oy0;
+      for (let y = 0; y < gc.height; y++) for (let x = 0; x < gc.width; x++) {
+        const al = a[(y * gc.width + x) * 4 + 3] / 255; if (al < 0.01) continue;
+        const tx = baseX + x, ty = baseY + y; if (tx < 0 || ty < 0 || tx >= W || ty >= H) continue;
+        const C = overrideColor || fRow(ty - (it.BL - baseline0));
+        comp(ty * W + tx, al, C); if (al > 0.3) grow(tx, ty);
+      }
+    }
+  }
+  octx.putImageData(O, 0, 0);
   setProgress(1);
-  return { url: out.toDataURL('image/png'), notice, newInk, newBaseline, usedFast };
+  const newInk = inkBox ? { x: inkBox.x0, y: inkBox.y0, w: inkBox.x1 - inkBox.x0 + 1, h: inkBox.y1 - inkBox.y0 + 1 } : r.ink;
+  return { url: out.toDataURL('image/png'), notice, newInk, usedFast, kept: keep.size, cloned: items.filter(i => i.kind === 'clone').length, rendered: items.filter(i => i.kind === 'render').length };
 }
 
 /* =============================================================================
@@ -1120,7 +1768,12 @@ function setError(msg, kind = 'error') {
 }
 function setStatus(t) { S.status = t; renderBottom(); }
 function setProgress(p) { S.progress = p; const bar = $('#canvas-bottom .progress-mini i'); if (bar) bar.style.width = Math.round(clamp(p, 0, 1) * 100) + '%'; }
-function choose(r) { S.selected = r.id; S.replacement = r.text; render(); }
+function choose(r) { S.selected = r.id; S.replacement = r.text; render(); warmFont(r); }
+function warmFont(r) {
+  if (!r || r.font !== undefined || (!r.text && !r.manual)) return;
+  const src = S.current;
+  ensureRegionFont(r, src).then(() => { if (S.current === src) { renderRight(); renderLayers(); } }).catch(e => console.warn(e));
+}
 
 async function analyze(src = S.current) {
   if (S.busy) return;
@@ -1128,7 +1781,7 @@ async function analyze(src = S.current) {
   try {
     const found = await detectRegions(src);
     S.regions = found; S.isDemo = false; S.overrides = {};
-    if (found[0]) { S.selected = found[0].id; S.replacement = found[0].text; }
+    if (found[0]) { S.selected = found[0].id; S.replacement = found[0].text; setTimeout(() => warmFont(found[0]), 0); }
     else { S.selected = ''; S.replacement = ''; setError('Aucun texte détecté. Vous pouvez sélectionner une zone manuellement.'); }
   } catch (e) { console.error(e); setError(e instanceof Error ? e.message : 'L’analyse n’a pas abouti.'); }
   finally { S.busy = null; S.status = ''; render(); }
@@ -1156,7 +1809,15 @@ async function apply() {
     const res = await performEdit(S.current, region, S.replacement);
     if (!res.url) throw new Error('La retouche n’a pas produit de résultat final.');
     S.history.push(before); S.future = []; S.current = res.url;
-    S.regions = S.regions.map(r => r.id === region.id ? { ...r, text: S.replacement, ink: res.newInk || r.ink, baseline: res.newBaseline ?? r.baseline } : r);
+    S.lastEdit = { kept: res.kept, cloned: res.cloned, rendered: res.rendered, usedFast: res.usedFast };
+    const Wd = S.dims.width, Hd = S.dims.height;
+    S.regions = S.regions.map(r => {
+      if (r.id !== region.id) return r;
+      const I = res.newInk || r.ink, m = Math.max(2, Math.round(I.h * 0.14 + 0.004 * Math.max(Wd, Hd)));
+      const x0 = Math.min(r.x / 100 * Wd, Math.max(0, I.x - m)), y0 = Math.min(r.y / 100 * Hd, Math.max(0, I.y - m));
+      const x1 = Math.max((r.x + r.width) / 100 * Wd, Math.min(Wd, I.x + I.w + m)), y1 = Math.max((r.y + r.height) / 100 * Hd, Math.min(Hd, I.y + I.h + m));
+      return { ...r, text: S.replacement, ink: I, symbols: null, x: x0 / Wd * 100, y: y0 / Hd * 100, width: (x1 - x0) / Wd * 100, height: (y1 - y0) / Hd * 100 };
+    });
     if (res.notice) setError(res.notice, 'info');
   } catch (e) { console.error(e); setError(e instanceof Error && e.message ? e.message : 'La retouche a échoué. Votre image reste intacte.'); }
   finally { S.busy = null; S.partial = ''; S.status = ''; render(); }
@@ -1203,18 +1864,18 @@ async function enrichManual(id) {
   const src = S.current, canvas = await imageCanvas(src), W = canvas.width, H = canvas.height;
   const r0 = regionById(id); if (!r0) return;
   const box = { x: r0.x / 100 * W, y: r0.y / 100 * H, w: r0.width / 100 * W, h: r0.height / 100 * H };
-  const pix = analyzePixels(canvas, box);
-  const apply1 = patch => { const r = regionById(id); if (!r || S.current !== src) return null; Object.assign(r, patch); if (S.selected === id) renderRight(); renderLayers(); return r; };
-  apply1({ color: rgbHex(pix.fg), background: pix.ok ? pix.background : 'Fond original à reconstruire', ink: pix.ok ? pix.tight : pix.box, bg: rgbHex(pix.bg) });
-  let text = '';
-  try { setStatus('Lecture du texte de la zone…'); const t = pix.ok ? pix.tight : pix.box; const o = await ocrCrop(canvas, { x: Math.round(t.x), y: Math.round(t.y), w: Math.round(t.w), h: Math.round(t.h) }); if (o.conf >= 45 && /[\p{L}\p{N}]/u.test(o.text)) text = o.text; } catch (e) { console.warn(e); }
+  const live = () => { const r = regionById(id); return r && S.current === src ? r : null; };
+  let o = null;
+  try { setStatus('Lecture du texte de la zone…'); o = await ocrCrop(canvas, box); } catch (e) { console.warn(e); }
   finally { if (!S.busy) { S.status = ''; renderBottom(); } }
-  await ensureFonts();
-  const fit = text ? (matchFont(pix, text) || heuristicFit(pix)) : heuristicFit(pix);
-  const r = apply1({ fit, baseline: (pix.ok ? pix.tight : pix.box).y + fit.ascent, fontSize: Math.round(fit.size), fontStyle: text ? styleLabel(fit, text, pix) : 'Estimé à partir de l’image · ' + weightLabel(fit.family, fit.weight) });
-  if (r && text && !r.text) { r.text = text; if (S.selected === id && !S.replacement) S.replacement = text; render(); }
+  const r = live(); if (!r) return;
+  const pix = o ? o.pix : analyzePixels(canvas, box);
+  Object.assign(r, { color: rgbHex(pix.fg), background: pix.ok ? pix.background : 'Fond original à reconstruire', ink: pix.ok ? pix.tight : pix.box, bg: rgbHex(pix.bg), bgStd: pix.bgStd, fontSize: Math.round((pix.ok ? pix.tight.h : box.h) * 1.35) });
+  if (o && o.conf >= 45 && /[\p{L}\p{N}]/u.test(o.text) && !r.text) { r.text = o.text; r.symbols = o.symbols; if (S.selected === id && !S.replacement) S.replacement = o.text; }
+  r.font = undefined; r.fontStyle = r.text ? 'Recherche de la police…' : 'À conserver depuis l’image';
+  render();
+  if (r.text) warmFont(r);
 }
-
 /* =============================================================================
    RENDU DE L'INTERFACE
    ============================================================================= */
@@ -1280,21 +1941,29 @@ function renderBottom() {
 function renderRight() {
   const r = currentRegion(), busy = !!S.busy;
   const ob = $('#old-text-box');
-  if (r && r.manual) {
+  if (r) {
     let inp = ob.querySelector('input');
-    if (!inp) { ob.innerHTML = '<input id="old-text" class="edit-input" placeholder="Texte dans cette zone">'; inp = ob.querySelector('input'); }
+    if (!inp) { ob.innerHTML = '<input id="old-text" class="edit-input" placeholder="Texte dans cette zone" title="Corrigez-le si la lecture automatique s’est trompée : la police est recherchée à partir de ces lettres.">'; inp = ob.querySelector('input'); }
     if (document.activeElement !== inp) inp.value = r.text;
     inp.disabled = busy;
-  } else ob.innerHTML = `<div id="old-text" class="original-text">${esc(r?.text || 'Aucun texte sélectionné')}</div>`;
+  } else ob.innerHTML = `<div id="old-text" class="original-text">Aucun texte sélectionné</div>`;
   const ta = $('#replacement');
   if (ta.value !== S.replacement) ta.value = S.replacement;
   ta.disabled = !r || busy;
   $('#count').textContent = `${S.replacement.length} caractères`;
   $('#style-title').textContent = 'Style ' + (S.isDemo ? 'de référence' : 'détecté');
-  $('#st-font').textContent = r?.fontStyle || '—';
+  const pending = r && r.font === undefined && r.text && !S.isDemo;
+  $('#st-font').innerHTML = pending ? `${icon('LoaderCircle', 'spin')} Recherche de la police…` : esc(r?.fontStyle || '—');
+  $('#st-font').title = r?.font && !r.font.fallback ? `${r.font.name} — correspondance ${Math.round(r.font.score * 100)} %` : '';
+  $('#st-match-row').hidden = !(r?.font && !r.font.fallback);
+  if (r?.font && !r.font.fallback) {
+    const sc = Math.round(r.font.score * 100), low = sc < 45;
+    $('#st-match').innerHTML = low ? `<span class="warn">${sc} % · à vérifier</span>` : `${sc} %`;
+    $('#st-match').title = low ? 'La police n’a pas pu être identifiée avec certitude (texte peu lisible ou fond chargé). Corrigez le texte original si besoin, ou choisissez la police dans « Ajuster le rendu ».' : 'Ressemblance entre les lettres de l’image et la police retrouvée.';
+  }
   $('#st-size').textContent = r?.fontSize ? `≈ ${r.fontSize} px` : 'Automatique';
-  $('#st-color').textContent = r?.color ? r.color.toUpperCase() : '—';
-  $('#st-swatch').style.backgroundColor = r?.color || 'transparent';
+  $('#st-color').textContent = r?.gradient ? `${r.gradient[0]} → ${r.gradient[1]}` : r?.color ? r.color.toUpperCase() : '—';
+  $('#st-swatch').style.background = r?.gradient ? `linear-gradient(${r.gradient[0]}, ${r.gradient[1]})` : (r?.color || 'transparent');
   $('#st-bg').textContent = r?.background || '—';
   const btn = $('#btn-apply');
   btn.disabled = !r || !S.replacement.trim() || S.replacement === r.text || busy;
@@ -1306,34 +1975,39 @@ function renderTune() {
   det.style.display = r ? '' : 'none';
   if (!r) return;
   const st = effectiveStyle(r), o = S.overrides[r.id] || {};
-  const famSel = $('#t-family');
-  const fitFam = r.fit?.family;
-  famSel.innerHTML = Object.keys(FAMILIES).map(f => `<option value="${esc(f)}" ${f === st.family ? 'selected' : ''}>${esc(f)}${f === fitFam && r.fit && !r.fit.heuristic ? ' (estimée)' : ''}</option>`).join('');
-  const ws = FAMILIES[st.family]?.w || [400, 700];
-  const wSel = $('#t-weight'); const w = ws.includes(st.weight) ? st.weight : ws.reduce((a, b) => Math.abs(b - st.weight) < Math.abs(a - st.weight) ? b : a);
-  wSel.innerHTML = ws.map(v => `<option value="${v}" ${v === w ? 'selected' : ''}>${v} · ${weightLabel(st.family, v)}</option>`).join('');
+  const famSel = $('#t-family'), fitFam = r.font && !r.font.fallback ? r.font.family : null;
+  const names = [...new Set([...(fitFam ? [fitFam] : []), ...FONTS.map(e => e.f)])];
+  famSel.innerHTML = names.map(f => `<option value="${esc(f)}" ${f === st.family ? 'selected' : ''}>${esc(f)}${f === fitFam ? ' (retrouvée)' : ''}</option>`).join('');
+  const e = fontByName(st.family) || { w: [400, 700] };
+  const ws = [...new Set([...weightsOf(e), roundW(st.weight)])].sort((a, b) => a - b);
+  const w = roundW(st.weight);
+  $('#t-weight').innerHTML = ws.map(v => `<option value="${v}" ${v === w ? 'selected' : ''}>${v} · ${WEIGHT_FR[v] || ''}</option>`).join('');
   const sz = $('#t-size'); sz.max = Math.max(60, Math.round((r.height / 100 * S.dims.height) * 2.5)); sz.value = Math.round(st.size); $('#t-size-o').textContent = Math.round(st.size) + ' px';
-  const lsEm = st.ls / Math.max(1, st.size) * 100; $('#t-ls').value = Math.round(lsEm); $('#t-ls-o').textContent = (lsEm / 100).toFixed(2) + ' em';
-  $('#t-color').value = /^#[0-9a-f]{6}$/i.test(st.color) ? st.color.toLowerCase() : '#333333';
+  const lsEm = (o.ls || 0) / Math.max(1, st.size) * 100; $('#t-ls').value = Math.round(lsEm); $('#t-ls-o').textContent = (lsEm >= 0 ? '+' : '') + (lsEm / 100).toFixed(2) + ' em';
+  const col = st.color || r.color || '#333333';
+  $('#t-color').value = /^#[0-9a-f]{6}$/i.test(col) ? col.toLowerCase() : '#333333';
   $$('#t-align button').forEach(b => b.classList.toggle('on', b.dataset.v === st.align));
   $$('#t-erase button').forEach(b => b.classList.toggle('on', b.dataset.v === st.erase));
+  $$('#t-reuse button').forEach(b => b.classList.toggle('on', b.dataset.v === (st.reuse ? 'orig' : 'redraw')));
   $('#t-reset').hidden = !Object.keys(o).length;
   $$('#tune select, #tune input, #tune button').forEach(el => el.disabled = !!S.busy);
-}
-function renderAIStatus() {
+}function renderAIStatus() {
+  if (!$('#ai-dot')) return;
   const dot = (el, st) => el.className = 'dot ' + (st === 'ready' ? 'ok' : st === 'loading' ? 'load' : st === 'error' ? 'err' : '');
-  dot($('#ocr-dot'), ocr.state);
+  const txt = (st, first, prog) => ({ idle: first, loading: prog > 0 && prog < 1 ? `Téléchargement… ${Math.round(prog * 100)} %` : 'Chargement…', ready: 'Prêt, fonctionne hors ligne.', error: 'Échec du téléchargement (connexion requise la première fois).' }[st]);
+  const bar = (id, on, p) => { const el = $(id); el.hidden = !on; el.firstElementChild.style.width = Math.round(p * 100) + '%'; };
+  dot($('#det-dot'), det.state); $('#det-state').textContent = det.state === 'error' ? 'Indisponible : lecture pleine page utilisée.' : txt(det.state, 'Se charge à la première analyse.', det.progress); bar('#det-prog', det.state === 'loading', det.progress);
+  dot($('#ocr-dot'), ocr.state); $('#ocr-state').textContent = txt(ocr.state, 'Se charge à la première analyse.', ocr.progress); bar('#ocr-prog', ocr.state === 'loading', ocr.progress);
+  const fp = fontsState.total ? fontsState.loaded / fontsState.total : 0;
+  dot($('#fnt-dot'), fontsState.state); $('#fnt-state').textContent = fontsState.state === 'ready' ? `${fontsState.usable} polices prêtes.` : fontsState.state === 'loading' ? `Chargement des polices… ${Math.round(fp * 100)} %` : fontsState.state === 'error' ? 'Polices indisponibles hors ligne : style approché.' : 'Se charge à la première analyse.'; bar('#fnt-prog', fontsState.state === 'loading', fp);
   dot($('#inp-dot'), settings.fast ? 'ready' : inp.state);
-  $('#ocr-state').textContent = { idle: 'Se charge à la première analyse.', loading: 'Chargement…', ready: 'Prête, fonctionne hors ligne.', error: 'Échec du téléchargement (connexion requise la première fois).' }[ocr.state];
-  $('#inp-state').textContent = settings.fast ? 'Mode rapide sans IA activé.' : { idle: 'Se charge à la première retouche.', loading: inp.progress > 0 && inp.progress < 1 ? `Téléchargement… ${Math.round(inp.progress * 100)} %` : 'Préparation…', ready: 'Prête, fonctionne hors ligne.', error: 'Échec du téléchargement : le mode rapide sera utilisé.' }[inp.state];
-  const op = $('#ocr-prog'); op.hidden = ocr.state !== 'loading'; op.firstElementChild.style.width = Math.round(ocr.progress * 100) + '%';
-  const ip = $('#inp-prog'); ip.hidden = settings.fast || inp.state !== 'loading'; ip.firstElementChild.style.width = Math.round(inp.progress * 100) + '%';
-  const all = [ocr.state, settings.fast ? 'ready' : inp.state];
+  $('#inp-state').textContent = settings.fast ? 'Mode rapide sans IA activé.' : inp.state === 'error' ? 'Échec du téléchargement : le mode rapide sera utilisé.' : txt(inp.state, 'Utilisé pour les fonds photo ou complexes ; se charge au besoin.', inp.progress);
+  bar('#inp-prog', !settings.fast && inp.state === 'loading', inp.progress);
+  const all = [det.state, ocr.state, fontsState.state, settings.fast ? 'ready' : inp.state];
   dot($('#ai-dot'), all.includes('loading') ? 'loading' : all.includes('error') ? 'error' : all.every(s => s === 'ready') ? 'ready' : 'idle');
-  $('#btn-preload').disabled = (ocr.state === 'ready' && (inp.state === 'ready' || settings.fast)) || ocr.state === 'loading' || inp.state === 'loading';
+  $('#btn-preload').disabled = all.every(s => s === 'ready') || all.includes('loading');
   $('#chk-fast').checked = settings.fast;
 }
-
 /* =============================================================================
    ÉVÉNEMENTS
    ============================================================================= */
@@ -1371,7 +2045,7 @@ function bind() {
   poster.addEventListener('pointerup', pointerUp); poster.addEventListener('pointercancel', () => { dragStart = null; S.draft = null; renderBoxes(); });
   $('#canvas-bottom').onclick = e => { if (e.target.closest('#btn-compare')) { S.comparing = !S.comparing; render(); } };
   $('#replacement').oninput = e => { S.replacement = e.target.value; $('#count').textContent = `${S.replacement.length} caractères`; const r = currentRegion(); $('#btn-apply').disabled = !r || !S.replacement.trim() || S.replacement === r.text || !!S.busy; };
-  $('#old-text-box').oninput = e => { const r = currentRegion(); if (r && e.target.id === 'old-text') { r.text = e.target.value; r.fit = undefined; r.baseline = undefined; renderLayers(); renderRight(); } };
+  $('#old-text-box').oninput = e => { const r = currentRegion(); if (r && e.target.id === 'old-text') { if (S.replacement === r.text) S.replacement = e.target.value; r.text = e.target.value; r.font = undefined; r.symbols = null; r.fontStyle = 'Recherche de la police…'; clearTimeout(r._t); r._t = setTimeout(() => warmFont(r), 600); renderLayers(); renderRight(); } };
   $('#btn-apply').onclick = apply;
   $('#error-close').onclick = () => setError('');
   // export
@@ -1381,16 +2055,17 @@ function bind() {
   $('#btn-ai').onclick = e => { e.stopPropagation(); em.hidden = true; am.hidden = !am.hidden; renderAIStatus(); };
   document.addEventListener('click', e => { if (!e.target.closest('.menu-wrap')) { em.hidden = true; am.hidden = true; } });
   $('#btn-preload').onclick = async () => {
-    const jobs = [ensureOCR()]; if (!settings.fast) jobs.push(ensureInpainter());
+    const jobs = [ensureDetector(), ensureOCR(), ensureFontCatalog()]; if (!settings.fast) jobs.push(ensureInpainter());
     const res = await Promise.allSettled(jobs);
     const fail = res.find(r => r.status === 'rejected'); if (fail) setError(fail.reason.message);
   };
   $('#chk-fast').onchange = e => { settings.fast = e.target.checked; try { localStorage.setItem('retouche_fast', settings.fast ? '1' : '0'); } catch (x) { } renderAIStatus(); };
   // réglages du rendu
-  $('#t-family').onchange = e => { setOverride('family', e.target.value); const ws = FAMILIES[e.target.value].w; const st = effectiveStyle(currentRegion()); if (!ws.includes(st.weight)) setOverride('weight', ws.reduce((a, b) => Math.abs(b - st.weight) < Math.abs(a - st.weight) ? b : a)); };
+  $('#t-family').onchange = e => { const f = fontByName(e.target.value); setOverride('family', e.target.value); if (f) { const st = effectiveStyle(currentRegion()); setOverride('weight', nearestWeight(f, st.weight)); loadFace(f, nearestWeight(f, st.weight), false, 'Aa'); } };
   $('#t-weight').onchange = e => setOverride('weight', +e.target.value);
   $('#t-size').oninput = e => setOverride('size', +e.target.value);
   $('#t-ls').oninput = e => { const r = currentRegion(); setOverride('ls', +e.target.value / 100 * effectiveStyle(r).size); };
+  $('#t-reuse').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setOverride('reuse', b.dataset.v); };
   $('#t-color').oninput = e => setOverride('color', e.target.value.toUpperCase());
   $('#t-align').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setOverride('align', b.dataset.v); };
   $('#t-erase').onclick = e => { const b = e.target.closest('[data-v]'); if (b) setOverride('erase', b.dataset.v); };
@@ -1409,7 +2084,7 @@ function bind() {
 hydrate();
 bind();
 render();
-ensureFonts();
+warmFont(currentRegion());
 </script>
 </body>
 </html>
